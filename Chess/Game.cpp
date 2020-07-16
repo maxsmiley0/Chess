@@ -54,7 +54,13 @@ Board* Game::getBoard() const
 //loops forever for now for testing purposes
 void Game::play()
 {
-    while (true)
+    while (playerColor != 'W' && playerColor != 'B')
+    {
+        cout << "Which side would you like to play? W/B" << endl;
+        cin >> playerColor;
+    }
+    
+    while (!gameOver())
     {
         //displays board at beginning of turn
         mBoard->print();
@@ -62,7 +68,7 @@ void Game::play()
         /*
          rudimentary way of getting beginning and end coord
          */
-        if (mBoard->getTurn() == 'W')
+        if (mBoard->getTurn() == playerColor)
         {
             string userInput;
             Coord c1, c2;
@@ -113,7 +119,7 @@ void Game::play()
             Timer t1;
             t1.start();
             
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             
@@ -122,7 +128,17 @@ void Game::play()
         }
     }
     
-    cout << "You win" << endl;
+    mBoard->print();
+    
+    if (!getBoard()->getKing(playerColor)->attackers.empty())
+    {
+        cout << "You lose :(" << endl;
+    }
+    else
+    {
+        cout << "You win!" << endl;
+    }
+    
 }
 
 Coord Game::convert(char c1, char c2)
@@ -193,16 +209,28 @@ Coord Game::convert(char c1, char c2)
 
 bool Game::gameOver()
 {
-    if (getBoard()->getKing('W')->inCheck() && getBoard()->getKing('W')->legalMoves().empty())
+    bool gameOverForWhite = true;
+    bool gameOverForBlack = true;
+    
+    for (list<Piece*>::iterator itr = mBoard->whitePieces.begin(); itr != mBoard->whitePieces.end(); itr++)
     {
-        return true;
-    }
-    else if (getBoard()->getKing('B')->inCheck() && getBoard()->getKing('B')->legalMoves().empty())
-    {
-        return true;
+        if (!(*itr)->legalMoves().empty())
+        {
+            gameOverForWhite = false;
+            break;
+        }
     }
     
-    return false;
+    for (list<Piece*>::iterator itr = mBoard->blackPieces.begin(); itr != mBoard->blackPieces.end(); itr++)
+    {
+        if (!(*itr)->legalMoves().empty())
+        {
+            gameOverForBlack = false;
+            break;
+        }
+    }
+    
+    return (gameOverForWhite || gameOverForBlack);
 }
 
 bool Game::isValid(string s)

@@ -168,7 +168,7 @@ double evalOpening(Board* b, char color)
         score -= .06*(*itr)->defenders.size();
     }
     
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     //score += centerBonus(b, color);
     score += evalPst(b);
     score -= majorPiecePenalty(b, color);
@@ -210,7 +210,7 @@ double evalMiddleGame(Board* b, char color)
     }
     
     score += evalPst(b);
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     //score += .33*centerBonus(b, color);
     score += evalPawn(b, 'W');
     score -= evalPawn(b, 'B');
@@ -266,7 +266,7 @@ double evalEndGame(Board* b, char color)
     }
     
     score += evalPstEg(b);
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     score += 1.5*evalPawn(b, 'W');
     score -= 1.5*evalPawn(b, 'B');
     //score += evalKingActivity(b, color);
@@ -967,7 +967,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
 {
     TuplePC tuple;          //keeps track of what will be returned
     double bestEval = 0.0;  //keeps track of the best eval
-    
+    bool endNode = true;   //if no legal moves at all, we call static eval
     /*
      RECURSIVE STEP
      */
@@ -982,6 +982,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                 //Iterate through legal moves
                 for (int i = 0; i < set.size(); i++)
                 {
+                    endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
                     temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
@@ -1025,6 +1026,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                 //Iterate through legal moves
                 for (int i = 0; i < set.size(); i++)
                 {
+                    endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
                     temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
@@ -1075,6 +1077,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                 //Iterate through legal moves
                 for (int i = 0; i < set.size(); i++)
                 {
+                    endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
                     temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
@@ -1113,6 +1116,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
             //Iterate through pieces
             for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
             {
+                endNode = false;
                 Set set((*itr)->legalMoves());
                 //Iterate through legal moves
                 for (int i = 0; i < set.size(); i++)
@@ -1156,6 +1160,33 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         cerr << "Passing an invalid depth to Auxiliary::reccomendMove(Board*,char,int)" << endl;
         exit(1);
     }
+    
+    if (endNode) //e.g. no legal moves
+    {
+        if (b->getTurn() == 'W')
+        {
+            if (b->getKing('W')->attackers.empty()) //stalemate
+            {
+                tuple.eval = 0.0;
+            }
+            else //checkmate, white lost
+            {
+                tuple.eval = -100.0;
+            }
+        }
+        else
+        {
+            if (b->getKing('B')->attackers.empty()) //stalemate
+            {
+                tuple.eval = 0.0;
+            }
+            else //checkmate, black lost
+            {
+                tuple.eval = 100.0;
+            }
+        }
+    }
+    
     return tuple;
 }
 
