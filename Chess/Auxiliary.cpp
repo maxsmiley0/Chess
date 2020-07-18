@@ -168,7 +168,7 @@ double evalOpening(Board* b, char color)
         score -= .06*(*itr)->defenders.size();
     }
     
-    score += .8*evalPiece(b, color);
+    //score += .8*evalPiece(b, color);
     //score += centerBonus(b, color);
     score += evalPst(b);
     score -= majorPiecePenalty(b, color);
@@ -210,7 +210,7 @@ double evalMiddleGame(Board* b, char color)
     }
     
     score += evalPst(b);
-    score += .8*evalPiece(b, color);
+    //score += .8*evalPiece(b, color);
     //score += .33*centerBonus(b, color);
     score += evalPawn(b, 'W');
     score -= evalPawn(b, 'B');
@@ -266,7 +266,7 @@ double evalEndGame(Board* b, char color)
     }
     
     score += evalPstEg(b);
-    score += .8*evalPiece(b, color);
+    //score += .8*evalPiece(b, color);
     score += 1.5*evalPawn(b, 'W');
     score -= 1.5*evalPawn(b, 'B');
     //score += evalKingActivity(b, color);

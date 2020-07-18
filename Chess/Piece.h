@@ -14,6 +14,7 @@ public:
      Defines a piece with a board pointer, a current position coord, and a color
      */
     Piece(Board* b, Coord c, char col);
+    bool operator!=(const Piece& other);
     virtual ~Piece();
     
     /*

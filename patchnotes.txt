@@ -410,6 +410,11 @@ Perhaps have 2 hash tables?
 We need to make an eval function independent of turn so we can efficiently store
 Instead of centerBonus use piece square tables?
 
+Day 20: July 18, 2020
+
+Making Board::operator==
+First, need to make Piece::operator==
+
 ~69 hrs
 
 Kasparov v Topalov
@@ -498,3 +503,17 @@ WP 4 3 1.02
 BP 3 7 
 WP 4 3 1.06
 
+Todo:
+Think about what I would want to implement later
+Think about how I might implement that and what I would need
+Redo the legalMoves search with that in mind
+E.g. how can we have a board class design that allows us to cheaply copy, evaluate, and store / compare boards?
+
+How can we have an eval function independent of turn?
+
+For example, should we have a list of pieces? How are we going to get legalMoves? How can we order it so that the pieces that are captured are first searched? 
+
+What is iterative deepening?
+
+Can we use a lazy eval alg. 
+Can we store the total points of the board so as not to waste time iterating through all of the pieces

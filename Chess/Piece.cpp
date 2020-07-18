@@ -21,6 +21,14 @@ Piece::Piece(Board* b, Coord c, char col)
     }
 }
 
+bool Piece::operator!=(const Piece& other)
+{
+    //When is a piece equal to another?
+    //simply must have the same color and typr
+    //the reason it doesn't need to have the same position is because we will be calling it in Board::operator==, which will check the squares entry by entry
+    return (color != other.color || type() != other.type());
+}
+
 Piece::~Piece()
 {
     //don't want to destroy mBoard! Because then there will be no shared board

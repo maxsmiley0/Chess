@@ -136,6 +136,28 @@ Board::Board(vector<vector<string>> b)
         }
 }
 
+bool Board::operator==(const Board& other)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (mBoard[i][j] == nullptr)
+            {
+                if (other.mBoard[i][j] != nullptr)
+                {
+                    return false;
+                }
+            }
+            else if (*mBoard[i][j] != *other.mBoard[i][j])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 Board::~Board()
 {
     for (int i = 0; i < 8; i++)

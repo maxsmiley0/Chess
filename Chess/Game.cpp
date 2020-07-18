@@ -114,10 +114,9 @@ void Game::play()
         }
         else
         {
-            
-            Tuple t;
-            Timer t1;
-            t1.start();
+            //Tuple t;
+            //Timer t1;
+            //t1.start();
             
             TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);

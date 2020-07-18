@@ -19,6 +19,7 @@ public:
     Board(const Board& other);
     //essentially copy constructor given a 2D array
     Board(vector<vector<string>> b);
+    bool operator==(const Board& other);
     ~Board();
     
     //functional
