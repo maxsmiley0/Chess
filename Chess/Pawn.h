@@ -27,6 +27,6 @@ public:
     virtual double centerControl() const;
     
     virtual void update();
-};
+}; 
 
 #endif /* Pawn_h */

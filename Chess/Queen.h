@@ -26,5 +26,5 @@ public:
     virtual Set pseudoLegalMoves() const;
     virtual void update();
 };
-
+ 
 #endif /* Queen_h*/

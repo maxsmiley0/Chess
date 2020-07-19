@@ -202,7 +202,7 @@ bool Piece::legalMove(Coord c) const
      So king can't capture a protected piece
      */
     if (b && type() == 'K' && mBoard->getPiece(c) != nullptr && mBoard->getPiece(c)->getColor() != color) //if same color
-    {
+    { 
         return true;
     }
     if (b && getBoard()->getPiece(c) != nullptr && getBoard()->getPiece(c)->getColor() == color) //if same color

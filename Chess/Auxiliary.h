@@ -52,7 +52,7 @@ const bool isAttacked(const Piece* p);
 const bool isPinned(const Piece* p);
 
 //Recommends a piece to go to a certain coord for a given board, turn, and # of half steps ahead
-
+ 
 /*
  Ray functions
  */

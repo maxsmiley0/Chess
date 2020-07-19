@@ -19,6 +19,6 @@ public:
     virtual double centerControl();
     
     virtual void update();
-};
+}; 
 
 #endif /* Knight_h */

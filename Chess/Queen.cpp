@@ -223,7 +223,7 @@ void Queen::updateLegalMoves()
     bool ulCheck = false;
     bool drCheck = false;
     bool dlCheck = false;
-    
+     
     for (int i = 1; i < 8; i++)
     {
         if (legalMove(getPos() + Coord(i, i)) && !drCheck)

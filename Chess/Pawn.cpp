@@ -77,7 +77,7 @@ void Pawn::updateLegalMoves()
     if (getColor() == 'W')
     {
         dir = -1;
-    }
+    } 
     else if (getColor() == 'B')
     {
         dir = 1;

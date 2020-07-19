@@ -35,6 +35,6 @@ private:
     Coord convert(char c1, char c2); //converts into a coord
     //a list of tuples used for my analysis of algorithm time
     list<Tuple> data;
-};
+}; 
 
 #endif /* Game_h */

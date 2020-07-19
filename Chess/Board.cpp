@@ -511,7 +511,7 @@ void Board::movePiece(Piece* p, Coord c)
         exit(1);
     }
 }
-
+ 
 void Board::updateLegalMoves(char c)
 {
     if (c == 'W')

@@ -82,7 +82,7 @@ int allLegalMoves(Board* b, char color)
             //temp->moveRaw(temp->getPiece((*itr)->getPos()), set.get(i));
             temp->nextTurn();
             cout << eval(temp, temp->getTurn()) << endl;
-            
+          
             delete temp;*/
         }
         cout << endl;

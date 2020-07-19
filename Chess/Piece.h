@@ -66,7 +66,7 @@ public:
     std::list<Piece*> attackers;
     //List of pieces of same color defending this piece (legally)
     std::list<Piece*> defenders;
-    
+     
 private:
     
     Board* mBoard;

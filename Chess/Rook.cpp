@@ -108,7 +108,7 @@ void Rook::updateLegalMoves()
     //responsible for adding these moves to legalMoves
     
     for (int i = 1; i < 8; i++)
-    {
+    { 
         if (legalMove(getPos() + Coord(i, 0)) && !dCheck)
         {
             legalMoves.push_back(getPos() + Coord(i, 0));

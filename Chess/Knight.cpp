@@ -131,7 +131,7 @@ Set Knight::pseudoLegalMoves() const
         set.insert(getPos() + Coord(-2, -1));
     }
     if (pseudoLegalMove(getPos() + Coord(1, 2)))
-    {
+    { 
         set.insert(getPos() + Coord(1, 2));
     }
     if (pseudoLegalMove(getPos() + Coord(1, -2)))

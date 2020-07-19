@@ -31,5 +31,5 @@ private:
     //Input -1 for left, 1 for right, and char color
     bool canCastle(char color, int side) const;
 };
-
+ 
 #endif /* King_hpp */

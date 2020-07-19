@@ -220,7 +220,7 @@ void King::update()
     setNumAttacking(0);
     
     Piece* p;
-    
+     
     p = getBoard()->getPiece(getPos() + Coord(1, 0));
     if (pseudoLegalMove((getPos() + Coord(1, 0))) && p != nullptr)
     {

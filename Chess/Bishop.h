@@ -25,7 +25,7 @@ public:
     virtual void updateLegalMoves();
     virtual Set pseudoLegalMoves() const;
     virtual double centerControl() const;
-    
+     
     virtual void update();
 };
 

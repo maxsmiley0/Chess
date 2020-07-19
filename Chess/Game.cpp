@@ -124,7 +124,7 @@ void Game::play()
             
             //cout << t1.elapsed() << endl;
             //data.push_back(t);
-        }
+        } 
     }
     
     mBoard->print();

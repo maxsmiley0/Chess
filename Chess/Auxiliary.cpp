@@ -142,7 +142,7 @@ double eval(Board* b, char c)
 
 double evalOpening(Board* b, char color)
 {
-    /*
+    /* 
      This is how the opening is evaluated:
      -A simple linear combination of the worth of the pieces for each side
      -A mobility bonus
