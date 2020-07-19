@@ -15,6 +15,8 @@
 #include "Coord.h"
 #include "Set.h"
 
+#include <unordered_map>
+
 Board::Board()
 {
     turn = 'W';
@@ -705,4 +707,25 @@ void Board::nextTurn()
     {
         turn = 'W';
     }
+}
+
+unsigned long Board::hashmap()
+{
+    hash<string> hasher;
+    string s = "";
+    
+    //A linear combination of the worth, x, and y. We add 1 so any x = y = worth = 0 dependancies dont kill the equation to zero
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (mBoard[i][j] != nullptr)
+            {
+                s += mBoard[i][j]->type();
+            }
+        }
+    }
+    
+    return hasher(s) % 100000;
 }

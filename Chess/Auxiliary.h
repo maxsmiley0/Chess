@@ -3,6 +3,7 @@
 
 #include <list>
 #include "Tuple.h"
+
 class Board;
 class Piece;
 class Set;
@@ -20,7 +21,12 @@ class Coord;
  
  For this to work, we need to detect if pieces are protected
  */
-
+/*
+ Hash table implementation
+ One for turn = white, one for turn = black
+ Array of 20k buckets
+ */
+void clearHash(char c); //clears hash table of a particular color
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
 
 double eval(Board* b, char color);

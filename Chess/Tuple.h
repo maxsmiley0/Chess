@@ -19,4 +19,10 @@ struct TuplePC
     double eval;
 };
 
+struct TupleBE
+{
+    Board* b;
+    double eval;
+};
+
 #endif /* Tuple_h */

@@ -62,9 +62,15 @@ void Game::play()
     
     while (!gameOver())
     {
+        Timer hashTimer;
+        hashTimer.start();
+        clearHash(mBoard->getTurn());
+        cout << "Hash timer: " << hashTimer.elapsed() << endl;
         //displays board at beginning of turn
         mBoard->print();
-        //cout << ",";
+        Timer t1;
+        cout << mBoard->hashmap() << endl;
+        cout << t1.elapsed() << endl;
         /*
          rudimentary way of getting beginning and end coord
          */
@@ -83,13 +89,11 @@ void Game::play()
                     //backdoor ending game
                     break;
                 }
-                
                 if (!isValid(userInput))
                 {
                     c1 = convert(userInput[0], userInput[1]);
                     c2 = convert(userInput[2], userInput[3]);
                 }
-                
                 if (!isValid(userInput) && mBoard->getPiece(c1) != nullptr && containsCoord(mBoard->getPiece(c1)->legalMoves, c2) && mBoard->getPiece(c1)->getColor() == mBoard->getTurn())
                 {
                     break;
@@ -114,16 +118,16 @@ void Game::play()
         }
         else
         {
-            //Tuple t;
-            //Timer t1;
-            //t1.start();
+            Tuple t;
+            Timer t1;
+            t1.start();
             
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             
-            //cout << t1.elapsed() << endl;
-            //data.push_back(t);
+            t.time = t1.elapsed();
+            data.push_back(t);
         } 
     }
     

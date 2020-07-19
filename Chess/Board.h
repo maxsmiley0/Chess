@@ -35,6 +35,8 @@ public:
     void updateLegalMoves(char color);
     list<Piece*> canReachKingPseudo(char color);
     
+    unsigned long hashmap(); //returns a hashkey
+    
     //game auxillary
     //returns a list of pointers to pieces that can reach a given coordinate of a given color
     //e.g. which black pieces can reach e4?

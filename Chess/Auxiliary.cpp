@@ -5,7 +5,20 @@
 //  Created by Max Smiley on 6/30/20.
 //  Copyright © 2020 Max Smiley. All rights reserved.
 //
-
+/*
+ ,476.621
+ ,1019.58
+ ,3079.75
+ ,3577.13
+ ,3462.71
+ ,3654.03
+ ,2923.18
+ ,1711.18
+ ,1112
+ ,401.958
+ ,1200.1
+ ,874.527
+ */
 #include <iostream>
 #include <cmath>
 
@@ -16,59 +29,53 @@
 #include "Set.h"
 #include "PST.h"
 
-
 using namespace std;
+
+list<TupleBE> whiteBoards[100000];
+list<TupleBE> blackBoards[100000];
+
+void clearHash(char c)
+{
+    if (c == 'W')
+    {
+        for (int i = 0; i < 100000; i++)
+        {
+            whiteBoards[i].clear();
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 100000; i++)
+        {
+            blackBoards[i].clear();
+        }
+    }
+}
 
 double eval(Board* b, char c)
 {
-    /*
-     Checkmate / stalemate clause
-     */
-    /*
-    bool gameOver = true;
-    Piece* p;
+    //Checking for having already searched goes here
+    unsigned long hashKey = b->hashmap();
     if (c == 'W')
     {
-        p = b->getKing('W');
-        for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+        for (list<TupleBE>::iterator itr = whiteBoards[hashKey].begin(); itr != whiteBoards[hashKey].end(); itr++)
         {
-            if (!(*itr)->legalMoves().empty())
+            if ((*itr).b == b) //dubious, have we defined operator== for pointers?
             {
-                gameOver = false;
+                return (*itr).eval;
             }
         }
     }
     else
     {
-        p = b->getKing('B');
-        for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+        for (list<TupleBE>::iterator itr = blackBoards[hashKey].begin(); itr != blackBoards[hashKey].end(); itr++)
         {
-            if (!(*itr)->legalMoves().empty())
+            if ((*itr).b == b) //dubious, have we defined operator== for pointers?
             {
-                gameOver = false;
+                return (*itr).eval;
             }
         }
     }
-
-    if (gameOver)
-    {
-        if (p->attackers.empty())
-        {
-            return 0.0;
-        }
-        else
-        {
-            if (c == 'W')
-            {
-                return -100.0;
-            }
-            else
-            {
-                return 100.0;
-            }
-        }
-    }
-    */
     /*
      DETERMINING GAME-STAGE PHASE
      */
@@ -137,6 +144,16 @@ double eval(Board* b, char c)
             break;
     }
     
+    if (c == 'W')
+    {
+        TupleBE tuple = {b, score};
+        whiteBoards[hashKey].push_back(tuple);
+    }
+    else
+    {
+        TupleBE tuple = {b, score};
+        blackBoards[hashKey].push_back(tuple);
+    }
     return score;
 }
 
@@ -168,7 +185,7 @@ double evalOpening(Board* b, char color)
         score -= .06*(*itr)->defenders.size();
     }
     
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     //score += centerBonus(b, color);
     score += evalPst(b);
     score -= majorPiecePenalty(b, color);
@@ -210,7 +227,7 @@ double evalMiddleGame(Board* b, char color)
     }
     
     score += evalPst(b);
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     //score += .33*centerBonus(b, color);
     score += evalPawn(b, 'W');
     score -= evalPawn(b, 'B');
@@ -266,7 +283,7 @@ double evalEndGame(Board* b, char color)
     }
     
     score += evalPstEg(b);
-    //score += .8*evalPiece(b, color);
+    score += .8*evalPiece(b, color);
     score += 1.5*evalPawn(b, 'W');
     score -= 1.5*evalPawn(b, 'B');
     //score += evalKingActivity(b, color);
