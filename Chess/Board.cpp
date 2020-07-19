@@ -75,6 +75,7 @@ Board::Board(const Board& other)
                 mBoard[i][j]->setPinDir(other.mBoard[i][j]->getPinDir());
                 mBoard[i][j]->setNumDefending(other.mBoard[i][j]->getNumDefending());
                 mBoard[i][j]->setNumAttacking(other.mBoard[i][j]->getNumAttacking());
+                mBoard[i][j]->legalMoves = other.mBoard[i][j]->legalMoves;
             }
             if (mBoard[i][j] != nullptr && mBoard[i][j]->getColor() == 'W')
             {
@@ -134,6 +135,10 @@ Board::Board(vector<vector<string>> b)
                 }
             }
         }
+
+    //Updates legal moves
+    updateLegalMoves('W');
+    updateLegalMoves('B');
 }
 
 bool Board::operator==(const Board& other)
@@ -187,6 +192,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
+        print();
         cerr << "No White King!" << endl;
         exit(1);
     }
@@ -201,6 +207,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
+        print();
         cerr << "No Black King!" << endl;
         exit(1);
     }
@@ -362,7 +369,7 @@ void Board::movePiece(Piece* p, Coord c)
         exit(1);
     }
     //castling clause
-    if (p->legalMoves().contains(c)) //if this coord is in the legal move set
+    if (containsCoord(p->legalMoves, c)) //if this coord is in the legal move set
     {
         if (p->type() == 'K' && !p->hasMoved() && c == Coord(7, 2))
         {
@@ -492,13 +499,34 @@ void Board::movePiece(Piece* p, Coord c)
         
         //Updates pin information
         updatePinDir(p->getOppositeColor());
+        //Updates legal moves
         //Updates which pieces are defended / attacked by which
-        p->getBoard()->update();
+        update();
+        updateLegalMoves('W');
+        updateLegalMoves('B');
     }
     else //Crashes on illegal move atm
     {
         cerr << "This is not a legal move!" << endl;
         exit(1);
+    }
+}
+
+void Board::updateLegalMoves(char c)
+{
+    if (c == 'W')
+    {
+        for (list<Piece*>::iterator itr = whitePieces.begin(); itr != whitePieces.end(); itr++)
+        {
+            (*itr)->updateLegalMoves();
+        }
+    }
+    else
+    {
+        for (list<Piece*>::iterator itr = blackPieces.begin(); itr != blackPieces.end(); itr++)
+        {
+            (*itr)->updateLegalMoves();
+        }
     }
 }
 

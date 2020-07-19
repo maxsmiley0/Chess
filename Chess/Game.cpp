@@ -90,7 +90,7 @@ void Game::play()
                     c2 = convert(userInput[2], userInput[3]);
                 }
                 
-                if (!isValid(userInput) && mBoard->getPiece(c1) != nullptr && mBoard->getPiece(c1)->legalMoves().contains(c2) && mBoard->getPiece(c1)->getColor() == mBoard->getTurn())
+                if (!isValid(userInput) && mBoard->getPiece(c1) != nullptr && containsCoord(mBoard->getPiece(c1)->legalMoves, c2) && mBoard->getPiece(c1)->getColor() == mBoard->getTurn())
                 {
                     break;
                 }
@@ -213,7 +213,7 @@ bool Game::gameOver()
     
     for (list<Piece*>::iterator itr = mBoard->whitePieces.begin(); itr != mBoard->whitePieces.end(); itr++)
     {
-        if (!(*itr)->legalMoves().empty())
+        if (!(*itr)->legalMoves.empty())
         {
             gameOverForWhite = false;
             break;
@@ -222,7 +222,7 @@ bool Game::gameOver()
     
     for (list<Piece*>::iterator itr = mBoard->blackPieces.begin(); itr != mBoard->blackPieces.end(); itr++)
     {
-        if (!(*itr)->legalMoves().empty())
+        if (!(*itr)->legalMoves.empty())
         {
             gameOverForBlack = false;
             break;

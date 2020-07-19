@@ -157,14 +157,14 @@ double evalOpening(Board* b, char color)
     for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
     {
         score += (*itr)->worth();
-        score += .04*(*itr)->legalMoves().size();
+        score += .04*(*itr)->legalMoves.size();
         score += .06*(*itr)->defenders.size();
     }
     //And subtracting black's material
     for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
     {
         score -= (*itr)->worth();
-        score -= .04*(*itr)->legalMoves().size();
+        score -= .04*(*itr)->legalMoves.size();
         score -= .06*(*itr)->defenders.size();
     }
     
@@ -198,14 +198,14 @@ double evalMiddleGame(Board* b, char color)
     for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
     {
         score += (*itr)->worth();
-        score += .06*(*itr)->legalMoves().size();
+        score += .06*(*itr)->legalMoves.size();
         score += .09*(*itr)->defenders.size();
     }
     //And subtracting black's material
     for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
     {
         score -= (*itr)->worth();
-        score -= .06*(*itr)->legalMoves().size();
+        score -= .06*(*itr)->legalMoves.size();
         score -= .09*(*itr)->defenders.size();
     }
     
@@ -242,7 +242,7 @@ double evalEndGame(Board* b, char color)
     for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
     {
         score += (*itr)->worth();
-        score += .08*(*itr)->legalMoves().size();
+        score += .08*(*itr)->legalMoves.size();
         score += .12*(*itr)->defenders.size();
         
         //penalty for unprotected pawns that guard others - and have more attackers than defenders
@@ -255,7 +255,7 @@ double evalEndGame(Board* b, char color)
     for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
     {
         score -= (*itr)->worth();
-        score -= .08*(*itr)->legalMoves().size();
+        score -= .08*(*itr)->legalMoves.size();
         score -= .12*(*itr)->defenders.size();
         
         //penalty for unprotected pawns that guard others
@@ -719,8 +719,8 @@ double evalKingActivity(Board* b, char c)
     {
         score -= .55;
     }
-    score += .1*whiteKing->legalMoves().size();
-    score -= .1*blackKing->legalMoves().size();
+    score += .1*whiteKing->legalMoves.size();
+    score -= .1*blackKing->legalMoves.size();
     
     return score;
 }
@@ -735,6 +735,20 @@ const bool isAttacked(const Piece* p)
     {
         return false;
     }
+}
+
+bool containsCoord(list<Coord> li, Coord c)
+{
+    //iterating through the list
+    for (list<Coord>::iterator itr = li.begin(); itr != li.end(); itr++)
+    {
+        //if the iterator "points" to the coord, return true
+        if ((*itr) == c)
+        {
+            return true;
+        }
+    }
+    return false; //else return false
 }
 
 const Set getRay(const Piece* p, char& dir)
@@ -978,14 +992,13 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
             //Iterate through pieces
             for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
             {
-                Set set((*itr)->legalMoves());
                 //Iterate through legal moves
-                for (int i = 0; i < set.size(); i++)
+                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
                     temp->nextTurn();
                     /*
                      We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
@@ -998,7 +1011,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     if (tuple.p == nullptr || tempTuple.eval > bestEval)
                     {
                         tuple.p = *itr;
-                        tuple.c = set.get(i);
+                        tuple.c = *itr2;
                         tuple.eval = tempTuple.eval;
                         bestEval = tempTuple.eval;
                     }
@@ -1022,14 +1035,13 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
             //Iterate through pieces
             for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
             {
-                Set set((*itr)->legalMoves());
                 //Iterate through legal moves
-                for (int i = 0; i < set.size(); i++)
+                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
                     temp->nextTurn();
                     /*
                     We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
@@ -1042,7 +1054,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     if (tuple.p == nullptr || tempTuple.eval < bestEval)
                     {
                         tuple.p = *itr;
-                        tuple.c = set.get(i);
+                        tuple.c = *itr2;
                         tuple.eval = tempTuple.eval;
                         bestEval = tempTuple.eval;
                     }
@@ -1073,14 +1085,13 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
             //Iterate through pieces
             for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
             {
-                Set set((*itr)->legalMoves());
                 //Iterate through legal moves
-                for (int i = 0; i < set.size(); i++)
+                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
                     temp->nextTurn();
                     //Simply call static eval on the board
                     double currentEval = eval(temp, 'B');
@@ -1092,7 +1103,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     if (tuple.p == nullptr || currentEval > bestEval)
                     {
                         tuple.p = *itr;
-                        tuple.c = set.get(i);
+                        tuple.c = *itr2;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
@@ -1117,13 +1128,12 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
             for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
             {
                 endNode = false;
-                Set set((*itr)->legalMoves());
                 //Iterate through legal moves
-                for (int i = 0; i < set.size(); i++)
+                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
                 {
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
                     temp->nextTurn();
                     //Simply call static eval on board
                     double currentEval = eval(temp, 'W');
@@ -1135,7 +1145,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     if (tuple.p == nullptr || currentEval < bestEval)
                     {
                         tuple.p = *itr;
-                        tuple.c = set.get(i);
+                        tuple.c = *itr2;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }

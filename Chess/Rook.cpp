@@ -95,9 +95,9 @@ char Rook::type() const
     return 'R';
 }
 
-Set Rook::legalMoves() const
+void Rook::updateLegalMoves()
 {
-    Set set;
+    legalMoves.clear();
     
     //set these to true when encountering an illegal move so rook can't move past
     bool rCheck = false;
@@ -111,19 +111,19 @@ Set Rook::legalMoves() const
     {
         if (legalMove(getPos() + Coord(i, 0)) && !dCheck)
         {
-            set.insert(getPos() + Coord(i, 0));
+            legalMoves.push_back(getPos() + Coord(i, 0));
         }
         if (legalMove(getPos() + Coord(-i, 0)) && !uCheck)
         {
-            set.insert(getPos() + Coord(-i, 0));
+            legalMoves.push_back(getPos() + Coord(-i, 0));
         }
         if (legalMove(getPos() + Coord(0, i)) && !rCheck)
         {
-            set.insert(getPos() + Coord(0, i));
+            legalMoves.push_back(getPos() + Coord(0, i));
         }
         if (legalMove(getPos() + Coord(0, -i)) && !lCheck)
         {
-            set.insert(getPos() + Coord(0, -i));
+            legalMoves.push_back(getPos() + Coord(0, -i));
         }
         
         //If we hit a piece, stop checking
@@ -145,8 +145,6 @@ Set Rook::legalMoves() const
             lCheck = true;
         }
     }
-    
-    return set;
 }
 
 Set Rook::pseudoLegalMoves() const

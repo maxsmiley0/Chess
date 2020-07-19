@@ -73,43 +73,40 @@ int allLegalMoves(Board* b, char color)
     {
     for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
     {
-        Set set((*itr)->legalMoves());
-        
         cout << (*itr)->getColor() << (*itr)->type() << endl;
-        for (int i = 0; i < set.size(); i++)
+        for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
         {
-            cout << set.get(i).getX() << " " << set.get(i).getY() <<  " ";
-            Board* temp = new Board(*b);
-            temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+            cout << (*itr2).getX() << " " << (*itr2).getY() <<  " ";
+            /*Board* temp = new Board(*b);
+            temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
             //temp->moveRaw(temp->getPiece((*itr)->getPos()), set.get(i));
             temp->nextTurn();
             cout << eval(temp, temp->getTurn()) << endl;
             
-            delete temp;
+            delete temp;*/
         }
         cout << endl;
-        i += set.size();
+        i += (*itr)->legalMoves.size();
     }
     }
     else if (color == 'B')
     {
     for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
     {
-        Set set((*itr)->legalMoves());
-        
         cout << (*itr)->getColor() << (*itr)->type() << endl;
-        for (int i = 0; i < set.size(); i++)
+        for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
         {
-            cout << set.get(i).getX() << " " << set.get(i).getY() <<  " ";
-            Board* temp = new Board(*b);
-            temp->movePiece(temp->getPiece((*itr)->getPos()), set.get(i));
+            cout << (*itr2).getX() << " " << (*itr2).getY() <<  " ";
+            /*Board* temp = new Board(*b);
+            temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
             //temp->moveRaw(temp->getPiece((*itr)->getPos()), set.get(i));
             temp->nextTurn();
             cout << eval(temp, temp->getTurn()) << endl;
-            delete temp;
+            
+            delete temp;*/
         }
         cout << endl;
-        i += set.size();
+        i += (*itr)->legalMoves.size();
     }
     }
     return i;

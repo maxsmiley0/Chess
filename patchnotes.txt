@@ -415,6 +415,15 @@ Day 20: July 18, 2020
 Making Board::operator==
 First, need to make Piece::operator==
 
+Another stylistic thing to consider: somehow store all of the information about legal moves without having to call it multiple times, e.g. every time we want to simply know the size of legal moves it actually has to calculate all of them... no bueno! A list of coords perhaps?
+-Could maintain order in list<Piece*>?
+
+Huge problem rn: only updates other side's legal moves to save time
+What if no legal mves> but not your turn it would falsely declare stalemate/checkmate
+Soon; tbi later only check on game over for turn
+
+//not even calculating defenders> do those get copied over?
+
 ~69 hrs
 
 Kasparov v Topalov

@@ -39,6 +39,7 @@ private:
     };
     
     Node* head;
+    int mSize;
 };
 
 #endif /* Set_h */

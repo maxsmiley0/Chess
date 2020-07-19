@@ -169,9 +169,9 @@ char Queen::type() const
     return 'Q';
 }
 
-Set Queen::legalMoves() const
+void Queen::updateLegalMoves()
 {
-    Set set;
+    legalMoves.clear();
     
     //"rook-like" portion of moves
     //set these to true when encountering an illegal move so queen can't move past
@@ -184,19 +184,19 @@ Set Queen::legalMoves() const
     {
         if (legalMove(getPos() + Coord(i, 0)) && !dCheck)
         {
-            set.insert(getPos() + Coord(i, 0));
+            legalMoves.push_back(getPos() + Coord(i, 0));
         }
         if (legalMove(getPos() + Coord(-i, 0)) && !uCheck)
         {
-            set.insert(getPos() + Coord(-i, 0));
+            legalMoves.push_back(getPos() + Coord(-i, 0));
         }
         if (legalMove(getPos() + Coord(0, i)) && !rCheck)
         {
-            set.insert(getPos() + Coord(0, i));
+            legalMoves.push_back(getPos() + Coord(0, i));
         }
         if (legalMove(getPos() + Coord(0, -i)) && !lCheck)
         {
-            set.insert(getPos() + Coord(0, -i));
+            legalMoves.push_back(getPos() + Coord(0, -i));
         }
         
         if (getBoard()->getPiece(getPos() + Coord(i, 0)) != nullptr)
@@ -228,22 +228,22 @@ Set Queen::legalMoves() const
     {
         if (legalMove(getPos() + Coord(i, i)) && !drCheck)
         {
-            set.insert(getPos() + Coord(i, i));
+            legalMoves.push_back(getPos() + Coord(i, i));
             
         }
         if (legalMove(getPos() + Coord(-i, i)) && !urCheck)
         {
-            set.insert(getPos() + Coord(-i, i));
+            legalMoves.push_back(getPos() + Coord(-i, i));
             
         }
         if (legalMove(getPos() + Coord(i, -i)) && !dlCheck)
         {
-            set.insert(getPos() + Coord(i, -i));
+            legalMoves.push_back(getPos() + Coord(i, -i));
             
         }
         if (legalMove(getPos() + Coord(-i, -i)) && !ulCheck)
         {
-            set.insert(getPos() + Coord(-i, -i));
+            legalMoves.push_back(getPos() + Coord(-i, -i));
             
         }
         
@@ -264,8 +264,6 @@ Set Queen::legalMoves() const
             ulCheck = true;
         }
     }
-    
-    return set;
 }
 
 Set Queen::pseudoLegalMoves() const

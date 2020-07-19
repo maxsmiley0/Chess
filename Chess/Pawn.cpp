@@ -66,8 +66,9 @@ char Pawn::type() const
     return 'P';
 }
 
-Set Pawn::legalMoves() const
+void Pawn::updateLegalMoves()
 {
+    legalMoves.clear();
     /*
      gives "directionality" to a pawn - -1 for white (going up the board), +1 for black (going down the board)
      */
@@ -87,15 +88,13 @@ Set Pawn::legalMoves() const
         exit(1);
     }
     
-    Set set;
-    
     //Regular forward case
     if (legalMove(getPos() + Coord(dir, 0)))
     {
         //Pawn can only move if there is no piece there
         if (getBoard()->getPiece(getPos() + Coord(dir, 0)) == nullptr)
         {
-            set.insert(getPos() + Coord(dir, 0));
+            legalMoves.push_back(getPos() + Coord(dir, 0));
         }
     }
     /*
@@ -106,7 +105,7 @@ Set Pawn::legalMoves() const
         //Pawn can only move forward two if not obstructed in any way
         if (getBoard()->getPiece(getPos() + Coord(dir, 0)) == nullptr&& getBoard()->getPiece(getPos() + Coord(2*dir, 0)) == nullptr)
         {
-            set.insert(getPos() + Coord(2*dir, 0));
+            legalMoves.push_back(getPos() + Coord(2*dir, 0));
         }
     }
     
@@ -116,14 +115,12 @@ Set Pawn::legalMoves() const
     
     if (legalMove(getPos() + Coord(dir, 1)) && getBoard()->getPiece(getPos() + Coord(dir, 1)) != nullptr && getBoard()->getPiece(getPos() + Coord(dir, 1))->getColor() != getColor())
     {
-        set.insert(getPos() + Coord(dir, 1));
+        legalMoves.push_back(getPos() + Coord(dir, 1));
     }
     if (legalMove(getPos() + Coord(dir, -1)) && getBoard()->getPiece(getPos() + Coord(dir, -1)) != nullptr && getBoard()->getPiece(getPos() + Coord(dir, -1))->getColor() != getColor())
     {
-        set.insert(getPos() + Coord(dir, -1));
+        legalMoves.push_back(getPos() + Coord(dir, -1));
     }
-    
-    return set;
 }
 
 Set Pawn::pseudoLegalMoves() const

@@ -54,13 +54,14 @@ public:
     virtual double worth() const = 0;
     virtual char type() const = 0; //returns the name character e.g. "K" for king
     virtual Set pseudoLegalMoves() const = 0; //returns a set of pseudolegal moves from given pos
-    virtual Set legalMoves() const = 0; //returns a set of legal moves from given pos
+    virtual void updateLegalMoves() = 0; //returns a set of legal moves from given pos
     virtual double centerControl() const; //returns a bonus for center control, convention is always positive so it will be up to Auxiliary::centerControl to adhere to sign conventions
     
     //Updates list of pieces it attacks and defends
     //We assume not in check
     virtual void update() = 0;
     
+    std::list<Coord> legalMoves;
     //List of pieces of opposite color attacking this piece (legally)
     std::list<Piece*> attackers;
     //List of pieces of same color defending this piece (legally)

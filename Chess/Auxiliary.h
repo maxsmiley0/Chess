@@ -56,7 +56,8 @@ const bool isPinned(const Piece* p);
 /*
  Ray functions
  */
-
+//returns true if a list contains a coord
+bool containsCoord(list<Coord> li, Coord c);
 //Returns a ray to the king, modifies dir to represent ray direction (not inclusive)
 const Set getRay(const Piece* p, char& dir);
 //Returns a ray to the coord c

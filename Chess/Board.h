@@ -32,6 +32,7 @@ public:
     //Moveraw moves pieces without checking if legal move, so faster
     //We do this to calculate hypothetical moves which we already know are legal
     void moveRaw(Piece* p, Coord c);
+    void updateLegalMoves(char color);
     list<Piece*> canReachKingPseudo(char color);
     
     //game auxillary

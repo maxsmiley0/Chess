@@ -72,44 +72,42 @@ char Knight::type() const
     return 'N';
 }
 
-Set Knight::legalMoves() const
+void Knight::updateLegalMoves()
 {
-    Set set;
+    legalMoves.clear();
     
     if (legalMove(getPos() + Coord(2, 1)))
     {
-        set.insert(getPos() + Coord(2, 1));
+        legalMoves.push_back(getPos() + Coord(2, 1));
     }
     if (legalMove(getPos() + Coord(2, -1)))
     {
-        set.insert(getPos() + Coord(2, -1));
+        legalMoves.push_back(getPos() + Coord(2, -1));
     }
     if (legalMove(getPos() + Coord(-2, 1)))
     {
-        set.insert(getPos() + Coord(-2, 1));
+        legalMoves.push_back(getPos() + Coord(-2, 1));
     }
     if (legalMove(getPos() + Coord(-2, -1)))
     {
-        set.insert(getPos() + Coord(-2, -1));
+        legalMoves.push_back(getPos() + Coord(-2, -1));
     }
     if (legalMove(getPos() + Coord(1, 2)))
     {
-        set.insert(getPos() + Coord(1, 2));
+        legalMoves.push_back(getPos() + Coord(1, 2));
     }
     if (legalMove(getPos() + Coord(1, -2)))
     {
-        set.insert(getPos() + Coord(1, -2));
+        legalMoves.push_back(getPos() + Coord(1, -2));
     }
     if (legalMove(getPos() + Coord(-1, 2)))
     {
-        set.insert(getPos() + Coord(-1, 2));
+        legalMoves.push_back(getPos() + Coord(-1, 2));
     }
     if (legalMove(getPos() + Coord(-1, -2)))
     {
-        set.insert(getPos() + Coord(-1, -2));
+        legalMoves.push_back(getPos() + Coord(-1, -2));
     }
-    
-    return set;
 }
 
 Set Knight::pseudoLegalMoves() const

@@ -6,6 +6,7 @@ using namespace std;
 Set::Set()
 {
     head = nullptr; //creates an empty set, i.e. no nodes, head points to nullptr
+    mSize = 0;
 }
 
 Set::~Set()
@@ -26,6 +27,7 @@ Set::Set(const Set& other)
     {
         insert(p->value);   //inserts each element of other set into this set
     }                       //insert also define the next and prev pointer for each node
+    mSize = other.mSize;
 }
 
 Set& Set::operator=(const Set& other) //assigns an existing set to another
@@ -49,27 +51,21 @@ bool Set::empty() const
 
 int Set::size() const
 {
-    int count = 0;                    //length starts as zero
-    Node* p = head;                   //let p = head to iterate through the list
-    while (p != nullptr)              //loops until p comes to the end of the list
-    {                                 //which is found when p == nullptr
-        count++;                      //through each node, increment length (count)
-        p = p->next;
-    }
-    
-    return count;                     //return how many nodes found
+    return mSize;
 }
 
 bool Set::insert(const Coord& value)
 {
     if (head == nullptr)              //Special Case: Empty Set
     {
+        mSize = 1;
         head = new Node;              //declare a new node
         head->value = value;          //initialize its value
         head->next = nullptr;         //set the prev pointer to nullptr (since it's the head)
     }
     else
     {
+        mSize++;
         Node* p = head;               //General Case: Set already has some elements (or one)
         Node* newNode = new Node;     //Allocate memory for new node
         while (p->next != nullptr)    //Loop until we get to the end of the linked list

@@ -107,9 +107,9 @@ char Bishop::type() const
     return 'B';
 }
 
-Set Bishop::legalMoves() const
+void Bishop::updateLegalMoves()
 {
-    Set set;
+    legalMoves.clear();
     
     //set these to true when encountering an illegal move so bishop can't move past
     bool urCheck = false;
@@ -123,22 +123,22 @@ Set Bishop::legalMoves() const
         
         if (legalMove(getPos() + Coord(i, i)) && !drCheck)
         {
-            set.insert(getPos() + Coord(i, i));
+            legalMoves.push_back(getPos() + Coord(i, i));
             
         }
         if (legalMove(getPos() + Coord(-i, i)) && !urCheck)
         {
-            set.insert(getPos() + Coord(-i, i));
+            legalMoves.push_back(getPos() + Coord(-i, i));
             
         }
         if (legalMove(getPos() + Coord(i, -i)) && !dlCheck)
         {
-            set.insert(getPos() + Coord(i, -i));
+            legalMoves.push_back(getPos() + Coord(i, -i));
             
         }
         if (legalMove(getPos() + Coord(-i, -i)) && !ulCheck)
         {
-            set.insert(getPos() + Coord(-i, -i));
+            legalMoves.push_back(getPos() + Coord(-i, -i));
             
         }
         
@@ -161,8 +161,6 @@ Set Bishop::legalMoves() const
             ulCheck = true;
         }
     }
-    
-    return set;
 }
 
 Set Bishop::pseudoLegalMoves() const

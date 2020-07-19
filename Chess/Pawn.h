@@ -22,7 +22,7 @@ public:
     virtual bool canReachEnemyKing() const;
     virtual double worth() const;
     virtual char type() const;
-    virtual Set legalMoves() const;
+    virtual void updateLegalMoves();
     virtual Set pseudoLegalMoves() const;
     virtual double centerControl() const;
     

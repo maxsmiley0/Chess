@@ -36,42 +36,42 @@ char King::type() const
     return 'K';
 }
 
-Set King::legalMoves() const
+void King::updateLegalMoves()
 {
-    Set set;
+    legalMoves.clear();
     //Regular Moves
     
     if ((legalMove(getPos() + Coord(1, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(1, 1));
+        legalMoves.push_back(getPos() + Coord(1, 1));
     }
     if ((legalMove(getPos() + Coord(0, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(0, 1));
+        legalMoves.push_back(getPos() + Coord(0, 1));
     }
     if ((legalMove(getPos() + Coord(-1, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, 1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(-1, 1));
+        legalMoves.push_back(getPos() + Coord(-1, 1));
     }
     if ((legalMove(getPos() + Coord(-1, 0)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, 0), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(-1, 0));
+        legalMoves.push_back(getPos() + Coord(-1, 0));
     }
     if ((legalMove(getPos() + Coord(-1, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, -1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(-1, -1));
+        legalMoves.push_back(getPos() + Coord(-1, -1));
     }
     if ((legalMove(getPos() + Coord(0, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(0, -1));
+        legalMoves.push_back(getPos() + Coord(0, -1));
     }
     if ((legalMove(getPos() + Coord(1, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, -1), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(1, -1));
+        legalMoves.push_back(getPos() + Coord(1, -1));
     }
     if ((legalMove(getPos() + Coord(1, 0)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, 0), getOppositeColor()).empty()))
     {
-        set.insert(getPos() + Coord(1, 0));
+        legalMoves.push_back(getPos() + Coord(1, 0));
     }
     //Castling
     
@@ -79,11 +79,11 @@ Set King::legalMoves() const
     {
         if (getColor() == 'W')
         {
-            set.insert(Coord(7, 2));
+            legalMoves.push_back(Coord(7, 2));
         }
         else if (getColor() == 'B')
         {
-            set.insert(Coord(0, 6));
+            legalMoves.push_back(Coord(0, 6));
         }
     }
     
@@ -91,15 +91,13 @@ Set King::legalMoves() const
     {
         if (getColor() == 'W')
         {
-            set.insert(Coord(7, 6));
+            legalMoves.push_back(Coord(7, 6));
         }
         else if (getColor() == 'B')
         {
-            set.insert(Coord(0, 2));
+            legalMoves.push_back(Coord(0, 2));
         }
     }
-    
-    return set;
 }
 
 bool King::canCastle(char color, int side) const
@@ -233,7 +231,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(1, 0)))
+            if (containsCoord(legalMoves, getPos() + Coord(1, 0)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -251,7 +249,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(-1, 0)))
+            if (containsCoord(legalMoves, getPos() + Coord(-1, 0)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -269,7 +267,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(0, 1)))
+            if (containsCoord(legalMoves, getPos() + Coord(0, 1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -287,7 +285,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(0, -1)))
+            if (containsCoord(legalMoves, getPos() + Coord(0, -1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -305,7 +303,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(1, 1)))
+            if (containsCoord(legalMoves, getPos() + Coord(1, 1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -323,7 +321,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(-1, 1)))
+            if (containsCoord(legalMoves, getPos() + Coord(-1, 1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -341,7 +339,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(1, -1)))
+            if (containsCoord(legalMoves, getPos() + Coord(1, -1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
@@ -359,7 +357,7 @@ void King::update()
         }
         else
         {
-            if (legalMoves().contains(getPos() + Coord(-1, -1)))
+            if (containsCoord(legalMoves, getPos() + Coord(-1, -1)))
             {
                 p->attackers.push_back(this);
                 incrementNumAttacking();
