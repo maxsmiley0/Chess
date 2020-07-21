@@ -26,6 +26,7 @@ class Coord;
  One for turn = white, one for turn = black
  Array of 20k buckets
  */
+void hashInfo(); //prints out distribution of hash table
 void clearHash(char c); //clears hash table of a particular color
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
 

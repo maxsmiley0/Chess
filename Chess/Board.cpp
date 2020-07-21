@@ -713,7 +713,7 @@ unsigned long Board::hashmap()
 {
     hash<string> hasher;
     string s = "";
-    
+    s += turn;
     //A linear combination of the worth, x, and y. We add 1 so any x = y = worth = 0 dependancies dont kill the equation to zero
     
     for (int i = 0; i < 8; i++)
@@ -722,7 +722,11 @@ unsigned long Board::hashmap()
         {
             if (mBoard[i][j] != nullptr)
             {
-                s += mBoard[i][j]->type();
+                s += mBoard[i][j]->getColor() + mBoard[i][j]->type();
+            }
+            else
+            {
+                s += 'N';
             }
         }
     }

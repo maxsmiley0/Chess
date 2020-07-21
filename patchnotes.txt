@@ -526,3 +526,9 @@ What is iterative deepening?
 
 Can we use a lazy eval alg. 
 Can we store the total points of the board so as not to waste time iterating through all of the pieces
+Have good moves be evaluated first
+-Tweaked hash table deletion
+
+TODO: condense hash table into 1
+      better hash function
+      make able to change length at will

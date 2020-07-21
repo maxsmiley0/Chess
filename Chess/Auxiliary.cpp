@@ -34,20 +34,36 @@ using namespace std;
 list<TupleBE> whiteBoards[100000];
 list<TupleBE> blackBoards[100000];
 
+void hashInfo()
+{
+    for (int i = 0; i < 100000; i++)
+    {
+        cout << whiteBoards[i].size() << blackBoards[i].size();
+    }
+}
+
 void clearHash(char c)
 {
     if (c == 'W')
     {
         for (int i = 0; i < 100000; i++)
         {
-            whiteBoards[i].clear();
+            for (list<TupleBE>::iterator itr = whiteBoards[i].begin(); itr != whiteBoards[i].end(); itr++)
+            {
+                delete (*itr).b; //deleting the board
+                itr = whiteBoards[i].erase(itr);
+            }
         }
     }
     else
     {
         for (int i = 0; i < 100000; i++)
         {
-            blackBoards[i].clear();
+            for (list<TupleBE>::iterator itr = blackBoards[i].begin(); itr != blackBoards[i].end(); itr++)
+            {
+                delete (*itr).b; //deleting the board
+                itr = blackBoards[i].erase(itr);
+            }
         }
     }
 }
@@ -1124,8 +1140,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
-                    //Deleting dynamically allocated temporary board
-                    delete temp;
+                    //We DON'T delete the board here, because at depth zero, the board will be pushed into the transposition table to be deleted in Auxiliary::clearHash
                     //Pruning
                     if (alpha >= beta)
                     {
@@ -1166,8 +1181,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
-                    //Deleting dynamically allocated temporary board
-                    delete temp;
+                    //We DON'T delete the board here, because at depth zero, the board will be pushed into the transposition table to be deleted in Auxiliary::clearHash
                     //Pruning
                     if (beta <= alpha)
                     {
