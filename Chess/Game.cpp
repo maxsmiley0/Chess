@@ -124,13 +124,13 @@ void Game::play()
             Timer t1;
             t1.start();
             
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             
             t.time = t1.elapsed();
             data.push_back(t);
-        } 
+        }
     }
     
     mBoard->print();
@@ -263,29 +263,3 @@ bool Game::isValid(string s)
     
     return true;
 }
-
-
-/*
-for (list<Piece*>::iterator itr = mBoard->whitePieces.begin(); itr != mBoard->whitePieces.end(); itr++)
-{
-    for (list<Piece*>::iterator itr2 = (*itr)->attackers.begin(); itr2 != (*itr)->attackers.end(); itr2++)
-    {
-        cout << (*itr)->getColor() << (*itr)->type() << " at " << (*itr)->getPos().getX() << " " << (*itr)->getPos().getY() << " attacked by " << (*itr2)->getColor() << (*itr2)->type() << " at " << (*itr2)->getPos().getX() << " " << (*itr)->getPos().getY() << endl;
-    }
-    for (list<Piece*>::iterator itr2 = (*itr)->defenders.begin(); itr2 != (*itr)->defenders.end(); itr2++)
-    {
-        cout << (*itr)->getColor() << (*itr)->type() << " at " << (*itr)->getPos().getX() << " " << (*itr)->getPos().getY() << " defended by " << (*itr2)->getColor() << (*itr2)->type() << " at " << (*itr2)->getPos().getX() << " " << (*itr)->getPos().getY() << endl;
-    }
-}
-
-for (list<Piece*>::iterator itr = mBoard->blackPieces.begin(); itr != mBoard->blackPieces.end(); itr++)
-{
-    for (list<Piece*>::iterator itr2 = (*itr)->attackers.begin(); itr2 != (*itr)->attackers.end(); itr2++)
-    {
-        cout << (*itr)->getColor() << (*itr)->type() << " at " << (*itr)->getPos().getX() << " " << (*itr)->getPos().getY() << " attacked by " << (*itr2)->getColor() << (*itr2)->type() << " at " << (*itr2)->getPos().getX() << " " << (*itr)->getPos().getY() << endl;
-    }
-    for (list<Piece*>::iterator itr2 = (*itr)->defenders.begin(); itr2 != (*itr)->defenders.end(); itr2++)
-    {
-        cout << (*itr)->getColor() << (*itr)->type() << " at " << (*itr)->getPos().getX() << " " << (*itr)->getPos().getY() << " defended by " << (*itr2)->getColor() << (*itr2)->type() << " at " << (*itr2)->getPos().getX() << " " << (*itr)->getPos().getY() << endl;
-    }
-}*/

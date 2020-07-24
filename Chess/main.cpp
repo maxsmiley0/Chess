@@ -80,7 +80,6 @@ int allLegalMoves(Board* b, char color)
             /*Board* temp = new Board(*b);
             temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
             //temp->moveRaw(temp->getPiece((*itr)->getPos()), set.get(i));
-            temp->nextTurn();
             cout << eval(temp, temp->getTurn()) << endl;
           
             delete temp;*/
@@ -100,7 +99,6 @@ int allLegalMoves(Board* b, char color)
             /*Board* temp = new Board(*b);
             temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
             //temp->moveRaw(temp->getPiece((*itr)->getPos()), set.get(i));
-            temp->nextTurn();
             cout << eval(temp, temp->getTurn()) << endl;
             
             delete temp;*/

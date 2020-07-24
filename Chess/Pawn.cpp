@@ -103,7 +103,7 @@ void Pawn::updateLegalMoves()
     if (!hasMoved() && legalMove(getPos() + Coord(2*dir, 0)))
     {
         //Pawn can only move forward two if not obstructed in any way
-        if (getBoard()->getPiece(getPos() + Coord(dir, 0)) == nullptr&& getBoard()->getPiece(getPos() + Coord(2*dir, 0)) == nullptr)
+        if (getBoard()->getPiece(getPos() + Coord(dir, 0)) == nullptr && getBoard()->getPiece(getPos() + Coord(2*dir, 0)) == nullptr)
         {
             legalMoves.push_back(getPos() + Coord(2*dir, 0));
         }

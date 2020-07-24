@@ -149,12 +149,13 @@ bool Board::operator==(const Board& other)
     {
         for (int j = 0; j < 8; j++)
         {
-            if (mBoard[i][j] == nullptr)
+            if (mBoard[i][j] == nullptr && other.mBoard[i][j] == nullptr)
             {
-                if (other.mBoard[i][j] != nullptr)
-                {
-                    return false;
-                }
+                return true;
+            }
+            else if (mBoard[i][j] == nullptr || other.mBoard[i][j] == nullptr)
+            {
+                return true;
             }
             else if (*mBoard[i][j] != *other.mBoard[i][j])
             {
@@ -731,5 +732,5 @@ unsigned long Board::hashmap()
         }
     }
     
-    return hasher(s) % 100000;
+    return hasher(s) % HASHCOUNT;
 }

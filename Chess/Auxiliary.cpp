@@ -31,12 +31,12 @@
 
 using namespace std;
 
-list<TupleBE> whiteBoards[100000];
-list<TupleBE> blackBoards[100000];
+list<TupleBE> whiteBoards[HASHCOUNT];
+list<TupleBE> blackBoards[HASHCOUNT];
 
 void hashInfo()
 {
-    for (int i = 0; i < 100000; i++)
+    for (int i = 0; i < HASHCOUNT; i++)
     {
         cout << whiteBoards[i].size() << blackBoards[i].size();
     }
@@ -46,7 +46,7 @@ void clearHash(char c)
 {
     if (c == 'W')
     {
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < HASHCOUNT; i++)
         {
             for (list<TupleBE>::iterator itr = whiteBoards[i].begin(); itr != whiteBoards[i].end(); itr++)
             {
@@ -57,7 +57,7 @@ void clearHash(char c)
     }
     else
     {
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < HASHCOUNT; i++)
         {
             for (list<TupleBE>::iterator itr = blackBoards[i].begin(); itr != blackBoards[i].end(); itr++)
             {
@@ -76,8 +76,9 @@ double eval(Board* b, char c)
     {
         for (list<TupleBE>::iterator itr = whiteBoards[hashKey].begin(); itr != whiteBoards[hashKey].end(); itr++)
         {
-            if ((*itr).b == b) //dubious, have we defined operator== for pointers?
+            if (*itr->b == *b && (*itr->b).getTurn() != b->getTurn()) //dubious, have we defined operator== for pointers?
             {
+                delete b;
                 return (*itr).eval;
             }
         }
@@ -86,8 +87,9 @@ double eval(Board* b, char c)
     {
         for (list<TupleBE>::iterator itr = blackBoards[hashKey].begin(); itr != blackBoards[hashKey].end(); itr++)
         {
-            if ((*itr).b == b) //dubious, have we defined operator== for pointers?
+            if ((*itr->b) == *b) //dubious, have we defined operator== for pointers?
             {
+                cout << "run";
                 return (*itr).eval;
             }
         }
@@ -175,7 +177,7 @@ double eval(Board* b, char c)
 
 double evalOpening(Board* b, char color)
 {
-    /* 
+    /*
      This is how the opening is evaluated:
      -A simple linear combination of the worth of the pieces for each side
      -A mobility bonus
@@ -1230,4 +1232,3 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
     
     return tuple;
 }
-

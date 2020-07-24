@@ -528,7 +528,30 @@ Can we use a lazy eval alg.
 Can we store the total points of the board so as not to waste time iterating through all of the pieces
 Have good moves be evaluated first
 -Tweaked hash table deletion
-
+Make sure movePiece is moveRaw, then change all necessary movePieces to moveRaw
 TODO: condense hash table into 1
       better hash function
       make able to change length at will
+"This is not a legal move" bug? w/ taking a friendly piece
+analysis on time saved w/ trans table, figure out where things are going wrong
+Hash table barely saves any time because eval is already very short and board is actually relatively the same time wise / same w/ hash mapping... ya know
+
+Also for hash table... store as recommend move instead of static eval
+
+I was wondering why static eval hash did not save a lot of time... but that was because the time to be saved needed to happen in movePiece!
+
+How do I want implement a movePiece hash table?
+
+First order of business: combine nextTurn into movePiece
+2) Store every board into a hash table
+3) When moving a piece, before doing all of the updating, see if we've already analyzed this board
+4) If we have, simply update from that
+5) If not, we need to manually update and then push_back into the hash table
+6) When do we clear hashing?
+*write helper function transferUpdateInfo
+Hash into a board and see if we've moved
+
+movePiece transposition table instead?
+What takes time in movePiece? updating!!!
+
+e2e4 d2d4 e4e5 g1f3 b1c3 c1d2 d2c3 f1b5 b5d7 

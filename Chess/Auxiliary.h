@@ -9,6 +9,7 @@ class Piece;
 class Set;
 class Coord;
 
+const int HASHCOUNT = 100000;
 /*
  //////////////
  THE MAIN BRAIN - evaluate function
@@ -111,5 +112,3 @@ class Timer
   private:
     std::chrono::high_resolution_clock::time_point m_time;
 };
-
-//LinReg on legal moves vs time
