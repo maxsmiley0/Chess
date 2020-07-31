@@ -1,6 +1,7 @@
 #ifndef Game_h
 #define Game_h
 
+#include <string>
 class Board;
 
 class Game
@@ -27,7 +28,7 @@ private:
         double value;
         double time;
     };
-    
+    list<string> moves;
     Board* mBoard;
     bool isValid(string s); //returns true if it is a valid move (syntactically!)
     char playerColor;

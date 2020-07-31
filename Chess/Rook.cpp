@@ -99,50 +99,48 @@ void Rook::updateLegalMoves()
 {
     legalMoves.clear();
     
-    //set these to true when encountering an illegal move so rook can't move past
-    bool rCheck = false;
-    bool uCheck = false;
-    bool lCheck = false;
-    bool dCheck = false;
-    
-    //responsible for adding these moves to legalMoves
-    
     for (int i = 1; i < 8; i++)
-    { 
-        if (legalMove(getPos() + Coord(i, 0)) && !dCheck)
-        {
-            legalMoves.push_back(getPos() + Coord(i, 0));
-        }
-        if (legalMove(getPos() + Coord(-i, 0)) && !uCheck)
-        {
-            legalMoves.push_back(getPos() + Coord(-i, 0));
-        }
-        if (legalMove(getPos() + Coord(0, i)) && !rCheck)
+    {
+        if (legalMove(getPos() + Coord(0, i)))
         {
             legalMoves.push_back(getPos() + Coord(0, i));
         }
-        if (legalMove(getPos() + Coord(0, -i)) && !lCheck)
+        if (getBoard()->getPiece(getPos() + Coord(0, i)) != nullptr)
+        {
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(0, -i)))
         {
             legalMoves.push_back(getPos() + Coord(0, -i));
         }
-        
-        //If we hit a piece, stop checking
-        
+        if (getBoard()->getPiece(getPos() + Coord(0, -i)) != nullptr)
+        {
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(i, 0)))
+        {
+            legalMoves.push_back(getPos() + Coord(i, 0));
+        }
         if (getBoard()->getPiece(getPos() + Coord(i, 0)) != nullptr)
         {
-            dCheck = true;
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(-i, 0)))
+        {
+            legalMoves.push_back(getPos() + Coord(-i, 0));
         }
         if (getBoard()->getPiece(getPos() + Coord(-i, 0)) != nullptr)
         {
-            uCheck = true;
-        }
-        if (getBoard()->getPiece(getPos() + Coord(0, i)) != nullptr)
-        {
-            rCheck = true;
-        }
-        if (getBoard()->getPiece(getPos() + Coord(0, -i)) != nullptr)
-        {
-            lCheck = true;
+            break;
         }
     }
 }

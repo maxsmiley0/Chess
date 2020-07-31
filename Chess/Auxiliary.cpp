@@ -70,30 +70,6 @@ void clearHash(char c)
 
 double eval(Board* b, char c)
 {
-    //Checking for having already searched goes here
-    unsigned long hashKey = b->hashmap();
-    if (c == 'W')
-    {
-        for (list<TupleBE>::iterator itr = whiteBoards[hashKey].begin(); itr != whiteBoards[hashKey].end(); itr++)
-        {
-            if (*itr->b == *b && (*itr->b).getTurn() != b->getTurn()) //dubious, have we defined operator== for pointers?
-            {
-                delete b;
-                return (*itr).eval;
-            }
-        }
-    }
-    else
-    {
-        for (list<TupleBE>::iterator itr = blackBoards[hashKey].begin(); itr != blackBoards[hashKey].end(); itr++)
-        {
-            if ((*itr->b) == *b) //dubious, have we defined operator== for pointers?
-            {
-                cout << "run";
-                return (*itr).eval;
-            }
-        }
-    }
     /*
      DETERMINING GAME-STAGE PHASE
      */
@@ -162,16 +138,6 @@ double eval(Board* b, char c)
             break;
     }
     
-    if (c == 'W')
-    {
-        TupleBE tuple = {b, score};
-        whiteBoards[hashKey].push_back(tuple);
-    }
-    else
-    {
-        TupleBE tuple = {b, score};
-        blackBoards[hashKey].push_back(tuple);
-    }
     return score;
 }
 
@@ -932,6 +898,191 @@ const Set getRay(const Piece* p, char& dir)
     return set;
 }
 
+const bool rayExists(Piece *p, Coord c)
+{
+    bool doStraight, doDiagonal;
+    switch (p->type())
+    {
+        case 'B':
+            doStraight = false;
+            doDiagonal = true;
+            break;
+        case 'R':
+            doStraight = true;
+            doDiagonal = false;
+            break;
+        case 'Q':
+            doStraight = true;
+            doDiagonal = true;
+            break;
+        default:
+            doStraight = false;
+            doDiagonal = false;
+            cerr << "passing non-ray piece into Auxiliary::rayExists(Piece*, Coord)" << endl;
+            exit(1);
+            break;
+    }
+    
+    Coord e(p->getPos());
+    Board* b = p->getBoard();
+    
+    if (doStraight)
+    {
+        if (c.getX() == e.getX())
+        {
+            if (c.getY() < e.getY())
+            {
+                int i = 1;
+                while ((c + Coord(0, i)).getY() < e.getY())
+                {
+                    i++;
+                    if (c + Coord(0, i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(0, i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                int i = -1;
+                while ((c + Coord(0, i)).getY() > e.getY())
+                {
+                    i--;
+                    if (c + Coord(0, i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(0, i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        else if (c.getY() == e.getY())
+        {
+            if (c.getX() < e.getX())
+            {
+                int i = 1;
+                while ((c + Coord(i, 0)).getX() < e.getX())
+                {
+                    i++;
+                    if (c + Coord(i, 0) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(i, 0)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                int i = -1;
+                while ((c + Coord(i, 0)).getX() > e.getX())
+                {
+                    i--;
+                    if (c + Coord(i, 0) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(i, 0)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    if (doDiagonal)
+    {
+        Coord differential(e - c);
+        //case y = -x diagonal
+        if (differential.getX() == differential.getY())
+        {
+            if (c.getX() < e.getX())
+            {
+                int i = 1;
+                while ((c + Coord(i, i)).getX() < e.getX())
+                {
+                    i++;
+                    if (c + Coord(i, i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(i, i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+            //case UL vector
+            else
+            {
+                int i = -1;
+                while ((c + Coord(i, i)).getX() > e.getX())
+                {
+                    i--;
+                    if (c + Coord(i, i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(i, i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        //case y = x diagonal
+        else if (differential.getX() == -1*differential.getY())
+        {
+            if (c.getX() > e.getX())
+            {
+                int i = 1;
+                while ((c + Coord(-i, i)).getX() > e.getX())
+                {
+                    i++;
+                    if (c + Coord(-i, i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(-i, i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+            //case DL vector
+            else
+            {
+                int i = 1;
+                while ((c + Coord(i, -i)).getX() < e.getX())
+                {
+                    i++;
+                    if (c + Coord(i, -i) == e)
+                    {
+                        return true;
+                    }
+                    if (b->getPiece(c + Coord(i, -i)) != nullptr)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    return false;
+}
+
 Piece* getPinned(const Piece* p, char& dir)
 {
     Set ray(getRay(p, dir));
@@ -1142,7 +1293,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
-                    //We DON'T delete the board here, because at depth zero, the board will be pushed into the transposition table to be deleted in Auxiliary::clearHash
+                    delete temp;
                     //Pruning
                     if (alpha >= beta)
                     {
@@ -1183,7 +1334,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
-                    //We DON'T delete the board here, because at depth zero, the board will be pushed into the transposition table to be deleted in Auxiliary::clearHash
+                    delete temp;
                     //Pruning
                     if (beta <= alpha)
                     {

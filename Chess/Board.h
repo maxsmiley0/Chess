@@ -40,6 +40,7 @@ public:
     //game auxillary
     //returns a list of pointers to pieces that can reach a given coordinate of a given color
     //e.g. which black pieces can reach e4?
+    bool boolCanReachCoordPseudo(Coord c, char color);
     list<Piece*> canReachCoordPseudo(Coord c, char color);
     //updates pin direction tags to each piece of a given color
     void update(); //updates all piece's attackers and defenders

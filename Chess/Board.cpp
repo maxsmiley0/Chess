@@ -499,7 +499,6 @@ void Board::movePiece(Piece* p, Coord c)
         
         p->setPos(c);
         p->setMoved(true);
-        
         //Updates pin information
         updatePinDir(p->getOppositeColor());
         //Updates legal moves
@@ -587,6 +586,32 @@ list<Piece*> Board::canReachCoordPseudo(Coord c, char color)
     }
     
     return li;
+}
+
+bool Board::boolCanReachCoordPseudo(Coord c, char color)
+{
+    if (color == 'W')
+    {
+        for (list<Piece*>::iterator itr = whitePieces.begin(); itr != whitePieces.end(); itr++)
+        {
+            if ((*itr)->pseudoLegalMoves().contains(c))
+            {
+                return true;
+            }
+        }
+    }
+    else if (color == 'B')
+    {
+        for (list<Piece*>::iterator itr = blackPieces.begin(); itr != blackPieces.end(); itr++)
+        {
+            if ((*itr)->pseudoLegalMoves().contains(c))
+            {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 void Board::updatePinDir(char color)

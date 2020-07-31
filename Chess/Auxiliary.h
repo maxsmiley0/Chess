@@ -76,6 +76,8 @@ Piece* getPinned(const Piece* p, char& dir);
  Defines a direction V for vertical, H for horizontal, D for UL vector, d for UR vector, and N for no direction. To be used in Piece::legalMove
  */
 const char defineDir(const Coord c1, const Coord c2);
+//returns true if there exists an unperturbed ray from p's location to c
+const bool rayExists(Piece* p, Coord c);
 
 
 #endif /* auxiliary_h */

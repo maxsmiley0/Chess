@@ -44,6 +44,10 @@ Game::~Game()
     {
         cout << "," << (*itr).time << endl;
     }
+    for (list<string>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        cout << (*itr) << " ";
+    }
 }
 
 Board* Game::getBoard() const
@@ -98,6 +102,7 @@ void Game::play()
                 }
                 if (!isValid(userInput) && mBoard->getPiece(c1) != nullptr && containsCoord(mBoard->getPiece(c1)->legalMoves, c2) && mBoard->getPiece(c1)->getColor() == mBoard->getTurn())
                 {
+                    moves.push_back(userInput);
                     break;
                 }
             }

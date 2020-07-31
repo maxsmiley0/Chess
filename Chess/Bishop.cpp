@@ -111,54 +111,48 @@ void Bishop::updateLegalMoves()
 {
     legalMoves.clear();
     
-    //set these to true when encountering an illegal move so bishop can't move past
-    bool urCheck = false;
-    bool ulCheck = false;
-    bool drCheck = false;
-    bool dlCheck = false;
-    
     for (int i = 1; i < 8; i++)
     {
-        //Inserting legal moves
-        
-        if (legalMove(getPos() + Coord(i, i)) && !drCheck)
+        if (legalMove(getPos() + Coord(i, i)))
         {
             legalMoves.push_back(getPos() + Coord(i, i));
-            
         }
-        if (legalMove(getPos() + Coord(-i, i)) && !urCheck)
-        {
-            legalMoves.push_back(getPos() + Coord(-i, i));
-            
-        }
-        if (legalMove(getPos() + Coord(i, -i)) && !dlCheck)
-        {
-            legalMoves.push_back(getPos() + Coord(i, -i));
-            
-        }
-        if (legalMove(getPos() + Coord(-i, -i)) && !ulCheck)
-        {
-            legalMoves.push_back(getPos() + Coord(-i, -i));
-            
-        }
-        
-        //If we hit a piece, stop checking
-        
         if (getBoard()->getPiece(getPos() + Coord(i, i)) != nullptr)
         {
-            drCheck = true;
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(-i, i)))
+        {
+            legalMoves.push_back(getPos() + Coord(-i, i));
         }
         if (getBoard()->getPiece(getPos() + Coord(-i, i)) != nullptr)
         {
-            urCheck = true;
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(i, -i)))
+        {
+            legalMoves.push_back(getPos() + Coord(i, -i));
         }
         if (getBoard()->getPiece(getPos() + Coord(i, -i)) != nullptr)
         {
-            dlCheck = true;
+            break;
+        }
+    }
+    for (int i = 1; i < 8; i++)
+    {
+        if (legalMove(getPos() + Coord(-i, -i)))
+        {
+            legalMoves.push_back(getPos() + Coord(-i, -i));
         }
         if (getBoard()->getPiece(getPos() + Coord(-i, -i)) != nullptr)
         {
-            ulCheck = true;
+            break;
         }
     }
 }
