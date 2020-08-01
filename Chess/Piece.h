@@ -7,9 +7,10 @@
 class Set;
 class Board;
 
-class Piece
+class Piece //Base class to each piece derived class
 {
 public:
+    //Housekeeping
     /*
      Defines a piece with a board pointer, a current position coord, and a color
      */
@@ -17,32 +18,29 @@ public:
     bool operator!=(const Piece& other);
     virtual ~Piece();
     
-    /*
-     Need to separate clauses so no cylical dependancies
-     
-     A move is legal IFF:
-     It can be reached
-     It can be reached without going in check
-     */
-    
+    //Accessors
     Coord getPos() const;
     char getColor() const;
     char getOppositeColor() const;
     Board* getBoard() const;
     char getPinDir() const;
+    int getNumDefending() const; //only used by king in determining king ring safety levels
+    bool hasMoved() const; //returns if a piece has moved or not
     
+    //Mutators
     void setPinDir(char c);
     void setMoved(bool b);
     void setPos(Coord c);
     
+    //Legal Move Detector
     bool inCheck() const; //King overwrites this, crashes if called on non-king (in a given board)
     bool pseudoLegalMove(Coord c) const; 
     bool legalMove(Coord c) const; //returns if the move that would end up with the piece here is legal
-    bool hasMoved() const; //returns if a piece has moved or not
+    
     Piece* getWeakestDefender(); //returns the weakest defender to be used in Auxiliary::evalPiece
     Piece* getWeakestAttacker(); //returns the weakest attacker to be used in Auxiliary::evalPiece
     
-    int getNumDefending() const; //only used by king in determining king ring safety levels
+    
     void incrementNumDefending(); //only used by king in determining king ring safety levels
     void setNumDefending(int i);
     
@@ -50,6 +48,7 @@ public:
     void incrementNumAttacking(); //only used by king
     void setNumAttacking(int i);
     
+    //Virtual methods
     virtual bool canReachEnemyKing() const = 0; //optimized version of pseudoLegalMoves() fit for finding the enemy king
     virtual double worth() const = 0;
     virtual char type() const = 0; //returns the name character e.g. "K" for king

@@ -40,41 +40,49 @@ void King::updateLegalMoves()
 {
     legalMoves.clear();
     //Regular Moves
+    //Timer t;
+    //t.start();
+    //legalMove(getPos() + Coord(1, 1));
+    //cout << "LM: " << t.elapsed() << endl;
     
-    if ((legalMove(getPos() + Coord(1, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor()).empty()))
+    //Timer f;
+    //f.start();
+    //!getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor());
+    //cout << "Check: " << f.elapsed() <<  endl;
+    
+    if ((legalMove(getPos() + Coord(1, 1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(1, 1));
     }
-    if ((legalMove(getPos() + Coord(0, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 1), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(0, 1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, 1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(0, 1));
     }
-    if ((legalMove(getPos() + Coord(-1, 1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, 1), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(-1, 1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(-1, 1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(-1, 1));
     }
-    if ((legalMove(getPos() + Coord(-1, 0)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, 0), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(-1, 0)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(-1, 0), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(-1, 0));
     }
-    if ((legalMove(getPos() + Coord(-1, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(-1, -1), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(-1, -1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(-1, -1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(-1, -1));
     }
-    if ((legalMove(getPos() + Coord(0, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -1), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(0, -1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, -1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(0, -1));
     }
-    if ((legalMove(getPos() + Coord(1, -1)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, -1), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(1, -1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, -1), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(1, -1));
     }
-    if ((legalMove(getPos() + Coord(1, 0)) && getBoard()->canReachCoordPseudo(getPos() + Coord(1, 0), getOppositeColor()).empty()))
+    if ((legalMove(getPos() + Coord(1, 0)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, 0), getOppositeColor())))
     {
         legalMoves.push_back(getPos() + Coord(1, 0));
     }
     //Castling
-    
     if (canCastle(getColor(), -1))
     {
         if (getColor() == 'W')
@@ -114,7 +122,7 @@ bool King::canCastle(char color, int side) const
             /*
              If neither the king nor the rook have moved, and there are neither any friendy pieces obstructing the castling path nor enemy pieces threatening these squares, AND the king is not already in check, the king may castle.
              */
-            if (getBoard()->getPiece(Coord(7, 7)) != nullptr &&!getBoard()->getPiece(Coord(7, 7))->hasMoved() && getBoard()->getPiece(getPos() + Coord(0, 1)) == nullptr && getBoard()->getPiece(getPos() + Coord(0, 2)) == nullptr && !inCheck() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 1), 'B').empty() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 2), 'B').empty())
+            if (getBoard()->getPiece(Coord(7, 7)) != nullptr &&!getBoard()->getPiece(Coord(7, 7))->hasMoved() && getBoard()->getPiece(getPos() + Coord(0, 1)) == nullptr && getBoard()->getPiece(getPos() + Coord(0, 2)) == nullptr && !inCheck() && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, 1), 'B') && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, 2), 'B'))
             {
                 return true;
             }
@@ -127,7 +135,7 @@ bool King::canCastle(char color, int side) const
         {
             if (getBoard()->getPiece(Coord(7, 0)) != nullptr &&!getBoard()->getPiece(Coord(7, 0))->hasMoved() && getBoard()->getPiece(getPos() + Coord(0, -1)) == nullptr && getBoard()->getPiece(getPos() + Coord(0, -2)) == nullptr &&
                 getBoard()->getPiece(getPos() + Coord(0, -3)) == nullptr &&
-                !inCheck() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -1), 'B').empty() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -2), 'B').empty())
+                !inCheck() && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, -1), 'B') && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, -2), 'B'))
             {
                 return true;
             }
@@ -143,7 +151,7 @@ bool King::canCastle(char color, int side) const
         {
             if (getBoard()->getPiece(Coord(0, 0)) != nullptr &&!getBoard()->getPiece(Coord(0, 0))->hasMoved() && getBoard()->getPiece(getPos() + Coord(0, -1)) == nullptr && getBoard()->getPiece(getPos() + Coord(0, -2)) == nullptr &&
                 getBoard()->getPiece(getPos() + Coord(0, -3)) == nullptr &&
-                !inCheck() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -1), 'W').empty() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, -2), 'W').empty())
+                !inCheck() && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, -1), 'W') && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, -2), 'W'))
             {
                 return true;
             }
@@ -155,7 +163,7 @@ bool King::canCastle(char color, int side) const
         else
         {
             if (getBoard()->getPiece(Coord(0, 7)) != nullptr && !getBoard()->getPiece(Coord(0, 7))->hasMoved() && getBoard()->getPiece(getPos() + Coord(0, 1)) == nullptr && getBoard()->getPiece(getPos() + Coord(0, 2)) == nullptr &&
-                !inCheck() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 1), 'W').empty() && getBoard()->canReachCoordPseudo(getPos() + Coord(0, 2), 'W').empty())
+                !inCheck() && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, 1), 'W') && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(0, 2), 'W'))
             {
                 return true;
             }

@@ -1,40 +1,38 @@
 #ifndef Game_h
 #define Game_h
 
+#include <string>
+#include "Tuple.h"
+
 class Board;
 
 class Game
 {
 public:
-    Game(Board* b);
-    ~Game();
-     
-    Board* getBoard() const;
-    //returns board
-    void play();
-    //loops into play
-    //bool reccomendMove(int n);
-    //reccomends a move by evaluating every possible position n moves ahead
-    void getMove();
-    //allows player to input move
-    bool gameOver();
-    //if in check and no legal moves, then the game is over
+    //Housekeeping
+    Game(Board* b);                 //Constructor given a board
+    ~Game();                        //Destructor (deletes board)
     
+    //Move Input
+    bool isValid(string s);         //Returns true if a syntactically valid input
+    Coord convert(char c1, char c2);//Converts input string into movePiece instructions
+    
+    //Game related functions
+    void play();                    //Loops until game over
+    bool gameOver();                //Returns true if no legal moves for a given sign
     
 private:
-    struct Tuple
-    {
-        double value;
-        double time;
-    };
+    //Game related members
+    Board* mBoard;                  //Pointer to the game board
+    char playerColor;               //Color of the human player
     
-    Board* mBoard;
-    bool isValid(string s); //returns true if it is a valid move (syntactically!)
-    char playerColor;
-    
-    Coord convert(char c1, char c2); //converts into a coord
-    //a list of tuples used for my analysis of algorithm time
+    //Developer statistics
+    /*
+     A list of a tuple of type double and int. Typically used in conjunction with the timer class, to push_back information regarding the time an algorithm takes to execute, to be displayed after the game has ended
+     */
     list<Tuple> data;
+    //A list of the player moves, effectively a PGN generator
+    list<string> moves;
 }; 
 
 #endif /* Game_h */

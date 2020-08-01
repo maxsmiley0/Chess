@@ -9,8 +9,16 @@
 #ifndef Tuple_h
 #define Tuple_h
 
-#include "Piece.h"
-#include "Board.h"
+class Piece;
+class Board;
+
+#include "Coord.h"
+
+struct Tuple
+{
+    double value;
+    double time;
+};
 
 struct TuplePC
 {

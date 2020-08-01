@@ -9,86 +9,51 @@ class Piece;
 class Set;
 class Coord;
 
-const int HASHCOUNT = 100000;
-/*
- //////////////
- THE MAIN BRAIN - evaluate function
- //////////////
- Will be a function of a pointer to a board, and a char color (whose turn it is)
- Checkmate is weighted as 200
- Sum up all values of white pieces and subtract by black pieces
- Pawn score: doubled, isolated, and blocked pawns
- Mobility score: simply number of all legal moves
- 
- For this to work, we need to detect if pieces are protected
- */
-/*
- Hash table implementation
- One for turn = white, one for turn = black
- Array of 20k buckets
- */
-void hashInfo(); //prints out distribution of hash table
-void clearHash(char c); //clears hash table of a particular color
-TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
+using namespace std;
 
+/*
+ Searching-related functions
+ */
+//Searches "depth" nodes into the game tree, using alpha-beta pruning
+TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
+//Static eval called at the leaf nodes of reccomendMove
 double eval(Board* b, char color);
 
-//eval for a given gamestage
+//Eval for a given gamestage
 double evalOpening(Board* b, char color);
 double evalMiddleGame(Board* b, char color);
 double evalEndGame(Board* b, char color);
-//returns the sum of all PST bonuses
-double evalPst(Board* b);
-//returns the sum of all PST bonuses for the endgame
-double evalPstEg(Board* b);
 
-//auxiliary eval functions
-double evalPiece(Board* b, char color);
-double evalPawn(Board* b, char color);
-double evalPassedPawn(Board* b, char color);
-double centerBonus(Board* b, char color);
-double majorPiecePenalty(Board* b, char color);
-//To be used in opening / middlegame
-double evalKingSafety(Board* b, char color);
-//To be used in the endgame
-double evalKingActivity(Board* b, char color);
- 
 /*
-functional
-*/
-const bool isAttacked(const Piece* p);
-const bool isPinned(const Piece* p);
-
-//Recommends a piece to go to a certain coord for a given board, turn, and # of half steps ahead
- 
-/*
- Ray functions
+ Auxiliary functions used in eval
  */
-//returns true if a list contains a coord
-bool containsCoord(list<Coord> li, Coord c);
+double evalPst(Board* b);   //positional bonuses assigned using a piece square table
+double evalPstEg(Board* b); //endgame piece square table
+//penalty for unprotected attacked pieces, or for pieces attacked by lesser pieces
+double evalPiece(Board* b, char color);
+//penalty for doubled / isolated pawns
+double evalPawn(Board* b, char color);
+//penalty for moving queen / rook out before castling or middlegame
+double majorPiecePenalty(Board* b, char color);
+
+//Ray-related functions
+
 //Returns a ray to the king, modifies dir to represent ray direction (not inclusive)
 const Set getRay(const Piece* p, char& dir);
-//Returns a ray to the coord c
-const Set getGeneralRay(const Piece* p, Coord c);
-//Returns the piece this piece pins (or nullptr if none)
-Piece* getPinned(const Piece* p, char& dir);
-/*
- Defines a direction V for vertical, H for horizontal, D for UL vector, d for UR vector, and N for no direction. To be used in Piece::legalMove
- */
+//Defines a direction for a given ray
 const char defineDir(const Coord c1, const Coord c2);
+//returns true if there exists an unperturbed ray from p's location to c
 
+//Misc
+
+//returns true if a list contains a coord
+bool containsCoord(list<Coord> li, Coord c);
+//Returns the piece pinning piece p
+Piece* getPinned(const Piece* p, char& dir);
 
 #endif /* auxiliary_h */
 
-/*
-for (list<Piece*>::iterator itr = mBoard->blackPieces.begin(); itr != mBoard->blackPieces.end(); itr++)
-{
-    if ((*itr)->type() == 'Q')
-    {
-        getRay(*itr).dump();
-    }
-}
-*/
+//Timer class, to be used in measuring time of certain functions to see what can be improved upon
 
 #include <chrono>
 

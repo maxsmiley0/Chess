@@ -554,4 +554,6 @@ Hash into a board and see if we've moved
 movePiece transposition table instead?
 What takes time in movePiece? updating!!!
 
+next item: add accurate piece + board copy constructor
+
 e2e4 d2d4 e4e5 g1f3 b1c3 c1d2 d2c3 f1b5 b5d7 

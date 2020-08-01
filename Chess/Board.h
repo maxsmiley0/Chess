@@ -2,9 +2,10 @@
 #define Board_h
 
 #include <iostream>
-
 #include <list>
 #include <vector>
+
+#include "Tuple.h"
 
 using namespace std;
 
@@ -14,48 +15,43 @@ class Piece;
 class Board
 {
 public:
-    //housekeeping
-    Board();
-    Board(const Board& other);
-    //essentially copy constructor given a 2D array
-    Board(vector<vector<string>> b);
+    //Housekeeping
+    Board();                                                //Constructor
+    Board(vector<vector<string>> b);                        //Copy constructor from 2D vector
+    Board(const Board& other);                              //Copy constructor from reference
+    ~Board();                                               //Destructor (deletes all pieces)
     bool operator==(const Board& other);
-    ~Board();
     
-    //functional
-    Piece* getPiece(Coord c) const;
-    Piece* getKing(char color);
+    //Accessors
+    Piece* getPiece(Coord c) const;                //Returns pointer to piece at coord c
+    Piece* getKing(char color);                    //Returns pointer to king of given color
     char getTurn();
-    void nextTurn();
-    void addPiece(Piece* p);
+    list<Piece*> canReachKingPseudo(char color);   //Returns pieces that can reach king
+    list<Piece*> canReachCoordPseudo(Coord c, char color);  //Same^ but for a given coord
+    
+    //Mutators
+    void nextTurn();                    //Changes turn
+    void addPiece(Piece* p);            //Adds piece
+    //Moves piece, and updates all pieces' legal moves, attackers, defenders and pin direction
     void movePiece(Piece* p, Coord c);
-    //Moveraw moves pieces without checking if legal move, so faster
-    //We do this to calculate hypothetical moves which we already know are legal
-    void moveRaw(Piece* p, Coord c);
-    void updateLegalMoves(char color);
-    list<Piece*> canReachKingPseudo(char color);
     
-    unsigned long hashmap(); //returns a hashkey
+    //Updating
+    void update();                      //updates all pieces' attackers and defenders
+    void updatePinDir(char color);      //updates all pieces' pin directions
+    void updateLegalMoves();            //updates all pieces' legal moves
     
-    //game auxillary
-    //returns a list of pointers to pieces that can reach a given coordinate of a given color
-    //e.g. which black pieces can reach e4?
-    list<Piece*> canReachCoordPseudo(Coord c, char color);
-    //updates pin direction tags to each piece of a given color
-    void update(); //updates all piece's attackers and defenders
-    void updatePinDir(char color);
-    void print();
+    //Functional
+    bool boolCanReachCoordPseudo(Coord c, char color); //returns true if any piece can reach a given coordinate
+    void print();   //prints a representation of the board to cout
     
-    /*
-     Only doing this because I couldn't find out how to return a list... the obvious way wasn't returning the correct list, broke when I tried to dereference the iterator
-     */
-    
-    list<Piece*> whitePieces;
-    list<Piece*> blackPieces;
+    list<Piece*> whitePieces;   //list of white pieces
+    list<Piece*> blackPieces;   //list of black pieces
+    //Note*: These members are public to avoid writing methods to push_back and access elements from these lists
     
 private:
-    Piece* mBoard[8][8];
-    char turn;
+    Piece* mBoard[8][8];        //Board representation as pointers to pieces
+                                //Same pointers to pieces as in the list white/blackPieces
+    char turn;                  //'W' or 'B' for white or black
 };
 
 #endif /* Board_h */
