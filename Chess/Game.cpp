@@ -66,20 +66,8 @@ void Game::play()
     
     while (!gameOver())
     {
-        //hashInfo();
-        
-        Timer hashTimer;
-        hashTimer.start();
-        clearHash(mBoard->getTurn());
-        cout << "ClearHash timer: " << hashTimer.elapsed() << endl;
-        //displays board at beginning of turn
         mBoard->print();
-        Timer t1;
-        cout << mBoard->hashmap() << endl;
-        cout << "Hashmap timer: " << t1.elapsed() << endl;
-        /*
-         rudimentary way of getting beginning and end coord
-         */
+        
         if (mBoard->getTurn() == playerColor)
         {
             string userInput;

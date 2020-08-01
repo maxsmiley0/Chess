@@ -13,7 +13,6 @@
 		736457EF24AA896C00A32FDC /* Queen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736457ED24AA896C00A32FDC /* Queen.cpp */; };
 		736457F224AA8FEB00A32FDC /* Pawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736457F024AA8FEB00A32FDC /* Pawn.cpp */; };
 		736457F724ABE61D00A32FDC /* Auxiliary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736457F524ABE61D00A32FDC /* Auxiliary.cpp */; };
-		7370B63A24B188D2001BD6BD /* AI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7370B63824B188D2001BD6BD /* AI.cpp */; };
 		737276B324A68FC000A1EABA /* Coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737276B224A68FBF00A1EABA /* Coord.cpp */; };
 		73D374992467406A00EE25C2 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D374972467406A00EE25C2 /* Game.cpp */; };
 		73D3749C2467419400EE25C2 /* Piece.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D3749A2467419400EE25C2 /* Piece.cpp */; };
@@ -48,8 +47,6 @@
 		736457F124AA8FEB00A32FDC /* Pawn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pawn.h; sourceTree = "<group>"; };
 		736457F524ABE61D00A32FDC /* Auxiliary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Auxiliary.cpp; sourceTree = "<group>"; };
 		736457F624ABE61D00A32FDC /* Auxiliary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Auxiliary.h; sourceTree = "<group>"; };
-		7370B63824B188D2001BD6BD /* AI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AI.cpp; sourceTree = "<group>"; };
-		7370B63924B188D2001BD6BD /* AI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AI.h; sourceTree = "<group>"; };
 		737276B224A68FBF00A1EABA /* Coord.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Coord.cpp; sourceTree = "<group>"; };
 		73D15EA724BE750000E8AF14 /* PST.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PST.h; sourceTree = "<group>"; };
 		73D374972467406A00EE25C2 /* Game.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
@@ -99,8 +96,6 @@
 			isa = PBXGroup;
 			children = (
 				736457F524ABE61D00A32FDC /* Auxiliary.cpp */,
-				7370B63824B188D2001BD6BD /* AI.cpp */,
-				7370B63924B188D2001BD6BD /* AI.h */,
 				736457F624ABE61D00A32FDC /* Auxiliary.h */,
 				73E4072724BAA6D4000D36A5 /* Tuple.h */,
 				734C832A246659E200CFBA9B /* main.cpp */,
@@ -193,7 +188,6 @@
 				736457EF24AA896C00A32FDC /* Queen.cpp in Sources */,
 				736457F724ABE61D00A32FDC /* Auxiliary.cpp in Sources */,
 				736457F224AA8FEB00A32FDC /* Pawn.cpp in Sources */,
-				7370B63A24B188D2001BD6BD /* AI.cpp in Sources */,
 				737276B324A68FC000A1EABA /* Coord.cpp in Sources */,
 				73D3749C2467419400EE25C2 /* Piece.cpp in Sources */,
 				73D374A6246745AD00EE25C2 /* Knight.cpp in Sources */,
