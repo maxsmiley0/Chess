@@ -12,6 +12,12 @@
 #include "Piece.h"
 #include "Board.h"
 
+struct Tuple
+{
+    double value;
+    double time;
+};
+
 struct TuplePC
 {
     Piece* p = nullptr;

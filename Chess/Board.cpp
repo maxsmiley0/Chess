@@ -146,6 +146,7 @@ Board::Board(const Board& other)
 
 Board::~Board()
 {
+    //We delete all pieces, but not the board itself, as that gets deleted in Game::~Game()
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
