@@ -191,7 +191,7 @@ void Game::play()
             t1.start();
             
             //Returning a tuple of type struct with pointer to piece and coord
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             

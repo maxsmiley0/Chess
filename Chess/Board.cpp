@@ -142,6 +142,7 @@ Board::Board(const Board& other)
             }
         }
     }
+    update();
 }
 
 Board::~Board()
