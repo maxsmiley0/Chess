@@ -18,7 +18,6 @@
 
 using namespace std;
 
-
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
 {
     TuplePC tuple;          //keeps track of what will be returned
@@ -31,40 +30,30 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
     {
         if (turn == 'W')
         {
-            //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+            //Iterate through ordered legal moves
+            list<TupleCC> li = getOrderedLegalMoves(b);
+            for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
             {
-                //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+                endNode = false;
+                
+                Board* temp = new Board(*b);
+                temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
+                temp->nextTurn();
+                
+                TuplePC tempTuple = reccomendMove(temp, 'B', depth - 1, alpha, beta);
+                alpha = max(alpha, tempTuple.eval);
+                /*
+                 If the tuple is empty (e.g. first move in our set) OR the eval is better than bestEval, then we replace this as our move
+                 */
+                if (tuple.p == nullptr || tempTuple.eval > bestEval)
                 {
-                    endNode = false;
-                    //Creating a temp board to evaluate, moving piece in temp board
-                    Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
-                    temp->nextTurn();
-                    /*
-                     We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
-                     */
-                    TuplePC tempTuple = reccomendMove(temp, 'B', depth - 1, alpha, beta);
-                    alpha = max(alpha, tempTuple.eval);
-                    /*
-                     If the tuple is empty (e.g. first move in our set) OR the eval is better than bestEval, then we replace this as our move
-                     */
-                    if (tuple.p == nullptr || tempTuple.eval > bestEval)
-                    {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
-                        tuple.eval = tempTuple.eval;
-                        bestEval = tempTuple.eval;
-                    }
-                    //Deleting dynamically allocated temporary board
-                    delete temp;
-                    //Pruning
-                    if (alpha >= beta)
-                    {
-                        break;
-                    }
+                    tuple.p = b->getPiece((*itr).s);
+                    tuple.c = (*itr).e;
+                    tuple.eval = tempTuple.eval;
+                    bestEval = tempTuple.eval;
                 }
+                //Deleting dynamically allocated temporary board
+                delete temp;
                 //Pruning
                 if (alpha >= beta)
                 {
@@ -74,48 +63,37 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         }
         else
         {
-            //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+            //Iterate through ordered legal moves
+            list<TupleCC> li = getOrderedLegalMoves(b);
+            for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
             {
-                //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+                endNode = false;
+                
+                Board* temp = new Board(*b);
+                temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
+                temp->nextTurn();
+                
+                TuplePC tempTuple = reccomendMove(temp, 'W', depth - 1, alpha, beta);
+                beta = min(beta, tempTuple.eval);
+                /*
+                 If the tuple is empty (e.g. first move in our set) OR the eval is better than bestEval, then we replace this as our move
+                 */
+                if (tuple.p == nullptr || tempTuple.eval < bestEval)
                 {
-                    endNode = false;
-                    //Creating a temp board to evaluate, moving piece in temp board
-                    Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
-                    temp->nextTurn();
-                    /*
-                    We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
-                    */
-                    TuplePC tempTuple = reccomendMove(temp, 'W', depth - 1, alpha, beta);
-                    beta = min(beta, tempTuple.eval);
-                    /*
-                    If the tuple is empty (e.g. first move in our set) OR the eval is better than bestEval, then we replace this as our move
-                    */
-                    if (tuple.p == nullptr || tempTuple.eval < bestEval)
-                    {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
-                        tuple.eval = tempTuple.eval;
-                        bestEval = tempTuple.eval;
-                    }
-                    //Deleting dynamically allocated temporary board
-                    delete temp;
-                    //Pruning
-                    if (beta <= alpha)
-                    {
-                        break;
-                    }
+                    tuple.p = b->getPiece((*itr).s);
+                    tuple.c = (*itr).e;
+                    tuple.eval = tempTuple.eval;
+                    bestEval = tempTuple.eval;
                 }
+                //Deleting dynamically allocated temporary board
+                delete temp;
                 //Pruning
-                if (beta <= alpha)
+                if (alpha >= beta)
                 {
                     break;
                 }
             }
         }
-        
     }
     else if (depth == 1)
     {
@@ -125,15 +103,13 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         if (turn == 'W')
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+            list<TupleCC> li = getOrderedLegalMoves(b);
+            for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
             {
-                //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
-                {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
                     //Simply call static eval on the board
                     double currentEval = eval(temp, 'B');
@@ -144,8 +120,8 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     
                     if (tuple.p == nullptr || currentEval > bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
@@ -156,53 +132,39 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         break;
                     }
                 }
-                //Pruning
-                if (alpha >= beta)
-                {
-                    break;
-                }
-            }
         }
         else
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+            list<TupleCC> li = getOrderedLegalMoves(b);
+            for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
             {
-                endNode = false;
-                //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
-                {
+                    endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
-                    //Simply call static eval on board
+                    //Simply call static eval on the board
                     double currentEval = eval(temp, 'W');
-                    beta = min(beta, currentEval);
+                    beta = min(alpha, currentEval);
                     /*
                     If the tuple is empty (e.g. first move in our set) OR the eval is better than bestEval, then we replace this as our move
                     */
                     
                     if (tuple.p == nullptr || currentEval < bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
                     delete temp;
                     //Pruning
-                    if (beta <= alpha)
+                    if (alpha >= beta)
                     {
                         break;
                     }
                 }
-                //Pruning
-                if (beta <= alpha)
-                {
-                    break;
-                }
-            }
         }
     }
     else
@@ -943,3 +905,89 @@ Piece* getPinned(const Piece* p, char& dir)
     }
     return returnPiece;
 }
+
+list<TupleCC> getOrderedLegalMoves(Board* b)
+{
+    //cout << "Pruned 1: " << pruned1 << endl;
+    //cout << "Pruned 2: " << pruned2 << endl;
+    //cout << "Pruned 3: " << pruned3 << endl;
+    
+    list<TupleCC> li;
+    
+    if (b->getTurn() == 'W')
+    {
+        for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+        {
+            for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+            {
+                TupleCC tuple;
+                tuple.s = (*itr)->getPos();
+                tuple.e = *itr2;
+                
+                Piece* p = b->getPiece(*itr2);
+                if (p != nullptr && p->worth() > (*itr)->worth())
+                {
+                    li.push_front(tuple);
+                }
+                else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
+                {
+                    li.push_front(tuple);
+                }
+                else
+                {
+                    li.push_back(tuple);
+                }
+            }
+        }
+    }
+    else
+    {
+        for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+        {
+            for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+            {
+                TupleCC tuple;
+                tuple.s = (*itr)->getPos();
+                tuple.e = *itr2;
+                
+                Piece* p = b->getPiece(*itr2);
+                if (p != nullptr && p->worth() >= (*itr)->worth())
+                {
+                    li.push_front(tuple);
+                }
+                /*else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
+                {
+                    li.push_front(tuple);
+                }*/
+                else
+                {
+                    li.push_back(tuple);
+                }
+            }
+        }
+    }
+    return li;
+}
+
+/*
+ When do we push front vs push back?
+ push_front if: can capture a piece worth more
+ push_front if:
+ */
+//now pruning tests
+/*
+ 3529.84
+ ,10673.1
+ ,6249.85
+ ,7349.36
+ ,1793.23
+ ,13053.5
+ ,12544
+ ,12950.4
+ ,23872.5
+ ,21971.9
+ ,28160
+ ,31097.9
+ ,64405.6
+ g1f3 e2e4 e4e5 b1c3 f3e5 d1e2 e2c4 a2a4 c3d5 h2h4 f1e2 e2f3 d2d3
+ */

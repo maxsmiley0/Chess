@@ -17,14 +17,6 @@ public:
     bool operator!=(const Piece& other);
     virtual ~Piece();
     
-    /*
-     Need to separate clauses so no cylical dependancies
-     
-     A move is legal IFF:
-     It can be reached
-     It can be reached without going in check
-     */
-    
     Coord getPos() const;
     char getColor() const;
     char getOppositeColor() const;

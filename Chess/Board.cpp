@@ -453,7 +453,6 @@ void Board::movePiece(Piece* p, Coord c)
         p->setPos(c);
         p->setMoved(true);
         
-        
         updatePinDir(p->getOppositeColor());    //Updating pin direction
         update();                               //Updating attackers / defenders
         updateLegalMoves();                  //Updating legal moves
