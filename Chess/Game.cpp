@@ -180,6 +180,11 @@ void Game::play()
                     break;
                 }
             }
+            if (userInput == "exit")
+            {
+                //backdoor method of ending the game
+                break;
+            }
             //At this point, the input is guaranteed to be syntactically correct
             mBoard->movePiece(mBoard->getPiece(c1), c2);    //move piece
             mBoard->nextTurn();                             //execute next turn
