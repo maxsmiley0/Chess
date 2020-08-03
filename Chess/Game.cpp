@@ -154,7 +154,7 @@ void Game::play()
         
         mBoard->print();                      //prints out board
         
-        if (mBoard->getTurn() == playerColor) //if turn is player turn
+        if (false) //if turn is player turn mBoard->getTurn() == playerColor
         {
             string userInput;
             Coord c1, c2;
@@ -197,10 +197,10 @@ void Game::play()
             t1.start();
             
             //Returning a tuple of type struct with pointer to piece and coord
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
-            
+            cout << t1.elapsed() << endl;
             t.time = t1.elapsed();
             data.push_back(t);
         }
