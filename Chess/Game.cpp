@@ -154,7 +154,7 @@ void Game::play()
         
         mBoard->print();                      //prints out board
         
-        if (false) //if turn is player turn mBoard->getTurn() == playerColor
+        if (mBoard->getTurn() == playerColor) 
         {
             string userInput;
             Coord c1, c2;
