@@ -9,12 +9,14 @@ class Piece;
 class Set;
 class Coord;
 
+const int HASHCOUNT = 100000;
 /*
  Searching-related functions
  */
 //Searches "depth" nodes into the game tree, using alpha-beta pruning
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
 //Static eval called at the leaf nodes of reccomendMove
+void clearHash();
 double eval(Board* b, char color);
 
 //Eval for a given gamestage

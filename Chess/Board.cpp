@@ -163,22 +163,30 @@ Board::~Board()
 
 bool Board::operator==(const Board& other)
 {
+    if (turn != other.turn)
+    {
+        return false;
+    }
+    
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
             //Not quite right, needs work
-            if (mBoard[i][j] == nullptr && other.mBoard[i][j] == nullptr)
+            if (mBoard[i][j] != nullptr || mBoard[i][j] != nullptr)
             {
-                return true;
-            }
-            else if (mBoard[i][j] == nullptr || other.mBoard[i][j] == nullptr)
-            {
-                return true;
-            }
-            else if (*mBoard[i][j] != *other.mBoard[i][j])
-            {
-                return false;
+                if (mBoard[i][j] == nullptr && other.mBoard[i][j] != nullptr)
+                {
+                    return false;
+                }
+                else if (mBoard[i][j] != nullptr && other.mBoard[i][j] == nullptr)
+                {
+                    return false;
+                }
+                else if (*mBoard[i][j] != *other.mBoard[i][j])
+                {
+                    return false;
+                }
             }
         }
     }
@@ -608,4 +616,52 @@ void Board::print()
         cout << endl << endl;
     }
     cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
+}
+
+unsigned long Board::hashmap()
+{
+    hash<string> hasher;
+    string s = "";
+    s += turn;
+    //A linear combination of the worth, x, and y. We add 1 so any x = y = worth = 0 dependancies dont kill the equation to zero
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (mBoard[i][j] != nullptr)
+            {
+                s += mBoard[i][j]->getColor() + mBoard[i][j]->type();
+            }
+            else
+            {
+                s += 'N';
+            }
+        }
+    }
+    
+    return hasher(s) % HASHCOUNT;
+}
+
+string Board::boardID()
+{
+    string s = "";
+    s += turn;
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (mBoard[i][j] != nullptr)
+            {
+                s += mBoard[i][j]->getColor() + mBoard[i][j]->type();
+            }
+            else
+            {
+                s += 'N';
+            }
+        }
+    }
+    
+    return s;
 }

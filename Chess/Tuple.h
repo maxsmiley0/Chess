@@ -38,4 +38,13 @@ struct TupleCC
     Coord e;
 };
 
+struct TupleHASH
+{
+    Board* b;
+    Piece* p;
+    Coord c;
+    double eval;
+    int depth;
+};
+
 #endif /* Tuple_h */

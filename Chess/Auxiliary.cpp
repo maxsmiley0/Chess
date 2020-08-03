@@ -18,6 +18,21 @@
 
 using namespace std;
 
+list<TupleHASH> tTable[HASHCOUNT];
+
+void clearHash()
+{
+    for (int i = 0; i < HASHCOUNT; i++)
+    {
+        for (list<TupleHASH>::iterator itr = tTable[i].begin(); itr != tTable[i].end(); itr++)
+        {
+            Board* b = (*itr).b;
+            itr = tTable[i].erase(itr);
+            delete b;
+        }
+    }
+}
+
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
 {
     TuplePC tuple;          //keeps track of what will be returned
@@ -26,6 +41,17 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
     /*
      RECURSIVE STEP
      */
+    
+    for (list<TupleHASH>::iterator itr = tTable[b->hashmap()].begin(); itr != tTable[b->hashmap()].end(); itr++)
+    {
+        if ((*itr->b) == *b && (*itr).depth >= depth)
+        {
+            tuple = {b->getPiece((*itr).p->getPos()), (*itr).c, (*itr).eval};
+            cout << "saved" << (*itr).depth << endl;
+            return tuple;
+        }
+    }
+    
     if (depth > 1)
     {
         if (turn == 'W')
@@ -214,6 +240,28 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                 tuple.eval = 100.0;
             }
         }
+    }
+    /*
+     Here is where we store the tuple into the hash table
+     We need to create new stuff though
+     e.g. say we have a struct HASHENTRY
+     that holds a board, a piece, a best move, an eval, and a depth
+     
+     -create new board using copy constructor - make sure it does it correctly!
+     -store piece into struct (temp->getPiece(tuple.p->getPos())
+     -store move into struct (tuple.c)
+     -store eval and depth into struct (only if not 1)
+     
+     -At beginning, we hash into the tTable
+     -Iterate through the bucket
+     -If we find that the boards are the same, then:
+     -Check if depth in tTable is > or = to what we're looking for, if it is then we use that
+     */
+    if (true) //maxdepth
+    {
+        Board* storedInHashTable = new Board(*b);
+        TupleHASH tupleHash = {storedInHashTable, storedInHashTable->getPiece(tuple.p->getPos()), tuple.c, tuple.eval, depth};
+        tTable[b->hashmap()].push_back(tupleHash);
     }
     
     return tuple;
