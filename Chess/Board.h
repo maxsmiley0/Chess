@@ -32,6 +32,8 @@ public:
     void addPiece(Piece* p);            //Adds piece
     //Moves piece, and updates all pieces' legal moves, attackers, defenders and pin direction
     void movePiece(Piece* p, Coord c);
+    void moveRaw(Piece* p, Coord c); //movePiece w/o updating legal moves to save time
+    //to be used at leaf nodes when we don't need to analyze any deeper
     
     //Updating
     void update();                      //updates all pieces' attackers and defenders

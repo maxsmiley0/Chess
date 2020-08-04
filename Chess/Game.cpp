@@ -154,7 +154,14 @@ void Game::play()
         clearHash();
         mBoard->print();                      //prints out board
         
-        if (mBoard->getTurn() == playerColor)
+        //list<TupleCC> li = getOrderedLegalMoves(mBoard);
+        //list<TupleCC>::iterator itr = li.begin();
+        //for (; itr != li.end(); itr++)
+        //{
+        //    cout << (*itr).s.getX() << " " << (*itr).s.getY() << " " << (*itr).e.getX() << /" " << (*itr).e.getY() << endl;
+        //}
+        
+        if (false)
         {
             string userInput;
             Coord c1, c2;
@@ -197,7 +204,7 @@ void Game::play()
             t1.start();
             
             //Returning a tuple of type struct with pointer to piece and coord
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 5, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             cout << t1.elapsed() << endl;

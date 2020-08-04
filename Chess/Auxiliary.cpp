@@ -47,7 +47,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         if ((*itr->b) == *b && (*itr).depth >= depth)
         {
             tuple = {b->getPiece((*itr).p->getPos()), (*itr).c, (*itr).eval};
-            cout << "saved" << (*itr).depth << endl;
+            //cout << "saved" << (*itr).depth << endl;
             return tuple;
         }
     }
@@ -257,7 +257,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
      -If we find that the boards are the same, then:
      -Check if depth in tTable is > or = to what we're looking for, if it is then we use that
      */
-    if (true) //maxdepth
+    if (!endNode) //maxdepth
     {
         Board* storedInHashTable = new Board(*b);
         TupleHASH tupleHash = {storedInHashTable, storedInHashTable->getPiece(tuple.p->getPos()), tuple.c, tuple.eval, depth};
@@ -973,10 +973,6 @@ Piece* getPinned(const Piece* p, char& dir)
 
 list<TupleCC> getOrderedLegalMoves(Board* b)
 {
-    //cout << "Pruned 1: " << pruned1 << endl;
-    //cout << "Pruned 2: " << pruned2 << endl;
-    //cout << "Pruned 3: " << pruned3 << endl;
-    
     list<TupleCC> li;
     
     if (b->getTurn() == 'W')
@@ -989,19 +985,27 @@ list<TupleCC> getOrderedLegalMoves(Board* b)
                 tuple.s = (*itr)->getPos();
                 tuple.e = *itr2;
                 
-                Piece* p = b->getPiece(*itr2);
-                if (p != nullptr && p->worth() > (*itr)->worth())
+                bool inserted = false;
+                Board* temp = new Board(*b);
+                temp->moveRaw(temp->getPiece(tuple.s), tuple.e);
+                temp->nextTurn();
+                tuple.eval = eval(temp, temp->getTurn());
+                                
+                for (list<TupleCC>::iterator i = li.begin(); i != li.end(); i++)
                 {
-                    li.push_front(tuple);
+                    if ((*i).eval <= tuple.eval)
+                    {
+                        li.insert(i, tuple);
+                        inserted = true;
+                        break;
+                    }
                 }
-                else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
-                {
-                    li.push_front(tuple);
-                }
-                else
+                
+                if (!inserted)
                 {
                     li.push_back(tuple);
                 }
+                delete temp;
             }
         }
     }
@@ -1015,44 +1019,93 @@ list<TupleCC> getOrderedLegalMoves(Board* b)
                 tuple.s = (*itr)->getPos();
                 tuple.e = *itr2;
                 
-                Piece* p = b->getPiece(*itr2);
-                if (p != nullptr && p->worth() >= (*itr)->worth())
+                bool inserted = false;
+                Board* temp = new Board(*b);
+                temp->moveRaw(temp->getPiece(tuple.s), tuple.e);
+                temp->nextTurn();
+                tuple.eval = eval(temp, temp->getTurn());
+                                
+                for (list<TupleCC>::iterator i = li.begin(); i != li.end(); i++)
                 {
-                    li.push_front(tuple);
+                    if ((*i).eval >= tuple.eval)
+                    {
+                        li.insert(i, tuple);
+                        inserted = true;
+                        break;
+                    }
                 }
-                /*else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
-                {
-                    li.push_front(tuple);
-                }*/
-                else
+                
+                if (!inserted)
                 {
                     li.push_back(tuple);
                 }
+                delete temp;
             }
         }
     }
+    
+    
     return li;
 }
 
 /*
- When do we push front vs push back?
- push_front if: can capture a piece worth more
- push_front if:
+ list<TupleCC> getOrderedLegalMoves(Board* b)
+ {
+     list<TupleCC> li;
+     
+     if (b->getTurn() == 'W')
+     {
+         for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+         {
+             for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+             {
+                 TupleCC tuple;
+                 tuple.s = (*itr)->getPos();
+                 tuple.e = *itr2;
+                 
+                 Piece* p = b->getPiece(*itr2);
+                 if (p != nullptr && p->worth() >= (*itr)->worth())
+                 {
+                     li.push_front(tuple);
+                 }
+                 else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
+                 {
+                     li.push_front(tuple);
+                 }
+                 else
+                 {
+                     li.push_back(tuple);
+                 }
+             }
+         }
+     }
+     else
+     {
+         for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+         {
+             for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+             {
+                 TupleCC tuple;
+                 tuple.s = (*itr)->getPos();
+                 tuple.e = *itr2;
+                 
+                 Piece* p = b->getPiece(*itr2);
+                 if (p != nullptr && p->worth() >= (*itr)->worth())
+                 {
+                     li.push_front(tuple);
+                 }
+                 else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
+                 {
+                     li.push_front(tuple);
+                 }
+                 else
+                 {
+                     li.push_back(tuple);
+                 }
+             }
+         }
+     }
+     return li;
+ }
  */
-//now pruning tests
-/*
- 3529.84
- ,10673.1
- ,6249.85
- ,7349.36
- ,1793.23
- ,13053.5
- ,12544
- ,12950.4
- ,23872.5
- ,21971.9
- ,28160
- ,31097.9
- ,64405.6
- g1f3 e2e4 e4e5 b1c3 f3e5 d1e2 e2c4 a2a4 c3d5 h2h4 f1e2 e2f3 d2d3
- */
+//movePiece transpo next...

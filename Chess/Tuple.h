@@ -36,6 +36,7 @@ struct TupleCC
 {
     Coord s;
     Coord e;
+    double eval;
 };
 
 struct TupleHASH
