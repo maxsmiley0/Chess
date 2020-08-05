@@ -2,6 +2,7 @@
 #define auxiliary_h
 
 #include <list>
+#include <random>
 #include "Tuple.h"
 
 class Board;
@@ -18,6 +19,11 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
 //Static eval called at the leaf nodes of reccomendMove
 void clearHash();
 double eval(Board* b, char color);
+
+void hashInfo();
+void zobristFill(); //called once in constructor of game
+int zobristKey(Board* b);
+int getZobristValue(Piece* p);
 
 //Eval for a given gamestage
 double evalOpening(Board* b, char color);
@@ -78,4 +84,35 @@ class Timer
     }
   private:
     std::chrono::high_resolution_clock::time_point m_time;
+};
+
+struct Zobrist
+{
+    int val[8][8][12];
+    int blackToMove;
+    
+    int randInt(int lowest, int highest)
+    {
+        static random_device rd;
+        static default_random_engine generator(rd());
+        uniform_int_distribution<> distro(lowest, highest);
+        
+        return distro(generator);
+    }
+    
+    void zobristFill()
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                for (int k = 0; k < 12; k++)
+                {
+                    val[i][j][k] = randInt(0, HASHCOUNT);
+                }
+            }
+        }
+        
+        blackToMove = randInt(0, HASHCOUNT);
+    }
 };

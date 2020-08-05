@@ -762,7 +762,7 @@ void Board::print()
     }
     cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
 }
-
+/*
 unsigned long Board::hashmap()
 {
     hash<string> hasher;
@@ -787,7 +787,7 @@ unsigned long Board::hashmap()
     
     return hasher(s) % HASHCOUNT;
 }
-
+*/
 string Board::boardID()
 {
     string s = "";

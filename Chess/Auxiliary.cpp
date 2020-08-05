@@ -19,6 +19,102 @@
 using namespace std;
 
 list<TupleHASH> tTable[HASHCOUNT];
+Zobrist zob;
+
+void hashInfo()
+{
+    for (int i = 0; i < HASHCOUNT; i++)
+    {
+        cout << tTable[i].size();
+    }
+}
+
+void zobristFill()
+{
+    zob.zobristFill();
+}
+
+int zobristKey(Board* b)
+{
+    int key = -1; //-1 significes uninitialized
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            Piece* p = b->getPiece(Coord(i, j));
+            if (p != nullptr)
+            {
+                if (key == -1)
+                {
+                    key = getZobristValue(p);
+                }
+                else
+                {
+                    key ^= getZobristValue(p);
+                }
+            }
+        }
+    }
+    
+    if (b->getTurn() == 'B')
+    {
+        key ^= zob.blackToMove;
+    }
+    
+    return key % HASHCOUNT;
+}
+
+int getZobristValue(Piece* p)
+{
+    if (p == nullptr)
+    {
+        cerr << "Trying to get zobrist value of an empty square" << endl;
+        exit(1);
+    }
+    else
+    {
+        if (p->getColor() == 'W')
+        {
+            switch (p->type())
+            {
+                case 'P':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][0];
+                case 'B':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][1];
+                case 'N':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][2];
+                case 'R':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][3];
+                case 'Q':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][4];
+                case 'K':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][5];
+            }
+        }
+        else
+        {
+            switch (p->type())
+            {
+                case 'P':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][6];
+                case 'B':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][7];
+                case 'N':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][8];
+                case 'R':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][9];
+                case 'Q':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][10];
+                case 'K':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][11];
+            }
+        }
+    }
+    
+    cerr << "Error in Auxiliary::getZobristValue(Piece*)" << endl;
+    exit(1);
+}
 
 void clearHash()
 {
@@ -27,6 +123,7 @@ void clearHash()
         for (list<TupleHASH>::iterator itr = tTable[i].begin(); itr != tTable[i].end(); itr++)
         {
             Board* b = (*itr).b;
+            cout << "saved" << (*itr).depth << endl;
             itr = tTable[i].erase(itr);
             delete b;
         }
@@ -42,7 +139,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
      RECURSIVE STEP
      */
     
-    for (list<TupleHASH>::iterator itr = tTable[b->hashmap()].begin(); itr != tTable[b->hashmap()].end(); itr++)
+    for (list<TupleHASH>::iterator itr = tTable[zobristKey(b)].begin(); itr != tTable[zobristKey(b)].end(); itr++)
     {
         if ((*itr->b) == *b && (*itr).depth >= depth)
         {
@@ -261,7 +358,7 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
     {
         Board* storedInHashTable = new Board(*b);
         TupleHASH tupleHash = {storedInHashTable, storedInHashTable->getPiece(tuple.p->getPos()), tuple.c, tuple.eval, depth};
-        tTable[b->hashmap()].push_back(tupleHash);
+        tTable[zobristKey(b)].push_back(tupleHash);
     }
     
     return tuple;

@@ -21,6 +21,7 @@ using namespace std;
 Game::Game(Board* b)
 {
     mBoard = b;
+    zobristFill();
 }
 
 Game::~Game()
@@ -151,6 +152,7 @@ void Game::play()
     
     while (!gameOver())
     {
+        //hashInfo();
         clearHash();
         mBoard->print();                      //prints out board
         
@@ -161,7 +163,7 @@ void Game::play()
         //    cout << (*itr).s.getX() << " " << (*itr).s.getY() << " " << (*itr).e.getX() << /" " << (*itr).e.getY() << endl;
         //}
         
-        if (false)
+        if (mBoard->getTurn() == playerColor)
         {
             string userInput;
             Coord c1, c2;
@@ -204,7 +206,7 @@ void Game::play()
             t1.start();
             
             //Returning a tuple of type struct with pointer to piece and coord
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 5, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 4, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
             cout << t1.elapsed() << endl;
