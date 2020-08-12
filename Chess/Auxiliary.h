@@ -11,28 +11,27 @@ class Set;
 class Coord;
 
 const int HASHCOUNT = 100000;
-/*
- Searching-related functions
- */
+
+//Searching
 //Searches "depth" nodes into the game tree, using alpha-beta pruning
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta);
 //Static eval called at the leaf nodes of reccomendMove
-void clearHash();
 double eval(Board* b, char color);
 
-void hashInfo();
-void zobristFill(); //called once in constructor of game
-int zobristKey(Board* b);
-int getZobristValue(Piece* p);
+//Transposition table
+void zobristFill();             //Fills zobrist arrays at the beginning of a game
+int zobristKey(Board* b);       //Maps a board to an integer
+int getZobristValue(Piece* p);  //Maps a piece to an integer for a given square
+void hashInfo();                //Prints out the distribution of hash table buckets
+void clearHash();               //Clears the transposition table and deletes dynamically
+                                //allocated boards
 
 //Eval for a given gamestage
 double evalOpening(Board* b, char color);
 double evalMiddleGame(Board* b, char color);
 double evalEndGame(Board* b, char color);
 
-/*
- Auxiliary functions used in eval
- */
+//Auxiliary functions used in eval
 double evalPst(Board* b);   //positional bonuses assigned using a piece square table
 double evalPstEg(Board* b); //endgame piece square table
 //penalty for unprotected attacked pieces, or for pieces attacked by lesser pieces
@@ -51,7 +50,6 @@ const char defineDir(const Coord c1, const Coord c2);
 //returns true if there exists an unperturbed ray from p's location to c
 
 //Misc
-
 //returns true if a list contains a coord
 bool containsCoord(list<Coord> li, Coord c);
 //Returns the piece pinning piece p

@@ -128,8 +128,6 @@ Board::Board(const Board& other)
             {
                 mBoard[i][j]->setMoved(other.mBoard[i][j]->hasMoved());
                 mBoard[i][j]->setPinDir(other.mBoard[i][j]->getPinDir());
-                mBoard[i][j]->setNumDefending(other.mBoard[i][j]->getNumDefending());
-                mBoard[i][j]->setNumAttacking(other.mBoard[i][j]->getNumAttacking());
                 mBoard[i][j]->legalMoves = other.mBoard[i][j]->legalMoves;
             }
             if (mBoard[i][j] != nullptr && mBoard[i][j]->getColor() == 'W')
@@ -762,51 +760,5 @@ void Board::print()
     }
     cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
 }
-/*
-unsigned long Board::hashmap()
-{
-    hash<string> hasher;
-    string s = "";
-    s += turn;
-    //A linear combination of the worth, x, and y. We add 1 so any x = y = worth = 0 dependancies dont kill the equation to zero
-    
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            if (mBoard[i][j] != nullptr)
-            {
-                s += mBoard[i][j]->getColor() + mBoard[i][j]->type();
-            }
-            else
-            {
-                s += 'N';
-            }
-        }
-    }
-    
-    return hasher(s) % HASHCOUNT;
-}
-*/
-string Board::boardID()
-{
-    string s = "";
-    s += turn;
-    
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            if (mBoard[i][j] != nullptr)
-            {
-                s += mBoard[i][j]->getColor() + mBoard[i][j]->type();
-            }
-            else
-            {
-                s += 'N';
-            }
-        }
-    }
-    
-    return s;
-}
+
+

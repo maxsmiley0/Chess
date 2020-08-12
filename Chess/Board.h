@@ -42,8 +42,6 @@ public:
     
     //Functional
     bool boolCanReachCoordPseudo(Coord c, char color); //returns true if any piece can reach a given coordinate
-    //unsigned long hashmap();
-    string boardID(); //returns unique board string
     void print();   //prints a representation of the board to cout
    
     list<Piece*> whitePieces;   //list of white pieces
@@ -58,4 +56,3 @@ private:
 
 #endif /* Board_h */
 
- 

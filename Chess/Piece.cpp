@@ -10,8 +10,6 @@ Piece::Piece(Board* b, Coord c, char col)
     color = col;
     moved = false;
     pinDir = 'N';
-    numDefending = 0;
-    numAttacking = 0;
     
     if (col != 'W' && col != 'B')
     {
@@ -39,16 +37,6 @@ Coord Piece::getPos() const
     return pos;
 }
 
-Board* Piece::getBoard() const
-{
-    return mBoard;
-}
-
-char Piece::getPinDir() const
-{
-    return pinDir;
-}
-
 char Piece::getColor() const
 {
     return color;
@@ -71,6 +59,16 @@ char Piece::getOppositeColor() const
     }
 }
 
+Board* Piece::getBoard() const
+{
+    return mBoard;
+}
+
+char Piece::getPinDir() const
+{
+    return pinDir;
+}
+
 void Piece::setPinDir(char c)
 {
     pinDir = c;
@@ -90,37 +88,6 @@ bool Piece::hasMoved() const
 {
     return moved;
 }
-
-int Piece:: getNumDefending() const
-{
-    return numDefending;
-}
-
-void Piece::incrementNumDefending()
-{
-    numDefending++;
-}
-
-void Piece::setNumDefending(int i)
-{
-    numDefending = i;
-}
-
-int Piece:: getNumAttacking() const
-{
-    return numAttacking;
-}
-
-void Piece::incrementNumAttacking()
-{
-    numAttacking++;
-}
-
-void Piece::setNumAttacking(int i)
-{
-    numAttacking = i;
-}
-
 
 Piece* Piece::getWeakestDefender()
 {
@@ -267,11 +234,4 @@ bool Piece::legalMove(Coord c) const
     return b;
 }
 
-double Piece::centerControl() const
-{
-    /*
-     This will be called for Kings, Queens, and Rooks because we don't really care about their center control in the beginning
-     */
-    
-    return 0.0;
-}
+
