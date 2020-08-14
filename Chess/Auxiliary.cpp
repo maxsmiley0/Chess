@@ -123,7 +123,6 @@ void clearHash()
         for (list<TupleHASH>::iterator itr = tTable[i].begin(); itr != tTable[i].end(); itr++)
         {
             Board* b = (*itr).b;
-            cout << "saved" << (*itr).depth << endl;
             itr = tTable[i].erase(itr);
             delete b;
         }
@@ -144,7 +143,6 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         if ((*itr->b) == *b && (*itr).depth >= depth)
         {
             tuple = {b->getPiece((*itr).p->getPos()), (*itr).c, (*itr).eval};
-            //cout << "saved" << (*itr).depth << endl;
             return tuple;
         }
     }
@@ -1145,64 +1143,48 @@ list<TupleCC> getOrderedLegalMoves(Board* b)
     return li;
 }
 
-/*
- list<TupleCC> getOrderedLegalMoves(Board* b)
- {
-     list<TupleCC> li;
-     
-     if (b->getTurn() == 'W')
-     {
-         for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
-         {
-             for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
-             {
-                 TupleCC tuple;
-                 tuple.s = (*itr)->getPos();
-                 tuple.e = *itr2;
-                 
-                 Piece* p = b->getPiece(*itr2);
-                 if (p != nullptr && p->worth() >= (*itr)->worth())
-                 {
-                     li.push_front(tuple);
-                 }
-                 else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
-                 {
-                     li.push_front(tuple);
-                 }
-                 else
-                 {
-                     li.push_back(tuple);
-                 }
-             }
-         }
-     }
-     else
-     {
-         for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
-         {
-             for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
-             {
-                 TupleCC tuple;
-                 tuple.s = (*itr)->getPos();
-                 tuple.e = *itr2;
-                 
-                 Piece* p = b->getPiece(*itr2);
-                 if (p != nullptr && p->worth() >= (*itr)->worth())
-                 {
-                     li.push_front(tuple);
-                 }
-                 else if (!(*itr)->attackers.empty() && ((*itr)->defenders.empty() || (*itr)->getWeakestAttacker()->worth() < (*itr)->worth()))
-                 {
-                     li.push_front(tuple);
-                 }
-                 else
-                 {
-                     li.push_back(tuple);
-                 }
-             }
-         }
-     }
-     return li;
- }
- */
-//movePiece transpo next...
+void print(Board* b, char c)
+{
+    if (c == 'W')
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            cout << 8 - i << " "; //number coordinates
+            for (int j = 0; j < 8; j++)
+            {
+                Piece* p = b->getPiece(Coord(i, j));
+                if (p != nullptr)
+                {
+                    cout << ' ' << p->getColor() << p->type() << ' ';
+                }
+                else
+                {
+                    cout << " .. ";
+                }
+            }
+            cout << endl << endl;
+        }
+        cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
+    }
+    else if (c == 'B')
+    {
+        for (int i = 7; i >= 0; i--)
+        {
+            cout << 8 - i << " "; //number coordinates
+            for (int j = 7; j >= 0; j--)
+            {
+                Piece* p = b->getPiece(Coord(i, j));
+                if (p != nullptr)
+                {
+                    cout << ' ' << p->getColor() << p->type() << ' ';
+                }
+                else
+                {
+                    cout << " .. ";
+                }
+            }
+            cout << endl << endl;
+        }
+        cout << "   h   g   f   e   d   c   b   a" << endl << endl; //letter coordinates
+    }
+}

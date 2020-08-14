@@ -215,7 +215,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
-        print();
+        print(this, 'W');
         cerr << "No White King!" << endl;
         exit(1);
     }
@@ -230,7 +230,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
-        print();
+        print(this, 'W');
         cerr << "No Black King!" << endl;
         exit(1);
     }
@@ -739,26 +739,4 @@ bool Board::boolCanReachCoordPseudo(Coord c, char color)
     
     return false;
 }
-
-void Board::print()
-{
-    for (int i = 0; i < 8; i++)
-    {
-        cout << 8 - i << " "; //number coordinates
-        for (int j = 0; j < 8; j++)
-        {
-            if (mBoard[i][j] != nullptr)
-            {
-                cout << ' ' << mBoard[i][j]->getColor() << mBoard[i][j]->type() << ' ';
-            }
-            else
-            {
-                cout << " .. ";
-            }
-        }
-        cout << endl << endl;
-    }
-    cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
-}
-
 

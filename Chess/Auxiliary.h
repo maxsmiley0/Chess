@@ -56,6 +56,8 @@ bool containsCoord(list<Coord> li, Coord c);
 Piece* getPinned(const Piece* p, char& dir);
 //Returns a list of all legal moves for a given board, ordered by priority (which moves appear to be better) to increase the efficiency of alpha-beta pruning
 list<TupleCC> getOrderedLegalMoves(Board* b);
+void print(Board* b, char c);
+//prints Board* b to cout from the POV of color c
 
 #endif /* auxiliary_h */
 

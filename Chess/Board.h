@@ -42,7 +42,6 @@ public:
     
     //Functional
     bool boolCanReachCoordPseudo(Coord c, char color); //returns true if any piece can reach a given coordinate
-    void print();   //prints a representation of the board to cout
    
     list<Piece*> whitePieces;   //list of white pieces
     list<Piece*> blackPieces;   //list of black pieces
