@@ -1,8 +1,6 @@
 # Chess
 A chess engine coded from scratch, in c++
 
-Skills Demonstrated: Memory management, custom data structures implementation, legal and pseudolegal move generation, class invariants, minimax, alpha-beta pruning, priority move ordering, transposition tables, zobrist hashing
-
 Front End:
 Upon booting up the program, the user will be prompted to pick a side, "White" or "Black". The board is represented by text characters in an 8x8 grid. For example, a white bishop is represented as "WB".
    
