@@ -21,6 +21,7 @@ using namespace std;
 Game::Game(Board* b)
 {
     mBoard = b;
+    zobristFill();
 }
 
 Game::~Game()
@@ -142,6 +143,22 @@ Coord Game::convert(char c1, char c2)
 
 void Game::play()
 {
+    cout << "What difficulty would you like to play at?" << endl;
+    cout << "Enter a number 1-4" << endl << endl;
+    cout << "Move Time: " << endl;
+    cout << "1: Negligible" << endl;
+    cout << "2: Negligible" << endl;
+    cout << "3: ~2 seconds" << endl;
+    cout << "4: ~10 seconds" << endl;
+    
+    cin >> difficulty;
+    
+    if (difficulty > 4 || difficulty < 1)
+    {
+        cerr << "Invalid difficulty" << endl;
+        exit(1);
+    }
+    
     while (playerColor != 'W' && playerColor != 'B')
     {
         //Loops until player enters 'W' or 'B'
@@ -151,9 +168,11 @@ void Game::play()
     
     while (!gameOver())
     {
-        mBoard->print();                      //prints out board
+        //hashInfo();
+        clearHash();
+        print(mBoard, playerColor);   //prints out board
         
-        if (mBoard->getTurn() == playerColor) //if turn is player turn
+        if (mBoard->getTurn() == playerColor)
         {
             string userInput;
             Coord c1, c2;
@@ -180,6 +199,11 @@ void Game::play()
                     break;
                 }
             }
+            if (userInput == "exit")
+            {
+                //backdoor method of ending the game
+                break;
+            }
             //At this point, the input is guaranteed to be syntactically correct
             mBoard->movePiece(mBoard->getPiece(c1), c2);    //move piece
             mBoard->nextTurn();                             //execute next turn
@@ -191,17 +215,17 @@ void Game::play()
             t1.start();
             
             //Returning a tuple of type struct with pointer to piece and coord
-            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), 3, -999, 999));
+            TuplePC tuple(reccomendMove(mBoard, mBoard->getTurn(), difficulty, -999, 999));
             mBoard->movePiece(tuple.p, tuple.c);
             mBoard->nextTurn();
-            
+            cout << t1.elapsed() << endl;
             t.time = t1.elapsed();
             data.push_back(t);
         }
     }
     
     //Once the game has ended, display the final position
-    mBoard->print();
+    print(mBoard, playerColor);
     
     if (!mBoard->getKing('W')->attackers.empty() && !mBoard->getKing('B')->attackers.empty())
     {

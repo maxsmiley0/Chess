@@ -18,6 +18,116 @@
 
 using namespace std;
 
+list<TupleHASH> tTable[HASHCOUNT];
+Zobrist zob;
+
+void hashInfo()
+{
+    for (int i = 0; i < HASHCOUNT; i++)
+    {
+        cout << tTable[i].size();
+    }
+}
+
+void zobristFill()
+{
+    zob.zobristFill();
+}
+
+int zobristKey(Board* b)
+{
+    int key = -1; //-1 significes uninitialized
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            Piece* p = b->getPiece(Coord(i, j));
+            if (p != nullptr)
+            {
+                if (key == -1)
+                {
+                    key = getZobristValue(p);
+                }
+                else
+                {
+                    key ^= getZobristValue(p);
+                }
+            }
+        }
+    }
+    
+    if (b->getTurn() == 'B')
+    {
+        key ^= zob.blackToMove;
+    }
+    
+    return key % HASHCOUNT;
+}
+
+int getZobristValue(Piece* p)
+{
+    if (p == nullptr)
+    {
+        cerr << "Trying to get zobrist value of an empty square" << endl;
+        exit(1);
+    }
+    else
+    {
+        if (p->getColor() == 'W')
+        {
+            switch (p->type())
+            {
+                case 'P':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][0];
+                case 'B':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][1];
+                case 'N':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][2];
+                case 'R':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][3];
+                case 'Q':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][4];
+                case 'K':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][5];
+            }
+        }
+        else
+        {
+            switch (p->type())
+            {
+                case 'P':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][6];
+                case 'B':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][7];
+                case 'N':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][8];
+                case 'R':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][9];
+                case 'Q':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][10];
+                case 'K':
+                    return zob.val[p->getPos().getX()][p->getPos().getY()][11];
+            }
+        }
+    }
+    
+    cerr << "Error in Auxiliary::getZobristValue(Piece*)" << endl;
+    exit(1);
+}
+
+void clearHash()
+{
+    for (int i = 0; i < HASHCOUNT; i++)
+    {
+        for (list<TupleHASH>::iterator itr = tTable[i].begin(); itr != tTable[i].end(); itr++)
+        {
+            Board* b = (*itr).b;
+            itr = tTable[i].erase(itr);
+            delete b;
+        }
+    }
+}
 
 TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
 {
@@ -27,20 +137,30 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
     /*
      RECURSIVE STEP
      */
+    
+    for (list<TupleHASH>::iterator itr = tTable[zobristKey(b)].begin(); itr != tTable[zobristKey(b)].end(); itr++)
+    {
+        if ((*itr->b) == *b && (*itr).depth >= depth)
+        {
+            tuple = {b->getPiece((*itr).p->getPos()), (*itr).c, (*itr).eval};
+            return tuple;
+        }
+    }
+    
     if (depth > 1)
     {
         if (turn == 'W')
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
-            {
+            
+                list<TupleCC> li = getOrderedLegalMoves(b);
                 //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+            for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
                     /*
                      We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
@@ -52,8 +172,8 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                      */
                     if (tuple.p == nullptr || tempTuple.eval > bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         tuple.eval = tempTuple.eval;
                         bestEval = tempTuple.eval;
                     }
@@ -65,25 +185,19 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                         break;
                     }
                 }
-                //Pruning
-                if (alpha >= beta)
-                {
-                    break;
-                }
-            }
         }
         else
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
-            {
+            
+                list<TupleCC> li = getOrderedLegalMoves(b);
                 //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+                 for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
                     /*
                     We need to know what the opponent will play in this scenario to evaluate if this is a path we want to go down. So, we call reccomendMove, but for the opposite side, on the temp board, and at 1 less depth
@@ -95,8 +209,8 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     */
                     if (tuple.p == nullptr || tempTuple.eval < bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         tuple.eval = tempTuple.eval;
                         bestEval = tempTuple.eval;
                     }
@@ -107,12 +221,6 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     {
                         break;
                     }
-                }
-                //Pruning
-                if (beta <= alpha)
-                {
-                    break;
-                }
             }
         }
         
@@ -125,15 +233,15 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
         if (turn == 'W')
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
-            {
+            
+                list<TupleCC> li = getOrderedLegalMoves(b);
                 //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+                 for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
                 {
                     endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
                     //Simply call static eval on the board
                     double currentEval = eval(temp, 'B');
@@ -144,37 +252,33 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     
                     if (tuple.p == nullptr || currentEval > bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
+                    //Deleting dynamically allocated temporary board
                     delete temp;
                     //Pruning
                     if (alpha >= beta)
                     {
                         break;
                     }
-                }
-                //Pruning
-                if (alpha >= beta)
-                {
-                    break;
-                }
             }
         }
         else
         {
             //Iterate through pieces
-            for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
-            {
-                endNode = false;
+            
+                
+               list<TupleCC> li = getOrderedLegalMoves(b);
                 //Iterate through legal moves
-                for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+                 for (list<TupleCC>::iterator itr = li.begin(); itr != li.end(); itr++)
                 {
+                    endNode = false;
                     //Creating a temp board to evaluate, moving piece in temp board
                     Board* temp = new Board(*b);
-                    temp->movePiece(temp->getPiece((*itr)->getPos()), *itr2);
+                    temp->movePiece(temp->getPiece((*itr).s), (*itr).e);
                     temp->nextTurn();
                     //Simply call static eval on board
                     double currentEval = eval(temp, 'W');
@@ -185,23 +289,19 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                     
                     if (tuple.p == nullptr || currentEval < bestEval)
                     {
-                        tuple.p = *itr;
-                        tuple.c = *itr2;
+                        tuple.p = b->getPiece((*itr).s);
+                        tuple.c = (*itr).e;
                         bestEval = currentEval;
                         tuple.eval = bestEval;
                     }
+                    //Deleting dynamically allocated temporary board
                     delete temp;
                     //Pruning
                     if (beta <= alpha)
                     {
                         break;
                     }
-                }
-                //Pruning
-                if (beta <= alpha)
-                {
-                    break;
-                }
+
             }
         }
     }
@@ -235,6 +335,28 @@ TuplePC reccomendMove(Board* b, char turn, int depth, double alpha, double beta)
                 tuple.eval = 100.0;
             }
         }
+    }
+    /*
+     Here is where we store the tuple into the hash table
+     We need to create new stuff though
+     e.g. say we have a struct HASHENTRY
+     that holds a board, a piece, a best move, an eval, and a depth
+     
+     -create new board using copy constructor - make sure it does it correctly!
+     -store piece into struct (temp->getPiece(tuple.p->getPos())
+     -store move into struct (tuple.c)
+     -store eval and depth into struct (only if not 1)
+     
+     -At beginning, we hash into the tTable
+     -Iterate through the bucket
+     -If we find that the boards are the same, then:
+     -Check if depth in tTable is > or = to what we're looking for, if it is then we use that
+     */
+    if (!endNode) //maxdepth
+    {
+        Board* storedInHashTable = new Board(*b);
+        TupleHASH tupleHash = {storedInHashTable, storedInHashTable->getPiece(tuple.p->getPos()), tuple.c, tuple.eval, depth};
+        tTable[zobristKey(b)].push_back(tupleHash);
     }
     
     return tuple;
@@ -963,4 +1085,127 @@ Piece* getPinned(const Piece* p, char& dir)
         }
     }
     return returnPiece;
+}
+
+list<TupleCC> getOrderedLegalMoves(Board* b)
+{
+    list<TupleCC> li;
+    
+    if (b->getTurn() == 'W')
+    {
+        for (list<Piece*>::iterator itr = b->whitePieces.begin(); itr != b->whitePieces.end(); itr++)
+        {
+            for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+            {
+                TupleCC tuple;
+                tuple.s = (*itr)->getPos();
+                tuple.e = *itr2;
+                
+                bool inserted = false;
+                Board* temp = new Board(*b);
+                temp->moveRaw(temp->getPiece(tuple.s), tuple.e);
+                temp->nextTurn();
+                tuple.eval = eval(temp, temp->getTurn());
+                                
+                for (list<TupleCC>::iterator i = li.begin(); i != li.end(); i++)
+                {
+                    if ((*i).eval <= tuple.eval)
+                    {
+                        li.insert(i, tuple);
+                        inserted = true;
+                        break;
+                    }
+                }
+                
+                if (!inserted)
+                {
+                    li.push_back(tuple);
+                }
+                delete temp;
+            }
+        }
+    }
+    else
+    {
+        for (list<Piece*>::iterator itr = b->blackPieces.begin(); itr != b->blackPieces.end(); itr++)
+        {
+            for (list<Coord>::iterator itr2 = (*itr)->legalMoves.begin(); itr2 != (*itr)->legalMoves.end(); itr2++)
+            {
+                TupleCC tuple;
+                tuple.s = (*itr)->getPos();
+                tuple.e = *itr2;
+                
+                bool inserted = false;
+                Board* temp = new Board(*b);
+                temp->moveRaw(temp->getPiece(tuple.s), tuple.e);
+                temp->nextTurn();
+                tuple.eval = eval(temp, temp->getTurn());
+                                
+                for (list<TupleCC>::iterator i = li.begin(); i != li.end(); i++)
+                {
+                    if ((*i).eval >= tuple.eval)
+                    {
+                        li.insert(i, tuple);
+                        inserted = true;
+                        break;
+                    }
+                }
+                
+                if (!inserted)
+                {
+                    li.push_back(tuple);
+                }
+                delete temp;
+            }
+        }
+    }
+    
+    
+    return li;
+}
+
+void print(Board* b, char c)
+{
+    if (c == 'W')
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            cout << 8 - i << " "; //number coordinates
+            for (int j = 0; j < 8; j++)
+            {
+                Piece* p = b->getPiece(Coord(i, j));
+                if (p != nullptr)
+                {
+                    cout << ' ' << p->getColor() << p->type() << ' ';
+                }
+                else
+                {
+                    cout << " .. ";
+                }
+            }
+            cout << endl << endl;
+        }
+        cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
+    }
+    else if (c == 'B')
+    {
+        for (int i = 7; i >= 0; i--)
+        {
+            cout << 8 - i << " "; //number coordinates
+            for (int j = 7; j >= 0; j--)
+            {
+                Piece* p = b->getPiece(Coord(i, j));
+                if (p != nullptr)
+                {
+                    cout << ' ' << p->getColor() << p->type() << ' ';
+                }
+                else
+                {
+                    cout << " .. ";
+                }
+            }
+            cout << endl << endl;
+        }
+        cout << "   h   g   f   e   d   c   b   a" << endl << endl; //letter coordinates
+    }
 }

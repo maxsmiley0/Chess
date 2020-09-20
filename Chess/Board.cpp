@@ -128,8 +128,6 @@ Board::Board(const Board& other)
             {
                 mBoard[i][j]->setMoved(other.mBoard[i][j]->hasMoved());
                 mBoard[i][j]->setPinDir(other.mBoard[i][j]->getPinDir());
-                mBoard[i][j]->setNumDefending(other.mBoard[i][j]->getNumDefending());
-                mBoard[i][j]->setNumAttacking(other.mBoard[i][j]->getNumAttacking());
                 mBoard[i][j]->legalMoves = other.mBoard[i][j]->legalMoves;
             }
             if (mBoard[i][j] != nullptr && mBoard[i][j]->getColor() == 'W')
@@ -163,22 +161,30 @@ Board::~Board()
 
 bool Board::operator==(const Board& other)
 {
+    if (turn != other.turn)
+    {
+        return false;
+    }
+    
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
             //Not quite right, needs work
-            if (mBoard[i][j] == nullptr && other.mBoard[i][j] == nullptr)
+            if (mBoard[i][j] != nullptr || mBoard[i][j] != nullptr)
             {
-                return true;
-            }
-            else if (mBoard[i][j] == nullptr || other.mBoard[i][j] == nullptr)
-            {
-                return true;
-            }
-            else if (*mBoard[i][j] != *other.mBoard[i][j])
-            {
-                return false;
+                if (mBoard[i][j] == nullptr && other.mBoard[i][j] != nullptr)
+                {
+                    return false;
+                }
+                else if (mBoard[i][j] != nullptr && other.mBoard[i][j] == nullptr)
+                {
+                    return false;
+                }
+                else if (*mBoard[i][j] != *other.mBoard[i][j])
+                {
+                    return false;
+                }
             }
         }
     }
@@ -209,7 +215,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
-        print();
+        print(this, 'W');
         cerr << "No White King!" << endl;
         exit(1);
     }
@@ -224,7 +230,7 @@ Piece* Board::getKing(char color)
             }
             itr++;
         }
-        print();
+        print(this, 'W');
         cerr << "No Black King!" << endl;
         exit(1);
     }
@@ -453,10 +459,154 @@ void Board::movePiece(Piece* p, Coord c)
         p->setPos(c);
         p->setMoved(true);
         
-        
         updatePinDir(p->getOppositeColor());    //Updating pin direction
         update();                               //Updating attackers / defenders
         updateLegalMoves();                  //Updating legal moves
+    }
+    else //Crashes on illegal move atm
+    {
+        cerr << "This is not a legal move!" << endl;
+        exit(1);
+    }
+}
+
+void Board::moveRaw(Piece* p, Coord c)
+{
+    if (p == nullptr)
+    {
+        cerr << "Trying to move a piece not at that position" << endl;
+        exit(1);
+    }
+    //Castling Clause, hard coding every castling case
+    if (containsCoord(p->legalMoves, c)) //if this coord is in the legal move set
+    {
+        if (p->type() == 'K' && !p->hasMoved() && c == Coord(7, 2))
+        {
+            //manually moving rook
+            mBoard[7][3] = mBoard[7][0];
+            mBoard[7][3]->setPos(Coord(7, 3));
+            mBoard[7][3]->setMoved(true);
+            mBoard[7][0] = nullptr;
+        }
+        else if (p->type() == 'K' && !p->hasMoved() && c == Coord(7, 6))
+        {
+            //manually moving rook
+            mBoard[7][5] = mBoard[7][7];
+            mBoard[7][5]->setPos(Coord(7, 5));
+            mBoard[7][5]->setMoved(true);
+            mBoard[7][7] = nullptr;
+        }
+        else if (p->type() == 'K' && !p->hasMoved() && c == Coord(0, 2))
+        {
+            //manually moving rook
+            mBoard[0][3] = mBoard[0][0];
+            mBoard[0][3]->setPos(Coord(0, 3));
+            mBoard[0][3]->setMoved(true);
+            mBoard[0][0] = nullptr;
+        }
+        else if (p->type() == 'K' && !p->hasMoved() && c == Coord(0, 6))
+        {
+            //manually moving rook
+            mBoard[0][5] = mBoard[0][7];
+            mBoard[0][5]->setPos(Coord(0, 5));
+            mBoard[0][5]->setMoved(true);
+            mBoard[0][7] = nullptr;
+        }
+        
+        if (this->getPiece(c) != nullptr) //if space is occupied
+        {
+            Piece* takenPiece = mBoard[c.getX()][c.getY()];
+            mBoard[c.getX()][c.getY()] = p;
+            mBoard[p->getPos().getX()][p->getPos().getY()] = nullptr;
+            
+            //removing the takenpiece from the piece list
+            if (takenPiece->getColor() == 'W')
+            {
+                for (list<Piece*>::iterator itr = whitePieces.begin(); itr != whitePieces.end(); itr++)
+                {
+                    if ((*itr) == takenPiece)
+                    {
+                        itr = whitePieces.erase(itr);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (list<Piece*>::iterator itr = blackPieces.begin(); itr != blackPieces.end(); itr++)
+                {
+                    if ((*itr) == takenPiece)
+                    {
+                        itr = blackPieces.erase(itr);
+                        break;
+                    }
+                }
+            }
+            delete takenPiece;
+        }
+        else //if space is empty
+        {
+            mBoard[c.getX()][c.getY()] = p;
+            mBoard[p->getPos().getX()][p->getPos().getY()] = nullptr;
+        }
+        
+        //Promotion Clause
+        
+        if (p->type() == 'P')
+        {
+            if (c.getX() == 0) //case white queen
+            {
+                for (list<Piece*>::iterator itr = whitePieces.begin(); itr != whitePieces.end(); itr++)
+                {
+                    if ((*itr) == p)
+                    {
+                        //Creating the new Piece and saving the old one
+                        Piece* switchedPiece = p;
+                        p = new Queen(this, c, 'W');
+                        p->setMoved(true);
+                        
+                        //Erasing the iterator from the list and deleting it
+                        itr = whitePieces.erase(itr);
+                        delete switchedPiece;
+                        
+                        //Adding the new piece to whitePieces and mBoard
+                        mBoard[c.getX()][c.getY()] = p;
+                        whitePieces.push_back(p);
+                        break;
+                    }
+                }
+            }
+            else if (c.getX() == 7) //case black queen
+            {
+                for (list<Piece*>::iterator itr = blackPieces.begin(); itr != blackPieces.end(); itr++)
+                {
+                    if ((*itr) == p)
+                    {
+                        //Creating the new Piece and saving the old one
+                        Piece* switchedPiece = p;
+                        p = new Queen(this, c, 'B');
+                        p->setMoved(true);
+                        
+                        //Erasing the iterator from the list and deleting it
+                        itr = blackPieces.erase(itr);
+                        delete switchedPiece;
+                        
+                        //Adding the new piece to whitePieces and mBoard
+                        mBoard[c.getX()][c.getY()] = p;
+                        blackPieces.push_back(p);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        //We adjusted the pointers on mBoard, now we have to change the coord on the piece
+        p->setPos(c);
+        p->setMoved(true);
+        
+        updatePinDir(p->getOppositeColor());    //Updating pin direction
+        update();                               //Updating attackers / defenders
+        //updateLegalMoves();                  //Updating legal moves
     }
     else //Crashes on illegal move atm
     {
@@ -590,23 +740,3 @@ bool Board::boolCanReachCoordPseudo(Coord c, char color)
     return false;
 }
 
-void Board::print()
-{
-    for (int i = 0; i < 8; i++)
-    {
-        cout << 8 - i << " "; //number coordinates
-        for (int j = 0; j < 8; j++)
-        {
-            if (mBoard[i][j] != nullptr)
-            {
-                cout << ' ' << mBoard[i][j]->getColor() << mBoard[i][j]->type() << ' ';
-            }
-            else
-            {
-                cout << " .. ";
-            }
-        }
-        cout << endl << endl;
-    }
-    cout << "   a   b   c   d   e   f   g   h" << endl << endl; //letter coordinates
-}

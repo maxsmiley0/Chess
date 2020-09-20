@@ -39,16 +39,6 @@ char King::type() const
 void King::updateLegalMoves()
 {
     legalMoves.clear();
-    //Regular Moves
-    //Timer t;
-    //t.start();
-    //legalMove(getPos() + Coord(1, 1));
-    //cout << "LM: " << t.elapsed() << endl;
-    
-    //Timer f;
-    //f.start();
-    //!getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor());
-    //cout << "Check: " << f.elapsed() <<  endl;
     
     if ((legalMove(getPos() + Coord(1, 1)) && !getBoard()->boolCanReachCoordPseudo(getPos() + Coord(1, 1), getOppositeColor())))
     {
@@ -224,9 +214,6 @@ Set King::pseudoLegalMoves() const
 
 void King::update()
 {
-    setNumDefending(0);
-    setNumAttacking(0);
-    
     Piece* p;
      
     p = getBoard()->getPiece(getPos() + Coord(1, 0));
@@ -235,14 +222,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(1, 0)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -253,14 +238,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(-1, 0)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -271,14 +254,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(0, 1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -289,14 +270,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(0, -1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -307,14 +286,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(1, 1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -325,14 +302,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(-1, 1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -343,14 +318,12 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(1, -1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
@@ -361,15 +334,14 @@ void King::update()
         if (p->getColor() == getColor())
         {
             p->defenders.push_back(this);
-            incrementNumDefending();
         }
         else
         {
             if (containsCoord(legalMoves, getPos() + Coord(-1, -1)))
             {
                 p->attackers.push_back(this);
-                incrementNumAttacking();
             }
         }
     }
 }
+

@@ -9,10 +9,9 @@
 #ifndef Tuple_h
 #define Tuple_h
 
-class Piece;
-class Board;
-
 #include "Coord.h"
+#include "Piece.h"
+#include "Board.h"
 
 struct Tuple
 {
@@ -31,6 +30,22 @@ struct TupleBE
 {
     Board* b;
     double eval;
+};
+
+struct TupleCC
+{
+    Coord s;
+    Coord e;
+    double eval;
+};
+
+struct TupleHASH
+{
+    Board* b;
+    Piece* p;
+    Coord c;
+    double eval;
+    int depth;
 };
 
 #endif /* Tuple_h */

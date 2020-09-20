@@ -5,8 +5,6 @@
 #include <list>
 #include <vector>
 
-#include "Tuple.h"
-
 using namespace std;
 
 class Coord;
@@ -34,6 +32,8 @@ public:
     void addPiece(Piece* p);            //Adds piece
     //Moves piece, and updates all pieces' legal moves, attackers, defenders and pin direction
     void movePiece(Piece* p, Coord c);
+    void moveRaw(Piece* p, Coord c); //movePiece w/o updating legal moves to save time
+    //to be used at leaf nodes when we don't need to analyze any deeper
     
     //Updating
     void update();                      //updates all pieces' attackers and defenders
@@ -42,8 +42,7 @@ public:
     
     //Functional
     bool boolCanReachCoordPseudo(Coord c, char color); //returns true if any piece can reach a given coordinate
-    void print();   //prints a representation of the board to cout
-    
+   
     list<Piece*> whitePieces;   //list of white pieces
     list<Piece*> blackPieces;   //list of black pieces
     //Note*: These members are public to avoid writing methods to push_back and access elements from these lists
@@ -56,4 +55,3 @@ private:
 
 #endif /* Board_h */
 
- 

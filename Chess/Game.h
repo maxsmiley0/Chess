@@ -33,6 +33,7 @@ private:
     list<Tuple> data;
     //A list of the player moves, effectively a PGN generator
     list<string> moves;
-}; 
+    int difficulty; //number of plys the computer will search
+};
 
 #endif /* Game_h */
