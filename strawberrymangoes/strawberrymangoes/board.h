@@ -14,11 +14,27 @@ class Board
 public:
     Board();
     
+    int getPosKey();
+    void addPiece(int r, int c, int pce);     //adds a piece to the board, and updates the position key, assumes an empty spot, assumes pce is valid
+    void removePiece(int r, int c);           //removes a piece from the board, updates the position key, assumes there is a piece in that square
+    
     
 private:
     //Initialization functions
     void InitBoard();   //initializes all values to NOPIECE
-    int mBoard[8][8];
-}
+    void InitKeys();    //initializes all keys to random 32 bit numbers
+    
+    //Related to position key
+    int posKey;         //all active keys XORed together form a unique key
+    int sideKey;        //key for if white is to move
+    int castleKeys[4];  //4 keys for each castling side
+    int enpasKey[64];   //only 16 possible squares, but we'll generate 64 keys for looping convenience
+    int pceKeys[8][8][12];  //64 squares with 12 possible pieces
+    
+    //Board information
+    int mBoard[8][8];   //stores pieces
+    int side;           //side to move
+    //Piece lists somewhere...
+};
 
 #endif /* board_h */

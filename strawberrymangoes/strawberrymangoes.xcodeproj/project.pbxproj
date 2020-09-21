@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		73FC645D2518027000E3C205 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC645C2518027000E3C205 /* main.cpp */; };
 		73FC64672519216F00E3C205 /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC64652519216E00E3C205 /* board.cpp */; };
+		73FC646B251924E000E3C205 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC646A251924E000E3C205 /* defs.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		73FC646325187CA800E3C205 /* board.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = board.h; sourceTree = "<group>"; };
 		73FC646425187E3E00E3C205 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		73FC64652519216E00E3C205 /* board.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = board.cpp; sourceTree = "<group>"; };
+		73FC646A251924E000E3C205 /* defs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 				73FC646325187CA800E3C205 /* board.h */,
 				73FC64652519216E00E3C205 /* board.cpp */,
 				73FC646425187E3E00E3C205 /* defs.h */,
+				73FC646A251924E000E3C205 /* defs.cpp */,
 			);
 			path = strawberrymangoes;
 			sourceTree = "<group>";
@@ -128,6 +131,7 @@
 			files = (
 				73FC64672519216F00E3C205 /* board.cpp in Sources */,
 				73FC645D2518027000E3C205 /* main.cpp in Sources */,
+				73FC646B251924E000E3C205 /* defs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
