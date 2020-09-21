@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		73FC645D2518027000E3C205 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC645C2518027000E3C205 /* main.cpp */; };
+		73FC64672519216F00E3C205 /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC64652519216E00E3C205 /* board.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,9 @@
 /* Begin PBXFileReference section */
 		73FC64592518026F00E3C205 /* strawberrymangoes */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = strawberrymangoes; sourceTree = BUILT_PRODUCTS_DIR; };
 		73FC645C2518027000E3C205 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		73FC646325187CA800E3C205 /* board.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = board.h; sourceTree = "<group>"; };
+		73FC646425187E3E00E3C205 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
+		73FC64652519216E00E3C205 /* board.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = board.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +62,9 @@
 			isa = PBXGroup;
 			children = (
 				73FC645C2518027000E3C205 /* main.cpp */,
+				73FC646325187CA800E3C205 /* board.h */,
+				73FC64652519216E00E3C205 /* board.cpp */,
+				73FC646425187E3E00E3C205 /* defs.h */,
 			);
 			path = strawberrymangoes;
 			sourceTree = "<group>";
@@ -119,6 +126,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73FC64672519216F00E3C205 /* board.cpp in Sources */,
 				73FC645D2518027000E3C205 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

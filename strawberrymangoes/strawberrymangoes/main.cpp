@@ -7,9 +7,11 @@
 //
 
 #include <iostream>
+#include "defs.h"
 
-int main(int argc, const char * argv[]) {
+int main()
+{
     // insert code here...
-    std::cout << "Hello, World!\n";
+    std::cout << NOPIECE;
     return 0;
 }
