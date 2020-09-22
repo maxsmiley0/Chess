@@ -135,6 +135,26 @@ void Board::printBoard()
     */
 }
 
+int Board::getPce(int r, int c)
+{
+    return mBoard[r][c];
+}
+
+int Board::getPceR(int pce, int i)
+{
+    return pListR[10 * pce + i];
+}
+
+int Board::getPceC(int pce, int i)
+{
+    return pListC[10 * pce + i];
+}
+
+int Board::getPceNum(int pce)
+{
+    return pceNum[pce];
+}
+
 void Board::parseFen(std::string fen)
 {
     ClearBoard();

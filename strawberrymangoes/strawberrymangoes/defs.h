@@ -36,8 +36,14 @@
 #define BLACK 1
 #define NEITHER 2
 
+#define MAXPOSITIONMOVES 256
+#define MAXDEPTH 32
+
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
+
+bool doDiag(int pce);   //return true if bishop or queen
+bool doVert(int pce);   //return trie if rook or queen
 
 class Timer
 {

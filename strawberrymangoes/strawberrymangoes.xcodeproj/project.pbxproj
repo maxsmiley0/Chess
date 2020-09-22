@@ -10,6 +10,7 @@
 		73FC645D2518027000E3C205 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC645C2518027000E3C205 /* main.cpp */; };
 		73FC64672519216F00E3C205 /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC64652519216E00E3C205 /* board.cpp */; };
 		73FC646B251924E000E3C205 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC646A251924E000E3C205 /* defs.cpp */; };
+		73FC646E2519D11500E3C205 /* movegen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC646D2519D11500E3C205 /* movegen.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +32,8 @@
 		73FC646425187E3E00E3C205 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		73FC64652519216E00E3C205 /* board.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = board.cpp; sourceTree = "<group>"; };
 		73FC646A251924E000E3C205 /* defs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
+		73FC646C2519D0CB00E3C205 /* movegen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = movegen.h; sourceTree = "<group>"; };
+		73FC646D2519D11500E3C205 /* movegen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = movegen.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +69,8 @@
 				73FC645C2518027000E3C205 /* main.cpp */,
 				73FC646325187CA800E3C205 /* board.h */,
 				73FC64652519216E00E3C205 /* board.cpp */,
+				73FC646C2519D0CB00E3C205 /* movegen.h */,
+				73FC646D2519D11500E3C205 /* movegen.cpp */,
 				73FC646425187E3E00E3C205 /* defs.h */,
 				73FC646A251924E000E3C205 /* defs.cpp */,
 			);
@@ -130,6 +135,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				73FC64672519216F00E3C205 /* board.cpp in Sources */,
+				73FC646E2519D11500E3C205 /* movegen.cpp in Sources */,
 				73FC645D2518027000E3C205 /* main.cpp in Sources */,
 				73FC646B251924E000E3C205 /* defs.cpp in Sources */,
 			);

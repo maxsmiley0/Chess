@@ -10,6 +10,16 @@
 #include <random>
 #include <utility>
 
+bool doDiag(int pce)
+{
+    return (pce == WB || pce == BB || pce == WQ || pce == BQ);
+}
+
+bool doVert(int pce)
+{
+    return (pce == WR || pce == BR || pce == WQ || pce == BQ);
+}
+
 int PceCol (int pce)
 {
     if (pce >= 0 && pce <= 5)

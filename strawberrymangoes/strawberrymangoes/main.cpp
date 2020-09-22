@@ -9,6 +9,7 @@
 #include <iostream>
 #include "defs.h"
 #include "board.h"
+#include "movegen.h"
 
 using namespace std;
 
@@ -19,8 +20,10 @@ int main()
     t.start();
     Board b;
     
-    b.parseFen("rnbqkbnr/pp3ppp/3pp3/2p5/2B1P2P/5N2/PPPP1PP1/RNBQK2R b Kq h3 0 1");
-    b.printBoard();
+    b.parseFen("4RK2/4r3/1P5B/1b1pN2n/6p1/pB4P1/Q7/3q1k2 w - - 0 1");
+    
+    Movegen m(b);
+    m.printAttacked();
     
     std::cout << t.elapsed() << endl;
     return 0;

@@ -20,6 +20,11 @@ public:
     void addPiece(int r, int c, int pce);     //adds a piece to the board, and updates the position key, assumes an empty spot, assumes pce is valid
     void removePiece(int r, int c);           //removes a piece from the board, updates the position key, assumes there is a piece in that square
     void parseFen(std::string fen);           //updates board according to fen, assumes valid fen
+    int getPce(int r, int c);        //returns piece located at (r, c)
+    int getPceR(int pce, int i);     //returns R coord on 'ith' piece (from 0 to pceNum)
+    int getPceC(int pce, int i);     //returns C coord on 'ith' piece (from 0 to pceNum)
+    int getPceNum(int pce); //returns # of pieces of a given type
+    int getSide() {return side; }
     
     void printBoard();      //prints char representation to couts
     
