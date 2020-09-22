@@ -39,11 +39,32 @@
 #define MAXPOSITIONMOVES 256
 #define MAXDEPTH 32
 
+#define FLAGENPASSANT 0x40000
+#define FLAGPAWNSTART 0x80000
+#define FLAGCASTLE 0x1000000
+#define FLAGCAPTURE 0x7C000
+#define FLAGPROMOTION 0xF00000
+#define NOFLAG 0
+
+#include <string>
+
+static std::string PceChar = "pnbrqkPNBRQK.";
+
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
 
+bool isPawn(int pce);   //returns true if pawn
+bool isKing(int pce);   //returns true if king
 bool doDiag(int pce);   //return true if bishop or queen
 bool doVert(int pce);   //return trie if rook or queen
+
+//Related to extracting information about the move key
+int fromR(int move);
+int fromC(int move);
+int toR(int move);
+int toC(int move);
+int captured(int move);
+int promoted(int move);
 
 class Timer
 {

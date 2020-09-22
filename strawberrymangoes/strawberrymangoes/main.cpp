@@ -20,11 +20,23 @@ int main()
     t.start();
     Board b;
     
-    b.parseFen("4RK2/4r3/1P5B/1b1pN2n/6p1/pB4P1/Q7/3q1k2 w - - 0 1");
+    b.parseFen("rnbqkbnr/ppppp1Pp/5p2/8/4B3/2NQ4/PPPPPP1P/R3KBNR w KQkq - 0 1");
     
-    Movegen m(b);
+    Movegen m(b);/*
     m.printAttacked();
+    b.printBoard();
+    int move = m.getMove(1, 6, 0, 5, WQ);
     
+    cout << move << endl;
+    cout << fromR(move) << endl;
+    cout << fromC(move) << endl;
+    cout << toR(move) << endl;
+    cout << toC(move) << endl;
+    cout << captured(move) << endl;
+    cout << promoted(move) << endl;
+    
+    */
+    m.generateMoves(0);
     std::cout << t.elapsed() << endl;
     return 0;
 }

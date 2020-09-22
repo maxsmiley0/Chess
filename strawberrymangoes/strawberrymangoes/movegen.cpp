@@ -16,6 +16,43 @@ Movegen::Movegen(Board& b)
 void Movegen::generateMoves(int ply)
 {
     int i = ply * MAXPOSITIONMOVES;
+    for (int i = 0; i < 500; i++)
+    {
+        getMove(1, 9, 2, 6, 3);
+    }
+}
+
+int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
+{
+    int moveKey = 0;
+    //From square handling
+    moveKey |= sR;          //3 bits allocated for 8 combinations for starting rank
+    moveKey |= (sC << 3);   //3 bits allocated for 8 combinations for starting file
+    //To square handling
+    moveKey |= (eR << 6);   //3 bits allocated for 8 combinations for ending rank
+    moveKey |= (eC << 9);   //3 bits allocated for 8 combinations for ending file
+    //Capture handling
+    int capturedPce = mBoard.getPce(eR, eC);    //captured piece
+    moveKey |= (capturedPce << 12);     //4 bits allocated for 16 pieces (upper bound)
+    //Is en passant capture
+    bool pawnMove = isPawn(mBoard.getPce(sR, sC));
+    if (pawnMove && eR == mBoard.getEnpasSquareR() && eC == mBoard.getEnpasSquareC())
+    {
+        moveKey |= (1 << 16);   //1 bit allocated for true or false
+    }
+    //Is pawn start move
+    if (pawnMove && abs(eR - sR) == 2)
+    {
+        moveKey |= (1 << 17);   //1 bit allocated for true or false
+    }
+    //Promoted piece
+    moveKey |= (promoted << 18);    //4 bits allocated for piece
+    //Is a castling move
+    if (isKing(mBoard.getPce(sR, sC)) && (sC == 4 && (eC == 2 || eC == 6)))
+    {
+        moveKey |= (1 << 22);
+    }
+    return moveKey;
 }
 
 bool Movegen::squareAttacked(int r, int c)

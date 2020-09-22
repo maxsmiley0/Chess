@@ -10,6 +10,16 @@
 #include <random>
 #include <utility>
 
+bool isPawn(int pce)
+{
+    return (pce == WP || pce == BP);
+}
+
+bool isKing(int pce)
+{
+    return (pce == WK || pce == BK);
+}
+
 bool doDiag(int pce)
 {
     return (pce == WB || pce == BB || pce == WQ || pce == BQ);
@@ -35,6 +45,36 @@ int PceCol (int pce)
         std::cerr << "Invalid piece color" << std::endl;
         exit(1);
     }
+}
+
+int fromR(int move)
+{
+    return (move & 0x7);
+}
+
+int fromC(int move)
+{
+    return ((move & 0x38) >> 3);
+}
+
+int toR(int move)
+{
+    return ((move & 0x1C0) >> 6);
+}
+
+int toC(int move)
+{
+    return ((move & 0xE00) >> 9);
+}
+
+int captured(int move)
+{
+    return ((move & 0xF000) >> 12);
+}
+
+int promoted(int move)
+{
+    return ((move & 0x3C0000) >> 18);
 }
 
 //Used for RAND32

@@ -51,52 +51,7 @@ void Board::printBoard()
     {
         for (int c = 0; c < 8; c++)
         {
-           switch (mBoard[r][c])
-            {
-                case BP:
-                    std::cout << "p   ";
-                    break;
-                case BN:
-                    std::cout << "n   ";
-                    break;
-                case BB:
-                    std::cout << "b   ";
-                    break;
-                case BR:
-                    std::cout << "r   ";
-                    break;
-                case BQ:
-                    std::cout << "q   ";
-                    break;
-                case BK:
-                    std::cout << "k   ";
-                    break;
-                case WP:
-                    std::cout << "P   ";
-                    break;
-                case WN:
-                    std::cout << "N   ";
-                    break;
-                case WB:
-                    std::cout << "B   ";
-                    break;
-                case WR:
-                    std::cout << "R   ";
-                    break;
-                case WQ:
-                    std::cout << "Q   ";
-                    break;
-                case WK:
-                    std::cout << "K   ";
-                    break;
-                case NOPIECE:
-                    std::cout << ".   ";
-                    break;
-                default:
-                    std::cerr << "Invalid FEN in Board::printBoard" << std::endl;
-                    exit(1);
-                    break;
-            }
+            std::cout << PceChar[mBoard[r][c]] << "   ";
         }
         std::cout << std::endl << std::endl;
     }
@@ -107,7 +62,7 @@ void Board::printBoard()
     std::cout << "En Pas Square: ";
     if (enpasSquareC != OFFBOARD)
     {
-        std::cout << (char)((int)'a' + enpasSquareC - 1);
+        std::cout << (char)((int)'a' + enpasSquareC);
         std::cout << 8 - enpasSquareR;
     }
     std::cout << std::endl;
@@ -297,7 +252,7 @@ void Board::parseFen(std::string fen)
             {
                 //update position key
                 //update en passant square
-                enpasSquareC = (int)fen[i] - (int)'a' + 1;
+                enpasSquareC = (int)fen[i] - (int)'a';
                 enpasSquareR = 8 - ((int)fen[i + 1] - (int)'0');
                 posKey ^= enpasKey[enpasSquareR][enpasSquareC];
             }

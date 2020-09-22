@@ -23,6 +23,8 @@ public:
     int getPce(int r, int c);        //returns piece located at (r, c)
     int getPceR(int pce, int i);     //returns R coord on 'ith' piece (from 0 to pceNum)
     int getPceC(int pce, int i);     //returns C coord on 'ith' piece (from 0 to pceNum)
+    int getEnpasSquareR() {return enpasSquareR; }
+    int getEnpasSquareC() {return enpasSquareC; }
     int getPceNum(int pce); //returns # of pieces of a given type
     int getSide() {return side; }
     
