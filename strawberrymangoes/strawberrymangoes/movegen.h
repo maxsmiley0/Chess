@@ -20,6 +20,7 @@ public:
     bool squareAttacked(int r, int c);  //returns true if square is attacked, really only used for checking if king is in check
     void printAttacked();          //prints attacked squares for debugging purposes
     int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
+    void printMoves(int ply);              //prints moves to cout
     
 private:
     //Board from which moves and scores are generated

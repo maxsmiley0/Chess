@@ -320,3 +320,27 @@ void Board::ClearBoard()
     
     //We don't need to reset piece coordinates, as they are accessed by piece num
 }
+
+bool Board::hasKcPerm()
+{
+    if (side == WHITE)
+    {
+        return ((castlePerm & WKCA) != 0);
+    }
+    else
+    {
+        return ((castlePerm & BKCA) != 0);
+    }
+}
+
+bool Board::hasQcPerm()
+{
+    if (side == WHITE)
+    {
+        return ((castlePerm & WQCA) != 0);
+    }
+    else
+    {
+        return ((castlePerm & BQCA) != 0);
+    }
+}

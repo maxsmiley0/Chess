@@ -17,14 +17,18 @@ int main()
 {
     // insert code here...
     Timer t;
-    t.start();
+    
     Board b;
     
-    b.parseFen("rnbqkbnr/ppppp1Pp/5p2/8/4B3/2NQ4/PPPPPP1P/R3KBNR w KQkq - 0 1");
+    b.parseFen("rnbqk1nr/ppppp2p/8/4Pb2/2PPBPp1/2NQ4/PPP4P/R3KBNR w KQkq - 0 1");
     
-    Movegen m(b);/*
-    m.printAttacked();
+    Movegen m(b);
+    t.start();
+    m.generateMoves(0);
+    m.printMoves(0);
+    
     b.printBoard();
+    /*
     int move = m.getMove(1, 6, 0, 5, WQ);
     
     cout << move << endl;
@@ -34,9 +38,7 @@ int main()
     cout << toC(move) << endl;
     cout << captured(move) << endl;
     cout << promoted(move) << endl;
-    
     */
-    m.generateMoves(0);
     std::cout << t.elapsed() << endl;
     return 0;
 }

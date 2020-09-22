@@ -48,7 +48,7 @@
 
 #include <string>
 
-static std::string PceChar = "pnbrqkPNBRQK.";
+static std::string PceChar = "PNBRQKpnbrqk.";
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
@@ -65,7 +65,11 @@ int toR(int move);
 int toC(int move);
 int captured(int move);
 int promoted(int move);
-
+/*
+bool isEnpasMove(int move);
+bool isPawnstartMove(int move);
+bool isCastleMove(int move);
+*/
 class Timer
 {
   public:

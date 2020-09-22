@@ -15,10 +15,529 @@ Movegen::Movegen(Board& b)
 
 void Movegen::generateMoves(int ply)
 {
-    int i = ply * MAXPOSITIONMOVES;
-    for (int i = 0; i < 500; i++)
+    int moveIndex = ply * MAXPOSITIONMOVES;
+    int lBound;
+    int uBound;
+    
+    //Loop through all pieces of the color whose turn it is
     {
-        getMove(1, 9, 2, 6, 3);
+        lBound = WP;
+        uBound = WK;
+    }
+    else
+    {
+        lBound = BP;
+        uBound = BK;
+    }
+    
+    //Looping through all pieces of the side
+    for (int i = lBound; i <= uBound; i++)
+    {
+        //Looping through all pieces of this type
+        for (int j = 0; j < mBoard.getPceNum(i); j++)
+        {
+            //r and c of the piece being examined
+            int r = mBoard.getPceR(i, j);
+            int c = mBoard.getPceC(i, j);
+            
+            switch (i)
+            {
+                //Separate cases for white and black pawns due to "directionality"
+                case WP:
+                    //One square forward
+                    if (mBoard.getPce(r - 1, c) == NOPIECE)
+                    {
+                        //Promotion case
+                        if (r == 1)
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c, WN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c, WB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c, WR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c, WQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c, NOPIECE);
+                            moveIndex++;
+                        }
+                        //Two squares forward
+                        if (r == 6 && mBoard.getPce(r - 2, c) == NOPIECE)
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 2, c, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    //Capture cases
+                    if (c != 0 && mBoard.getPce(r - 1, c - 1) != NOPIECE && PceCol(mBoard.getPce(r - 1, c - 1)) != mBoard.getSide())
+                    {
+                        //Promotion case
+                        if (r == 1)
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    if (c != 7 && mBoard.getPce(r - 1, c + 1) != NOPIECE && PceCol(mBoard.getPce(r - 1, c + 1)) != mBoard.getSide())
+                    {
+                        //Promotion case
+                        if (r == 1)
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
+                            moveIndex++;
+                        }
+                        
+                    }
+                    //En passant case
+                    if (c != 0 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r - 1)
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (c != 7 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r - 1)
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    break;
+                case BP:
+                    //One square forward
+                    if (mBoard.getPce(r + 1, c) == NOPIECE)
+                    {
+                        //Promotion case
+                        if (r == 6)
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c, BN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c, BB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c, BR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c, BQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c, NOPIECE);
+                            moveIndex++;
+                        }
+                        //Two squares forward
+                        if (r == 1 && mBoard.getPce(r + 2, c) == NOPIECE)
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 2, c, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    //Capture cases
+                    if (c != 0 && mBoard.getPce(r + 1, c - 1) != NOPIECE && PceCol(mBoard.getPce(r + 1, c - 1)) != mBoard.getSide())
+                    {
+                        //Promotion case
+                        if (r == 6)
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    if (c != 7 && mBoard.getPce(r + 1, c + 1) != NOPIECE && PceCol(mBoard.getPce(r + 1, c + 1)) != mBoard.getSide())
+                    {
+                        //Promotion case
+                        if (r == 6)
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BN);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BB);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BR);
+                            moveIndex++;
+                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BQ);
+                            moveIndex++;
+                        }
+                        //General case
+                        else
+                        {
+                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
+                            moveIndex++;
+                        }
+                        
+                    }
+                    //En passant case
+                    if (c != 0 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r + 1)
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (c != 7 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r + 1)
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    break;
+                    
+                case WN:
+                case BN:
+                    //8 squares that the knight might move to
+                    //Can only move to a given square if empty or occupied by enemy pce
+                    if (r >= 1 && c <= 5 && (mBoard.getPce(r - 1, c + 2) == NOPIECE || PceCol(mBoard.getPce(r - 1, c + 2)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c + 2, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 5 && c >= 1 && (mBoard.getPce(r + 2, c - 1) == NOPIECE || PceCol(mBoard.getPce(r + 2, c - 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 2, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r >= 2 && c <= 6 && (mBoard.getPce(r - 2, c + 1) == NOPIECE || PceCol(mBoard.getPce(r - 2, c + 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 2, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 6 && c >= 2 && (mBoard.getPce(r + 1, c - 2) == NOPIECE || PceCol(mBoard.getPce(r + 1, c - 2)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c - 2, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r >= 1 && c >= 2 && (mBoard.getPce(r - 1, c - 2) == NOPIECE || PceCol(mBoard.getPce(r - 1, c - 2)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c - 2, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r >= 2 && c >= 1 && (mBoard.getPce(r - 2, c - 1) == NOPIECE || PceCol(mBoard.getPce(r - 2, c - 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 2, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 5 && c <= 6 && (mBoard.getPce(r + 2, c + 1) == NOPIECE || PceCol(mBoard.getPce(r + 2, c + 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 2, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 6 && c <= 5 && (mBoard.getPce(r + 1, c + 2) == NOPIECE || PceCol(mBoard.getPce(r + 1, c + 2)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c + 2, NOPIECE);
+                        moveIndex++;
+                    }
+                    break;
+                case WB:
+                case BB:
+                case WR:
+                case BR:
+                case WQ:
+                case BQ:
+                {
+                    if (doDiag(i))
+                    {
+                        //Loop in 4 directions until we hit a piece or go offboard
+                        int indexR = r + 1;
+                        int indexC = c + 1;
+                        //down right direction
+                        while (indexR <= 7 && indexC <= 7)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR++;
+                            indexC++;
+                        }
+                        //down left direction
+                        indexR = r - 1;
+                        indexC = c + 1;
+                        
+                        while (indexR >= 0 && indexC <= 7)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR--;
+                            indexC++;
+                        }
+                        //up right direction
+                        indexR = r + 1;
+                        indexC = c - 1;
+                        
+                        while (indexR <= 7 && indexC >= 0)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR++;
+                            indexC--;
+                        }
+                        //up left direction
+                        indexR = r - 1;
+                        indexC = c - 1;
+                        
+                        while (indexR >= 0 && indexC >= 0)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR--;
+                            indexC--;
+                        }
+                    }
+                    if (doVert(i))
+                    {
+                        //Loop in 4 directions until we hit a piece or go offboard
+                        int indexR = r;
+                        int indexC = c + 1;
+                        //right direction
+                        while (indexC <= 7)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexC++;
+                        }
+                        
+                        indexR = r;
+                        indexC = c - 1;
+                        //left direction
+                        while (indexC >= 0)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexC--;
+                        }
+                        
+                        indexR = r - 1;
+                        indexC = c;
+                        //up direction
+                        while (indexR >= 0)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR--;
+                        }
+                        
+                        indexR = r + 1;
+                        indexC = c;
+                        //down direction
+                        while (indexR <= 7)
+                        {
+                            if (mBoard.getPce(indexR, indexC) == NOPIECE)
+                            {
+                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                if (PceCol(mBoard.getPce(indexR, indexC)) != mBoard.getSide())
+                                {
+                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
+                                    moveIndex++;
+                                }
+                                break;
+                            }
+                            indexR++;
+                        }
+                    }
+                    break;
+                }
+                case WK:
+                case BK:
+                    //8 squares that the king might move to
+                    //Regular king move case
+                    if (r >= 1 && c >= 1 && (mBoard.getPce(r - 1, c - 1) == NOPIECE || PceCol(mBoard.getPce(r - 1, c - 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r >= 1 && (mBoard.getPce(r - 1, c) == NOPIECE || PceCol(mBoard.getPce(r - 1, c)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r >= 1 && c <= 6 && (mBoard.getPce(r - 1, c + 1) == NOPIECE || PceCol(mBoard.getPce(r - 1, c + 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (c <= 6 && (mBoard.getPce(r, c + 1) == NOPIECE || PceCol(mBoard.getPce(r, c + 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 6 && c <= 6 && (mBoard.getPce(r + 1, c + 1) == NOPIECE || PceCol(mBoard.getPce(r + 1, c + 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 6 && (mBoard.getPce(r + 1, c) == NOPIECE || PceCol(mBoard.getPce(r + 1, c)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (r <= 6 && c >= 1 && (mBoard.getPce(r + 1, c - 1) == NOPIECE || PceCol(mBoard.getPce(r + 1, c - 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    if (c >= 1 && (mBoard.getPce(r, c - 1) == NOPIECE || PceCol(mBoard.getPce(r, c - 1)) != mBoard.getSide()))
+                    {
+                        moves[moveIndex] = getMove(r, c, r, c - 1, NOPIECE);
+                        moveIndex++;
+                    }
+                    
+                    //Castling case
+                    if (mBoard.hasKcPerm())
+                    {
+                        if (mBoard.getPce(r, c + 1) == NOPIECE && mBoard.getPce(r, c + 2) == NOPIECE && !squareAttacked(r, c) && !squareAttacked(r, c + 1))
+                        {
+                            moves[moveIndex] = getMove(r, c, r, c + 2, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    if (mBoard.hasQcPerm())
+                    {
+                        if (mBoard.getPce(r, c - 1) == NOPIECE && mBoard.getPce(r, c - 2) == NOPIECE && !squareAttacked(r, c) && !squareAttacked(r, c - 1))
+                        {
+                            moves[moveIndex] = getMove(r, c, r, c - 2, NOPIECE);
+                            moveIndex++;
+                        }
+                    }
+                    break;
+                default:
+                    std::cerr << "Error in Movegen::generateThreats()" << std::endl;
+                    break;
+            }
+        }
+    }
+    moves[moveIndex] = 0;   //signalling end of move generation
+}
+
+void Movegen::printMoves(int ply)
+{
+    for (int i = ply * MAXPOSITIONMOVES; moves[i] != 0; i++)
+    {
+        int move = moves[i];
+        
+        std::cout << "Move: " << move << std::endl;
+        std::cout << "From: " << fromR(move) << ' ' << fromC(move) << std::endl;
+        std::cout << "TO: " << toR(move) << ' ' << toC(move) << std::endl;
+        std::cout << PceChar[captured(move)] << std::endl;
+        std::cout << PceChar[promoted(move)] << std::endl;
+        std::cout << std::endl;
     }
 }
 

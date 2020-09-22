@@ -27,6 +27,8 @@ public:
     int getEnpasSquareC() {return enpasSquareC; }
     int getPceNum(int pce); //returns # of pieces of a given type
     int getSide() {return side; }
+    bool hasKcPerm();   //returns if the current side still has kingside castling perms
+    bool hasQcPerm();   //returns if the current side still has queenside castling perms
     
     void printBoard();      //prints char representation to couts
     
