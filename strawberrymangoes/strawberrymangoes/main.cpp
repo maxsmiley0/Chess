@@ -19,26 +19,8 @@ int main()
     t.start();
     Board b;
     
-    cout << b.getPosKey() << endl;
-    b.addPiece(2, 3, WB);
-    b.addPiece(7, 3, BK);
-    
-    cout << b.getPosKey() << endl;
-    
-    b.addPiece(1, 2, WP);
-    b.removePiece(7, 3);
-    
-    cout << b.getPosKey() << endl;
-    
-    b.removePiece(1, 2);
-    b.addPiece(7, 3, BK);
-    
-    cout << b.getPosKey() << endl;
-    
-    b.removePiece(7, 3);
-    b.addPiece(7, 3, WK);
-    
-    cout << b.getPosKey() << endl;
+    b.parseFen("rnbqkbnr/pp3ppp/3pp3/2p5/2B1P2P/5N2/PPPP1PP1/RNBQK2R b Kq h3 0 1");
+    b.printBoard();
     
     std::cout << t.elapsed() << endl;
     return 0;

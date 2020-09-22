@@ -12,6 +12,7 @@
 #include <iostream>
 #include <chrono>
 
+#define OFFBOARD -1
 #define WP 0
 #define WN 1
 #define WB 2
@@ -25,6 +26,11 @@
 #define BQ 10
 #define BK 11
 #define NOPIECE 12
+
+#define WKCA 8
+#define WQCA 4
+#define BKCA 2
+#define BQCA 1
 
 #define WHITE 0
 #define BLACK 1
