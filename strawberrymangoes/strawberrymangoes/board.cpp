@@ -7,7 +7,6 @@
 //
 
 #include "board.h"
-#include "defs.h"
 
 Board::Board()
 {
@@ -295,6 +294,10 @@ void Board::ClearBoard()
     //Resetting side to white
     side = WHITE;
     
+    //Resetting history
+    hisPly = 0;
+    history[hisPly] = 0;
+    
     //Resetting en passant square and castle perms
     enpasSquareC = OFFBOARD;
     enpasSquareR = OFFBOARD;
@@ -343,4 +346,49 @@ bool Board::hasQcPerm()
     {
         return ((castlePerm & BQCA) != 0);
     }
+}
+
+int Board::getKingR(int color)
+{
+    if (color == WHITE)
+    {
+        return pListR[10 * WK];
+    }
+    else
+    {
+        return pListR[10 * BK];
+    }
+}
+
+int Board::getKingC(int color)
+{
+    if (color == WHITE)
+    {
+        return pListC[10 * WK];
+    }
+    else
+    {
+        return pListC[10 * BK];
+    }
+}
+
+void Board::pushHistory(int move)
+{
+    history[hisPly] = move;
+    hisPly++;
+}
+
+void Board::popHistory()
+{
+    hisPly--;
+}
+
+int Board::getLastMove()
+{
+    if (hisPly == 0)
+    {
+        std::cerr << "Attempting to access history with no moves made (Board::getLastMove())" << std::endl;
+        exit(1);
+    }
+    return history[hisPly - 1];
 }

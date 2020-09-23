@@ -20,6 +20,7 @@ void Movegen::generateMoves(int ply)
     int uBound;
     
     //Loop through all pieces of the color whose turn it is
+    if (mBoard.getSide() == WHITE)
     {
         lBound = WP;
         uBound = WK;
@@ -117,12 +118,12 @@ void Movegen::generateMoves(int ply)
                         
                     }
                     //En passant case
-                    if (c != 0 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r - 1)
+                    if (c != 0 && r == 3 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r - 1)
                     {
                         moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
                         moveIndex++;
                     }
-                    if (c != 7 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r - 1)
+                    if (c != 7 && r == 3 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r - 1)
                     {
                         moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
                         moveIndex++;
@@ -202,12 +203,12 @@ void Movegen::generateMoves(int ply)
                         
                     }
                     //En passant case
-                    if (c != 0 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r + 1)
+                    if (c != 0 && r == 4 && mBoard.getEnpasSquareC() == c - 1 && mBoard.getEnpasSquareR() == r + 1)
                     {
                         moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
                         moveIndex++;
                     }
-                    if (c != 7 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r + 1)
+                    if (c != 7 && r == 4 && mBoard.getEnpasSquareC() == c + 1 && mBoard.getEnpasSquareR() == r + 1)
                     {
                         moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
                         moveIndex++;
@@ -535,8 +536,11 @@ void Movegen::printMoves(int ply)
         std::cout << "Move: " << move << std::endl;
         std::cout << "From: " << fromR(move) << ' ' << fromC(move) << std::endl;
         std::cout << "TO: " << toR(move) << ' ' << toC(move) << std::endl;
-        std::cout << PceChar[captured(move)] << std::endl;
-        std::cout << PceChar[promoted(move)] << std::endl;
+        std::cout << "Cap: " << PceChar[captured(move)] << std::endl;
+        std::cout << "Prom: " << PceChar[promoted(move)] << std::endl;
+        std::cout << "isep: " << isEnpasMove(move) << std::endl;
+        std::cout << "ispa: " << isPawnstartMove(move) << std::endl;
+        std::cout << "isca: " << isCastleMove(move) << std::endl;
         std::cout << std::endl;
     }
 }
@@ -555,7 +559,7 @@ int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
     moveKey |= (capturedPce << 12);     //4 bits allocated for 16 pieces (upper bound)
     //Is en passant capture
     bool pawnMove = isPawn(mBoard.getPce(sR, sC));
-    if (pawnMove && eR == mBoard.getEnpasSquareR() && eC == mBoard.getEnpasSquareC())
+    if (pawnMove && eR == mBoard.getEnpasSquareR() && eC == mBoard.getEnpasSquareC() && (sR == 3 || sR == 4))
     {
         moveKey |= (1 << 16);   //1 bit allocated for true or false
     }
@@ -872,4 +876,47 @@ void Movegen::printAttacked()
         }
         std::cout << std::endl << std::endl;
     }
+}
+
+bool Movegen::makeMove(int move)
+{
+    mBoard.pushHistory(move);
+    
+    //Handling special cases first
+    
+    //Store the pce for later use
+    int pce = mBoard.getPce(fromR(move), fromC(move));
+    //Remove the piece we want to move
+    mBoard.removePiece(fromR(move), fromC(move));
+    //If we have captured some piece
+    if (captured(move) != NOPIECE)
+    {
+        //Remove that piece
+        mBoard.removePiece(toR(move), toC(move));
+    }
+    if (promoted(move) != NOPIECE)
+    {
+        mBoard.addPiece(toR(move), toC(move), promoted(move));
+    }
+    else
+    {
+        mBoard.addPiece(toR(move), toC(move), pce);
+    }
+    
+    if (squareAttacked(mBoard.getKingR(mBoard.getSide()), mBoard.getKingC(mBoard.getSide())))
+    {
+        //need to undo all of that...
+        return false;
+    }
+    //Move the piece to where it belongs
+    return true;
+}
+
+bool takeMove()
+{
+    //What are steps?
+    /*
+    Have to undo the move, using history array
+     */
+    return false;
 }

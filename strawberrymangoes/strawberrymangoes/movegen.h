@@ -21,14 +21,22 @@ public:
     void printAttacked();          //prints attacked squares for debugging purposes
     int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
     void printMoves(int ply);              //prints moves to cout
+    Board& getBoard() {return mBoard; }
+    
+    //Returns true if we can make such a move, false otherwise
+    //Updates all relevant key information for board
+    bool makeMove(int move);
+    void takeMove();    //Takes back the previously made move
+    
+    //Indexed by MAXPOSITIONMOVES * search ply
+    int moves[MAXPOSITIONMOVES * MAXDEPTH];     //after moves have been generated, append subcontainer with '0' so we know when we are finished
+    int scores[MAXPOSITIONMOVES * MAXDEPTH];
     
 private:
     //Board from which moves and scores are generated
     Board mBoard;
     
-    //Indexed by MAXPOSITIONMOVES * search ply
-    int moves[MAXPOSITIONMOVES * MAXDEPTH];     //after moves have been generated, append subcontainer with '0' so we know when we are finished
-    int scores[MAXPOSITIONMOVES * MAXDEPTH];
+    
 };
 
 #endif /* movegen_h */

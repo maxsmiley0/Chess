@@ -76,25 +76,21 @@ int promoted(int move)
 {
     return ((move & 0x3C0000) >> 18);
 }
-/*
+
 bool isEnpasMove(int move)
 {
-    if (((move & 0x10000) >> 16) == 0)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return ((move & 0x10000) >> 16);
 }
 
 bool isPawnstartMove(int move)
 {
-    return ((move & ))
+    return ((move & 0x20000) >> 17);
 }
-bool isCastleMove(int move);
-*/
+bool isCastleMove(int move)
+{
+    return ((move & 0x400000) >> 22);
+}
+
 //Used for RAND32
 static std::random_device rd;
 static std::default_random_engine generator(rd());

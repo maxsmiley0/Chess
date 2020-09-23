@@ -39,12 +39,7 @@
 #define MAXPOSITIONMOVES 256
 #define MAXDEPTH 32
 
-#define FLAGENPASSANT 0x40000
-#define FLAGPAWNSTART 0x80000
-#define FLAGCASTLE 0x1000000
-#define FLAGCAPTURE 0x7C000
-#define FLAGPROMOTION 0xF00000
-#define NOFLAG 0
+#define MAXGAMELENGTH 1024
 
 #include <string>
 
@@ -65,11 +60,11 @@ int toR(int move);
 int toC(int move);
 int captured(int move);
 int promoted(int move);
-/*
+
 bool isEnpasMove(int move);
 bool isPawnstartMove(int move);
 bool isCastleMove(int move);
-*/
+
 class Timer
 {
   public:

@@ -10,6 +10,7 @@
 #define board_h
 
 #include <string>
+#include "defs.h"
 
 class Board
 {
@@ -29,6 +30,14 @@ public:
     int getSide() {return side; }
     bool hasKcPerm();   //returns if the current side still has kingside castling perms
     bool hasQcPerm();   //returns if the current side still has queenside castling perms
+    int getKingR(int color); //returns r coord of king of a given color
+    int getKingC(int color); //returns c coord of king of a given color
+    
+    //declare hash side, ep, castle, etc
+    
+    void pushHistory(int move);   //updates history with new move
+    void popHistory();            //gets rid of latest move
+    int getLastMove();            //returns latest move in history table
     
     void printBoard();      //prints char representation to couts
     
@@ -53,8 +62,9 @@ private:
     int enpasSquareR;   //stores the en passant square row
     int enpasSquareC;   //stores the en passant square column
     int castlePerm;     //stores the castle perms
-    //piece num, piece lists
-    //Piece lists somewhere...
+    
+    int history[MAXGAMELENGTH]; //stores all moves made
+    int hisPly;                 //stores what number ply of the game we are on
 };
 
 #endif /* board_h */
