@@ -27,6 +27,7 @@
 #define BK 11
 #define NOPIECE 12
 
+#define INVERSE 15  //inverts castling bits when XORed
 #define WKCA 8
 #define WQCA 4
 #define BKCA 2

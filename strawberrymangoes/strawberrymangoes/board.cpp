@@ -44,6 +44,59 @@ void Board::removePiece(int r, int c)
     mBoard[r][c] = NOPIECE;
 }
 
+void Board::hashOutCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
+{
+    int invCastlePerm = (castlePerm ^ INVERSE); //inverting the castle key
+    //This executes if we are trying to hash out something that is in there
+    if (this->castlePerm != (invCastlePerm & this->castlePerm))
+    {
+        //Change the castle perms, and then the position key
+        this->castlePerm &= invCastlePerm;
+        if (castlePerm == WKCA)
+        {
+            posKey ^= castleKeys[0];
+        }
+        else if (castlePerm == WQCA)
+        {
+            posKey ^= castleKeys[1];
+        }
+        else if (castlePerm == BKCA)
+        {
+            posKey ^= castleKeys[2];
+        }
+        else if (castlePerm == BQCA)
+        {
+            posKey ^= castleKeys[3];
+        }
+    }
+}
+
+void Board::hashOutEp()
+{
+    if (enpasSquareR != OFFBOARD)
+    {
+        posKey ^= enpasKey[enpasSquareR][enpasSquareC];
+        enpasSquareR = OFFBOARD;
+        enpasSquareC = OFFBOARD;
+    }
+    //We don't do anything if an en passant square was not there to begin with
+}
+
+void Board::hashInEp(int r, int c)
+{
+    //Assumes ep is empty
+    posKey ^= enpasKey[r][c];
+    enpasSquareR = r;
+    enpasSquareC = c;
+}
+
+void Board::changeSide()
+{
+    //Changes side and changes pos key
+    (side == WHITE) ? (side = BLACK) : (side = WHITE);
+    posKey ^= sideKey;
+}
+
 void Board::printBoard()
 {
     for (int r = 0; r < 8; r++)

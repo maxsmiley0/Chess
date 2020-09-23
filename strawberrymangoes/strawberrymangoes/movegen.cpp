@@ -582,9 +582,10 @@ bool Movegen::squareAttacked(int r, int c)
 {
     int lBound;
     int uBound;
+    int side = PceCol(mBoard.getPce(r, c)); //defining side to simply be the color of the piece in question
     
     //Loop through opposite color, so we can see what ISNT legal for this side
-    if (mBoard.getSide() == WHITE)
+    if (side == WHITE)
     {
         lBound = BP;
         uBound = BK;
@@ -882,10 +883,106 @@ bool Movegen::makeMove(int move)
 {
     mBoard.pushHistory(move);
     
-    //Handling special cases first
+    int side = mBoard.getSide();
+    int fR = fromR(move);
+    int fC = fromC(move);
+    int tR = toR(move);
+    int tC = toC(move);
     
-    //Store the pce for later use
-    int pce = mBoard.getPce(fromR(move), fromC(move));
+    int pce = mBoard.getPce(fR, fC);
+    
+    //Handling special cases first
+    //En passant case
+    if (isEnpasMove(move))
+    {
+        //Delete the pawn behind the finish square
+        if (side == WHITE)
+        {
+            mBoard.removePiece(tR + 1, tC);
+        }
+        else
+        {
+            mBoard.removePiece(tR - 1, tC);
+        }
+    }
+    //Castling case
+    else if (isCastleMove(move))
+    {
+        //Need to move the rooks
+        if (side == WHITE)
+        {
+            if (tC == 2)    //WQCA
+            {
+                mBoard.removePiece(7, 0);
+                mBoard.addPiece(7, 3, WR);
+                //where do we hash castling perms??
+            }
+            else            //WKCA
+            {
+                mBoard.removePiece(7, 7);
+                mBoard.addPiece(7, 5, WR);
+            }
+        }
+        else
+        {
+            if (tC == 2)    //BQCA
+            {
+                mBoard.removePiece(0, 0);
+                mBoard.addPiece(0, 3, BR);
+            }
+            else            //BKCA
+            {
+                mBoard.removePiece(0, 7);
+                mBoard.addPiece(0, 5, BR);
+            }
+        }
+    }
+    
+    mBoard.hashOutEp();     //hashes out ep square, if such a square exists
+    //Updating castling perms
+    //If king moves, loses all castling perms for that side
+    if (isKing(pce))
+    {
+        if (mBoard.getSide() == WHITE)
+        {
+            mBoard.hashOutCastle(WKCA);
+            mBoard.hashOutCastle(WQCA);
+        }
+        else
+        {
+            mBoard.hashOutCastle(BKCA);
+            mBoard.hashOutCastle(BQCA);
+        }
+    }
+    //If any piece moves from the initial rook square, or to that square, that side will lose one of its castle perms
+    if ((fR == 0 && fC == 0) || (tR == 0 && tC == 0))
+    {
+        mBoard.hashOutCastle(BQCA);
+    }
+    if ((fR == 0 && fC == 7) || (tR == 7 && tC == 0))
+    {
+        mBoard.hashOutCastle(BKCA);
+    }
+    if ((fR == 7 && fC == 0) || (tR == 7 && tC == 0))
+    {
+        mBoard.hashOutCastle(WQCA);
+    }
+    if ((fR == 7 && fC == 7) || (tR == 7 && tC == 7))
+    {
+        mBoard.hashOutCastle(WKCA);
+    }
+    //Resetting enpas square if it was a starting pawn move
+    if (isPawnstartMove(move))
+    {
+        if (side == WHITE)
+        {
+            mBoard.hashInEp(tR + 1, tC);
+        }
+        else
+        {
+            mBoard.hashInEp(tR - 1, tC);
+        }
+    }
     //Remove the piece we want to move
     mBoard.removePiece(fromR(move), fromC(move));
     //If we have captured some piece
@@ -903,16 +1000,20 @@ bool Movegen::makeMove(int move)
         mBoard.addPiece(toR(move), toC(move), pce);
     }
     
-    if (squareAttacked(mBoard.getKingR(mBoard.getSide()), mBoard.getKingC(mBoard.getSide())))
+    mBoard.changeSide();
+    
+    if (squareAttacked(mBoard.getKingR(side), mBoard.getKingC(side)))
     {
-        //need to undo all of that...
+        std::cout << mBoard.getKingR(side) << std::endl;
+        std::cout << mBoard.getKingC(side) << std::endl;
+        //takeMove();
         return false;
     }
-    //Move the piece to where it belongs
+    //Legal move
     return true;
 }
 
-bool takeMove()
+bool Movegen::takeMove()
 {
     //What are steps?
     /*

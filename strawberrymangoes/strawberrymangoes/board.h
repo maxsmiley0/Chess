@@ -39,6 +39,11 @@ public:
     void popHistory();            //gets rid of latest move
     int getLastMove();            //returns latest move in history table
     
+    void hashOutCastle(int castlePerm); //hashes out a given castle perm
+    void hashOutEp();                    //hashes out ep, if enpas square exists
+    void hashInEp(int r, int c);         //hashes in an ep
+    void changeSide();                  //changes side and hashes the pos key
+    
     void printBoard();      //prints char representation to couts
     
 private:

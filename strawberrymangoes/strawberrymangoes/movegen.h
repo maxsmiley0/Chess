@@ -26,17 +26,15 @@ public:
     //Returns true if we can make such a move, false otherwise
     //Updates all relevant key information for board
     bool makeMove(int move);
-    void takeMove();    //Takes back the previously made move
-    
-    //Indexed by MAXPOSITIONMOVES * search ply
-    int moves[MAXPOSITIONMOVES * MAXDEPTH];     //after moves have been generated, append subcontainer with '0' so we know when we are finished
-    int scores[MAXPOSITIONMOVES * MAXDEPTH];
+    bool takeMove();    //Takes back the previously made move
     
 private:
     //Board from which moves and scores are generated
     Board mBoard;
     
-    
+    //Indexed by MAXPOSITIONMOVES * search ply
+    int moves[MAXPOSITIONMOVES * MAXDEPTH];     //after moves have been generated, append subcontainer with '0' so we know when we are finished
+    int scores[MAXPOSITIONMOVES * MAXDEPTH];
 };
 
 #endif /* movegen_h */
