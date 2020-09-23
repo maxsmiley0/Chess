@@ -87,4 +87,12 @@ class Timer
     std::chrono::high_resolution_clock::time_point m_time;
 };
 
+struct History
+{
+    int move;
+    int castlePerm;
+    int enpasSquareR;
+    int enpasSquareC;
+};
+
 #endif /* defs_h */

@@ -22,15 +22,17 @@ int main()
     Board b;
     Movegen m(b);
     
-    m.getBoard().parseFen("r2qkb1r/ppp2ppp/2np1n2/1B2p3/4P1b1/3P1N2/PPPQ1PPP/RNB1K2R b KQkq -");
+    m.getBoard().parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     cout << m.getBoard().getPosKey() << endl;
     
     m.generateMoves(0);
     m.printMoves(0);
-    (m.makeMove(3196532)) ? (cout << "legal" << endl) : (cout << "illegal" << endl);
-    //m.makeMove(3182599);
+    (m.makeMove(3328294)) ? (cout << "legal" << endl) : (cout << "illegal" << endl);
     m.getBoard().printBoard();
-    
+    cout << m.getBoard().getLastState().move << endl;
+    cout << m.getBoard().getLastState().enpasSquareC << endl;
+    cout << m.getBoard().getLastState().enpasSquareR << endl;
+    cout << m.getBoard().getLastState().castlePerm << endl;
     //cout << "Poskey is now: " << m.getBoard().getPosKey() << endl;
     //m.getBoard().parseFen("R2qkbnr/1ppppppp/1nb5/3p4/4P2P/1P5R/1PPP1PP1/1NBQKBN1 b k - 0 1");
     //cout << m.getBoard().getPosKey() << endl;

@@ -349,7 +349,6 @@ void Board::ClearBoard()
     
     //Resetting history
     hisPly = 0;
-    history[hisPly] = 0;
     
     //Resetting en passant square and castle perms
     enpasSquareC = OFFBOARD;
@@ -427,7 +426,13 @@ int Board::getKingC(int color)
 
 void Board::pushHistory(int move)
 {
-    history[hisPly] = move;
+    History h;
+    h.move = move;
+    h.castlePerm = castlePerm;
+    h.enpasSquareR = enpasSquareR;
+    h.enpasSquareC = enpasSquareC;
+    
+    history[hisPly] = h;
     hisPly++;
 }
 
@@ -436,7 +441,7 @@ void Board::popHistory()
     hisPly--;
 }
 
-int Board::getLastMove()
+History Board::getLastState()
 {
     if (hisPly == 0)
     {

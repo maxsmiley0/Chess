@@ -37,7 +37,7 @@ public:
     
     void pushHistory(int move);   //updates history with new move
     void popHistory();            //gets rid of latest move
-    int getLastMove();            //returns latest move in history table
+    History getLastState();            //returns latest move in history table
     
     void hashOutCastle(int castlePerm); //hashes out a given castle perm
     void hashOutEp();                    //hashes out ep, if enpas square exists
@@ -68,7 +68,7 @@ private:
     int enpasSquareC;   //stores the en passant square column
     int castlePerm;     //stores the castle perms
     
-    int history[MAXGAMELENGTH]; //stores all moves made
+    History history[MAXGAMELENGTH]; //stores all moves made
     int hisPly;                 //stores what number ply of the game we are on
 };
 
