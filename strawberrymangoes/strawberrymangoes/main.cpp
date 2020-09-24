@@ -15,26 +15,16 @@ using namespace std;
 
 int main()
 {
-    // insert code here...
     Timer t;
-    
     
     Board b;
     Movegen m(b);
     
-    m.getBoard().parseFen("7q/r5PK/8/3k4/8/8/8/8 w - - 0 1");
+    m.getBoard().parseFen("r3k1r1/8/8/8/8/8/8/R3K2R b KQq -");
+    m.perftTest(6);
     
+    cout << "Time: " << t.elapsed() << endl;
     m.getBoard().printBoard();
-    m.generateMoves(0);
-    m.printMoves(0);
-    cout << m.getBoard().getPosKey() << endl;
-    t.start();
-    (m.makeMove(1093169)) ? (cout << "legal" << endl) : (cout << "illegal" << endl);
-    cout << t.elapsed() << endl;
-    
-    m.getBoard().printBoard();
-    cout << m.getBoard().getPosKey() << endl;
-    
-    
+    cout << m.getBoard().getPosKey();
     return 0;
 }

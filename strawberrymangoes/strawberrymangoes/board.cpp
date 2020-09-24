@@ -36,9 +36,26 @@ void Board::addPiece(int r, int c, int pce)
 void Board::removePiece(int r, int c)
 {
     //XORing out the piece at (r, c)
-    posKey ^= pceKeys[r][c][mBoard[r][c]];
+    int pce = mBoard[r][c];
     
+    if (pce == NOPIECE)
+    {
+        std::cerr << "removing no piece Board::removePiece" << std::endl;
+    }
+    
+    posKey ^= pceKeys[r][c][pce];
     pceNum[mBoard[r][c]]--;                 //decrementing piece num of that type
+    
+    for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
+    {
+        if (r == pListR[i] && c == pListC[i])
+        {
+            std::swap(pListR[i], pListR[10 * pce + pceNum[pce]]);
+            std::swap(pListC[i], pListC[10 * pce + pceNum[pce]]);
+            break;
+            //does this actually work???
+        }
+    }
     
     //Setting the square on mBoard
     mBoard[r][c] = NOPIECE;
@@ -455,12 +472,20 @@ void Board::pushHistory(int move)
 {
     History h;
     h.move = move;
+    h.pce = mBoard[fromR(move)][fromC(move)];
     h.castlePerm = castlePerm;
     h.enpasSquareR = enpasSquareR;
     h.enpasSquareC = enpasSquareC;
     
     history[hisPly] = h;
     hisPly++;
+    
+    if (h.pce == NOPIECE)
+    {
+        printBoard();
+        std::cerr << "how is this possible (pce invalid in pushHistory)" << std::endl;
+        exit(1);
+    }
 }
 
 void Board::popHistory()

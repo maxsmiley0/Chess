@@ -91,6 +91,17 @@ bool isCastleMove(int move)
     return ((move & 0x400000) >> 22);
 }
 
+std::string printMove(int move)
+{
+    std::string str = "";
+    str += FileChar[fromC(move)];
+    str += RankChar[fromR(move)];
+    str += FileChar[toC(move)];
+    str += RankChar[toR(move)];
+    
+    return str;
+}
+
 //Used for RAND32
 static std::random_device rd;
 static std::default_random_engine generator(rd());

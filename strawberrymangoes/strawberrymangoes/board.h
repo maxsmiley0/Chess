@@ -47,6 +47,16 @@ public:
     
     void printBoard();      //prints char representation to couts
     int castlePerm;     //stores the castle perms
+    
+    //For purpose of debugging, so we can see where the pieces are according to their piece list
+    void printPieces(int pce)
+    {
+        for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
+        {
+            std::cout << pListR[i] << ' ' << pListC[i] << std::endl;
+        }
+    }
+    
 private:
     //Initialization functions
     void ClearBoard();  //initializes all values to NOPIECE, all piece lists and nums to empty

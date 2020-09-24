@@ -11,6 +11,7 @@
 Movegen::Movegen(Board& b)
 {
     mBoard = b;
+    leafNodes = 0;
 }
 
 void Movegen::generateMoves(int ply)
@@ -511,7 +512,7 @@ void Movegen::generateMoves(int ply)
                     }
                     if (mBoard.hasQcPerm())
                     {
-                        if (mBoard.getPce(r, c - 1) == NOPIECE && mBoard.getPce(r, c - 2) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c - 1, PceCol(i)))
+                        if (mBoard.getPce(r, c - 1) == NOPIECE && mBoard.getPce(r, c - 2) == NOPIECE && mBoard.getPce(r, c - 3) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c - 1, PceCol(i)))
                         {
                             moves[moveIndex] = getMove(r, c, r, c - 2, NOPIECE);
                             moveIndex++;
@@ -578,7 +579,7 @@ int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
     return moveKey;
 }
 
-bool Movegen::squareAttacked(int r, int c, int side)
+bool Movegen::squareAttacked(int r, int c, int side, int move)
 {
     int lBound;
     int uBound;
@@ -609,22 +610,22 @@ bool Movegen::squareAttacked(int r, int c, int side)
             {
                 //Separate cases for white and black pawns due to "directionality"
                 case WP:
-                    if (pceC != 0 && r == pceR - 1 && c == pceC - 1)
+                    if (r == pceR - 1 && c == pceC - 1)
                     {
                         return true;
                     }
-                    if (pceC != 7 && r == pceR - 1 && c == pceC + 1)
+                    if (r == pceR - 1 && c == pceC + 1)
                     {
                         return true;
                     }
                     break;
                 case BP:
                     
-                    if (pceC != 0 && r == pceR + 1 && c == pceC - 1)
+                    if (r == pceR + 1 && c == pceC - 1)
                     {
                         return true;
                     }
-                    if (pceC != 7 && r == pceR + 1 && c == pceC + 1)
+                    if (r == pceR + 1 && c == pceC + 1)
                     {
                         return true;
                     }
@@ -848,7 +849,6 @@ bool Movegen::squareAttacked(int r, int c, int side)
                         return true;
                     }
                     break;
-                    break;
                 default:
                     std::cerr << "Error in Movegen::generateThreats()" << std::endl;
                     break;
@@ -889,6 +889,11 @@ bool Movegen::makeMove(int move)
     int tC = toC(move);
     
     int pce = mBoard.getPce(fR, fC);        //piece being moved
+    
+    if (move == 3198844 && pce == WP)
+    {
+        mBoard.printPieces(WP);
+    }
     
     //Handling special cases first
     //En passant case
@@ -952,13 +957,19 @@ bool Movegen::makeMove(int move)
             mBoard.hashOutCastle(BQCA);
         }
     }
+    
     //If any piece moves from the initial rook square, or to that square, that side will lose one of its castle perms
     if ((fR == 0 && fC == 0) || (tR == 0 && tC == 0))
     {
         mBoard.hashOutCastle(BQCA);
     }
-    if ((fR == 0 && fC == 7) || (tR == 7 && tC == 0))
+    if ((fR == 0 && fC == 7) || (tR == 0 && tC == 7))
     {
+        if (move == 3195343)
+        {
+            std::cerr << "hereewe" << std::endl;
+        }
+        
         mBoard.hashOutCastle(BKCA);
     }
     if ((fR == 7 && fC == 0) || (tR == 7 && tC == 0))
@@ -1000,7 +1011,7 @@ bool Movegen::makeMove(int move)
     
     mBoard.changeSide();
     
-    if (squareAttacked(mBoard.getKingR(side), mBoard.getKingC(side), side))
+    if (squareAttacked(mBoard.getKingR(side), mBoard.getKingC(side), side, move))
     {
         takeBack();
         return false;
@@ -1019,8 +1030,15 @@ void Movegen::takeBack()
     int tR = toR(move);
     int tC = toC(move);
     
-    int pce = mBoard.getPce(tR, tC);    //stores the MOVED piece
-    
+    int pce = lastState.pce;    //stores the MOVED piece
+    if (pce == NOPIECE)
+    {
+        mBoard.printBoard();
+        std::cerr << fR << ' ' << fC << std::endl;
+        std::cerr << tR << ' ' << tC << std::endl;
+        std::cerr << "something terrible has happened" << std::endl;
+        exit(1);
+    }
     mBoard.changeSide();
     
     //Handling special cases
@@ -1125,4 +1143,46 @@ void Movegen::takeBack()
     }
     
     mBoard.popHistory();
+}
+
+//Perft testing functions, used to verify the integrity of the legal move generator
+void Movegen::perft(int depth)
+{
+    if (depth == 0)
+    {
+        leafNodes++;
+    }
+    else
+    {
+        generateMoves(depth);
+        for (int i = depth * MAXPOSITIONMOVES; moves[i] != 0; i++)
+        {
+            if (makeMove(moves[i]))
+            {
+                perft(depth - 1);
+                takeBack();
+            }
+        }
+    }
+}
+
+void Movegen::perftTest(int depth)
+{
+    int totalNodes = 0;
+    leafNodes = 0;
+    generateMoves(depth);
+    int moveNum = 0;
+    for (int i = depth * MAXPOSITIONMOVES; moves[i] != 0; i++)
+    {
+        if (makeMove(moves[i]))
+        {
+            moveNum++;
+            int cumnodes = leafNodes;
+            perft(depth - 1);
+            takeBack();
+            totalNodes += (leafNodes - cumnodes);
+            std::cout << "Move " << moveNum << ' ' << printMove(moves[i]) << ' ' << moves[i] << std::endl << (leafNodes - cumnodes) << std::endl;
+        }
+    }
+    std::cout << "Total Nodes: " << totalNodes << std::endl;
 }

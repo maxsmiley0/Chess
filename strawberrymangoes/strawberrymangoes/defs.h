@@ -45,6 +45,8 @@
 #include <string>
 
 static std::string PceChar = "PNBRQKpnbrqk.";
+static std::string RankChar = "87654321";
+static std::string FileChar = "abcdefgh";
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
@@ -61,6 +63,7 @@ int toR(int move);
 int toC(int move);
 int captured(int move);
 int promoted(int move);
+std::string printMove(int move);    //converts move e2e4 form
 
 bool isEnpasMove(int move);
 bool isPawnstartMove(int move);
@@ -90,6 +93,7 @@ class Timer
 struct History
 {
     int move;
+    int pce;
     int castlePerm;
     int enpasSquareR;
     int enpasSquareC;
