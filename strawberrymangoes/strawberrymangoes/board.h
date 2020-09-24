@@ -46,7 +46,8 @@ public:
     void changeSide();                   //changes side and hashes the pos key
     
     void printBoard();      //prints char representation to couts
-    int castlePerm;     //stores the castle perms
+    
+    int material;
     
     //For purpose of debugging, so we can see where the pieces are according to their piece list
     void printPieces(int pce)
@@ -68,6 +69,7 @@ private:
     int castleKeys[4];  //4 keys for each castling side
     int enpasKey[8][8];   //only 16 possible squares, but we'll generate 64 keys for looping convenience
     int pceKeys[8][8][12];  //64 squares with 12 possible pieces
+    int castlePerm;     //stores the castle perms
     
     //Board information
     int mBoard[8][8];   //stores pieces

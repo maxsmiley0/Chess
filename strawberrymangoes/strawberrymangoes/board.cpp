@@ -31,6 +31,9 @@ void Board::addPiece(int r, int c, int pce)
     
     //Updating posKey
     posKey ^= pceKeys[r][c][pce];
+    
+    //Updating material
+    material += worth(pce);
 }
 
 void Board::removePiece(int r, int c)
@@ -59,6 +62,9 @@ void Board::removePiece(int r, int c)
     
     //Setting the square on mBoard
     mBoard[r][c] = NOPIECE;
+    
+    //Updating material
+    material -= worth(pce);
 }
 
 void Board::hashInCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
@@ -393,6 +399,9 @@ void Board::ClearBoard()
     
     //Resetting history
     hisPly = 0;
+    
+    //Resetting material
+    material = 0;
     
     //Resetting en passant square and castle perms
     enpasSquareC = OFFBOARD;

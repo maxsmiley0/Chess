@@ -102,6 +102,40 @@ std::string printMove(int move)
     return str;
 }
 
+int worth(int pce)
+{
+    switch (pce)
+    {
+        case WP:
+            return 100;
+        case WN:
+            return 325;
+        case WB:
+            return 325;
+        case WR:
+            return 550;
+        case WQ:
+            return 1000;
+        case WK:
+            return 50000;
+        case BP:
+            return -100;
+        case BN:
+            return -325;
+        case BB:
+            return -325;
+        case BR:
+            return -550;
+        case BQ:
+            return -1000;
+        case BK:
+            return -50000;
+        default:
+            std::cerr << "Trying to find worth of an undefined pce" << std::endl;
+            exit(1);
+    }
+}
+
 //Used for RAND32
 static std::random_device rd;
 static std::default_random_engine generator(rd());

@@ -65,6 +65,8 @@ int captured(int move);
 int promoted(int move);
 std::string printMove(int move);    //converts move e2e4 form
 
+int worth(int pce);     //returns worth, give piece
+
 bool isEnpasMove(int move);
 bool isPawnstartMove(int move);
 bool isCastleMove(int move);
