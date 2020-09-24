@@ -44,6 +44,33 @@ void Board::removePiece(int r, int c)
     mBoard[r][c] = NOPIECE;
 }
 
+void Board::hashInCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
+{
+    int newPerm = (this->castlePerm | castlePerm);
+    //This executes if we are trying to hash in something that is not already in there
+    if (this->castlePerm != newPerm)
+    {
+        //Change the castle perms, and then the position key
+        this->castlePerm = newPerm;
+        if (castlePerm == WKCA)
+        {
+            posKey ^= castleKeys[0];
+        }
+        else if (castlePerm == WQCA)
+        {
+            posKey ^= castleKeys[1];
+        }
+        else if (castlePerm == BKCA)
+        {
+            posKey ^= castleKeys[2];
+        }
+        else if (castlePerm == BQCA)
+        {
+            posKey ^= castleKeys[3];
+        }
+    }
+}
+
 void Board::hashOutCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
 {
     int invCastlePerm = (castlePerm ^ INVERSE); //inverting the castle key

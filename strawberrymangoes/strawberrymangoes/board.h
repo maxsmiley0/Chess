@@ -39,13 +39,14 @@ public:
     void popHistory();            //gets rid of latest move
     History getLastState();            //returns latest move in history table
     
-    void hashOutCastle(int castlePerm); //hashes out a given castle perm
+    void hashInCastle(int castlePerm);   //hashes in a given castle perm
+    void hashOutCastle(int castlePerm);  //hashes out a given castle perm
     void hashOutEp();                    //hashes out ep, if enpas square exists
     void hashInEp(int r, int c);         //hashes in an ep
-    void changeSide();                  //changes side and hashes the pos key
+    void changeSide();                   //changes side and hashes the pos key
     
     void printBoard();      //prints char representation to couts
-    
+    int castlePerm;     //stores the castle perms
 private:
     //Initialization functions
     void ClearBoard();  //initializes all values to NOPIECE, all piece lists and nums to empty
@@ -66,7 +67,7 @@ private:
     int pListC[120];    //stores column of each piece, indexed by piece type
     int enpasSquareR;   //stores the en passant square row
     int enpasSquareC;   //stores the en passant square column
-    int castlePerm;     //stores the castle perms
+    //int castlePerm;     //stores the castle perms
     
     History history[MAXGAMELENGTH]; //stores all moves made
     int hisPly;                 //stores what number ply of the game we are on

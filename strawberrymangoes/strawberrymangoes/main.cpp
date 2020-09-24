@@ -17,26 +17,24 @@ int main()
 {
     // insert code here...
     Timer t;
-    t.start();
+    
     
     Board b;
     Movegen m(b);
     
-    m.getBoard().parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    cout << m.getBoard().getPosKey() << endl;
+    m.getBoard().parseFen("7q/r5PK/8/3k4/8/8/8/8 w - - 0 1");
     
+    m.getBoard().printBoard();
     m.generateMoves(0);
     m.printMoves(0);
-    (m.makeMove(3328294)) ? (cout << "legal" << endl) : (cout << "illegal" << endl);
-    m.getBoard().printBoard();
-    cout << m.getBoard().getLastState().move << endl;
-    cout << m.getBoard().getLastState().enpasSquareC << endl;
-    cout << m.getBoard().getLastState().enpasSquareR << endl;
-    cout << m.getBoard().getLastState().castlePerm << endl;
-    //cout << "Poskey is now: " << m.getBoard().getPosKey() << endl;
-    //m.getBoard().parseFen("R2qkbnr/1ppppppp/1nb5/3p4/4P2P/1P5R/1PPP1PP1/1NBQKBN1 b k - 0 1");
-    //cout << m.getBoard().getPosKey() << endl;
+    cout << m.getBoard().getPosKey() << endl;
+    t.start();
+    (m.makeMove(1093169)) ? (cout << "legal" << endl) : (cout << "illegal" << endl);
+    cout << t.elapsed() << endl;
     
-    //std::cout << t.elapsed() << endl;
+    m.getBoard().printBoard();
+    cout << m.getBoard().getPosKey() << endl;
+    
+    
     return 0;
 }

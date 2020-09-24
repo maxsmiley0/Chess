@@ -503,7 +503,7 @@ void Movegen::generateMoves(int ply)
                     //Castling case
                     if (mBoard.hasKcPerm())
                     {
-                        if (mBoard.getPce(r, c + 1) == NOPIECE && mBoard.getPce(r, c + 2) == NOPIECE && !squareAttacked(r, c) && !squareAttacked(r, c + 1))
+                        if (mBoard.getPce(r, c + 1) == NOPIECE && mBoard.getPce(r, c + 2) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c + 1, PceCol(i)))
                         {
                             moves[moveIndex] = getMove(r, c, r, c + 2, NOPIECE);
                             moveIndex++;
@@ -511,7 +511,7 @@ void Movegen::generateMoves(int ply)
                     }
                     if (mBoard.hasQcPerm())
                     {
-                        if (mBoard.getPce(r, c - 1) == NOPIECE && mBoard.getPce(r, c - 2) == NOPIECE && !squareAttacked(r, c) && !squareAttacked(r, c - 1))
+                        if (mBoard.getPce(r, c - 1) == NOPIECE && mBoard.getPce(r, c - 2) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c - 1, PceCol(i)))
                         {
                             moves[moveIndex] = getMove(r, c, r, c - 2, NOPIECE);
                             moveIndex++;
@@ -578,11 +578,10 @@ int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
     return moveKey;
 }
 
-bool Movegen::squareAttacked(int r, int c)
+bool Movegen::squareAttacked(int r, int c, int side)
 {
     int lBound;
     int uBound;
-    int side = PceCol(mBoard.getPce(r, c)); //defining side to simply be the color of the piece in question
     
     //Loop through opposite color, so we can see what ISNT legal for this side
     if (side == WHITE)
@@ -866,7 +865,7 @@ void Movegen::printAttacked()
     {
         for (int c = 0; c < 8; c++)
         {
-            if (squareAttacked(r, c))
+            if (squareAttacked(r, c, mBoard.getSide()))
             {
                 std::cout << "X   ";
             }
@@ -889,7 +888,7 @@ bool Movegen::makeMove(int move)
     int tR = toR(move);
     int tC = toC(move);
     
-    int pce = mBoard.getPce(fR, fC);
+    int pce = mBoard.getPce(fR, fC);        //piece being moved
     
     //Handling special cases first
     //En passant case
@@ -915,7 +914,6 @@ bool Movegen::makeMove(int move)
             {
                 mBoard.removePiece(7, 0);
                 mBoard.addPiece(7, 3, WR);
-                //where do we hash castling perms??
             }
             else            //WKCA
             {
@@ -1002,22 +1000,129 @@ bool Movegen::makeMove(int move)
     
     mBoard.changeSide();
     
-    if (squareAttacked(mBoard.getKingR(side), mBoard.getKingC(side)))
+    if (squareAttacked(mBoard.getKingR(side), mBoard.getKingC(side), side))
     {
-        std::cout << mBoard.getKingR(side) << std::endl;
-        std::cout << mBoard.getKingC(side) << std::endl;
-        //takeMove();
+        takeBack();
         return false;
     }
     //Legal move
     return true;
 }
 
-bool Movegen::takeMove()
+void Movegen::takeBack()
 {
-    //What are steps?
-    /*
-    Have to undo the move, using history array
-     */
-    return false;
+    History lastState = mBoard.getLastState();
+    int move = lastState.move;
+    
+    int fR = fromR(move);
+    int fC = fromC(move);
+    int tR = toR(move);
+    int tC = toC(move);
+    
+    int pce = mBoard.getPce(tR, tC);    //stores the MOVED piece
+    
+    mBoard.changeSide();
+    
+    //Handling special cases
+    //En passant case
+    if (isEnpasMove(move))
+    {
+        //Add the pawn behind the finish square
+        if (mBoard.getSide() == WHITE)
+        {
+            mBoard.addPiece(tR + 1, tC, BP);
+        }
+        else
+        {
+            mBoard.addPiece(tR - 1, tC, WP);
+        }
+    }
+    //Castling case
+    else if (isCastleMove(move))
+    {
+        //Need to move the rooks
+        if (mBoard.getSide() == WHITE)
+        {
+            if (tC == 2)    //WQCA
+            {
+                mBoard.removePiece(7, 3);
+                mBoard.addPiece(7, 0, WR);
+            }
+            else            //WKCA
+            {
+                mBoard.removePiece(7, 5);
+                mBoard.addPiece(7, 7, WR);
+            }
+        }
+        else
+        {
+            if (tC == 2)    //BQCA
+            {
+                mBoard.removePiece(0, 3);
+                mBoard.addPiece(0, 0, BR);
+            }
+            else            //BKCA
+            {
+                mBoard.removePiece(0, 5);
+                mBoard.addPiece(0, 7, BR);
+            }
+        }
+    }
+    //Hashing in en passant / castling perms to the key
+    mBoard.hashOutEp();
+    if (lastState.enpasSquareR != OFFBOARD)
+    {
+        mBoard.hashInEp(lastState.enpasSquareR, lastState.enpasSquareC);
+    }
+    if ((lastState.castlePerm & WKCA) != 0) //if wkca last move
+    {
+        mBoard.hashInCastle(WKCA);
+    }
+    if ((lastState.castlePerm & WQCA) != 0) //if wqca last move
+    {
+        mBoard.hashInCastle(WQCA);
+    }
+    if ((lastState.castlePerm & BKCA) != 0) //if bkca last move
+    {
+        mBoard.hashInCastle(BKCA);
+    }
+    if ((lastState.castlePerm & BQCA) != 0) //if bqca last move
+    {
+        mBoard.hashInCastle(BQCA);
+    }
+    
+    //Promotion Check
+    if (promoted(move) != NOPIECE)
+    {
+        if (PceCol(pce) == WHITE)
+        {
+            mBoard.removePiece(tR, tC);
+            mBoard.addPiece(tR, tC, WP);
+        }
+        else
+        {
+            mBoard.removePiece(tR, tC);
+            mBoard.addPiece(tR, tC, BP);
+        }
+    }
+    
+    //Move piece back to original square
+    mBoard.removePiece(tR, tC);
+    
+    if (promoted(move) == NOPIECE)
+    {
+        mBoard.addPiece(fR, fC, pce);
+    }
+    else
+    {
+        (PceCol(pce) == WHITE) ? (mBoard.addPiece(fR, fC, WP)) : (mBoard.addPiece(fR, fC, BP));
+    }
+    
+    //Add captured piece, if any
+    if (captured(move) != NOPIECE)
+    {
+        mBoard.addPiece(tR, tC, captured(move));
+    }
+    
+    mBoard.popHistory();
 }
