@@ -45,9 +45,8 @@ public:
     void hashInEp(int r, int c);         //hashes in an ep
     void changeSide();                   //changes side and hashes the pos key
     
+    int getMaterial() {return material;} //returns material differential of board
     void printBoard();      //prints char representation to couts
-    
-    int material;
     
     //For purpose of debugging, so we can see where the pieces are according to their piece list
     void printPieces(int pce)
@@ -79,7 +78,8 @@ private:
     int pListC[120];    //stores column of each piece, indexed by piece type
     int enpasSquareR;   //stores the en passant square row
     int enpasSquareC;   //stores the en passant square column
-    //int castlePerm;     //stores the castle perms
+    
+    int material;       //stores material differential of the board
     
     History history[MAXGAMELENGTH]; //stores all moves made
     int hisPly;                 //stores what number ply of the game we are on

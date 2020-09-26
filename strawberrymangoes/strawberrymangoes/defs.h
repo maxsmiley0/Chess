@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <chrono>
+class Board;
 
 #define OFFBOARD -1
 #define WP 0
@@ -39,8 +40,8 @@
 
 #define MAXPOSITIONMOVES 256
 #define MAXDEPTH 32
-
 #define MAXGAMELENGTH 1024
+#define INFINITY 100000
 
 #include <string>
 
@@ -70,6 +71,9 @@ int worth(int pce);     //returns worth, give piece
 bool isEnpasMove(int move);
 bool isPawnstartMove(int move);
 bool isCastleMove(int move);
+
+//static evaluation, assummin
+int static_eval(Board* b);
 
 class Timer
 {
