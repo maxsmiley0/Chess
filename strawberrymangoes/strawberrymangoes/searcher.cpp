@@ -11,7 +11,6 @@
 Searcher::Searcher()
 {
     moveGenerator = new Movegen();
-    InitPvTable();
 }
 
 Searcher::~Searcher()
@@ -145,8 +144,11 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     {
         if (inCheck)
         {
-            // + ply so mate in 2 is better than mate in 1!
-            return -MATE;
+            /*
+             Subtract depth so mates found at lower depths are favored over higher depths
+             So the computer will treat a mate in 6 as more favorable than a mate in 2
+             */
+            return -MATE - depth;
         }
         else
         {
@@ -183,14 +185,6 @@ Movegen* Searcher::getMoveGenerator()
     return moveGenerator;
 }
 
-void Searcher::InitPvTable()
-{
-    for (int i = 0; i < TTABLEENTRIES; i++)
-    {
-        pvTable[i] = PVNode {0, 0};
-    }
-}
-
 void Searcher::printPvLine(int depth)
 {
     int move = getPvMove();
@@ -218,20 +212,19 @@ int Searcher::getPvMove()
     int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
     
     //If this board has been stored in the pv nodes ttable
-    if (pvTable[i].posKey == moveGenerator->getBoard()->getPosKey())
+    for (std::list<PVNode>::iterator itr = pvTable[i].begin(); itr != pvTable[i].end(); itr++)
     {
-        //Compare stored move to this move
-        return pvTable[i].move;
+        if (itr->posKey == moveGenerator->getBoard()->getPosKey())
+        {
+            return itr->move;
+        }
     }
-    else
-    {
-        return NOMOVE;
-    }
+    
+    return NOMOVE;
 }
 
 void Searcher::storePvMove(int move)
 {
     int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
-    pvTable[i].move = move;
-    pvTable[i].posKey = moveGenerator->getBoard()->getPosKey();
+    pvTable[i].push_back(PVNode {moveGenerator->getBoard()->getPosKey(), move});
 }

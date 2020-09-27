@@ -31,9 +31,7 @@ public:
     
 private:
     Movegen* moveGenerator;
-    PVNode pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
-    
-    void InitPvTable();
+    std::list<PVNode> pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
     
     int bestMove;
     int ply;
