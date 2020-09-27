@@ -25,6 +25,7 @@ public:
     
     void orderMoves(std::list<int>& moves);    //takes in an unordered list of legal moves, orders them
     
+    void printPvLine(int depth);    //after recommending a move, print the pv line
     void storePvMove(int move);     //stores pv move for a particular board
     int getPvMove();                //returns PV move for a given position
     
@@ -36,6 +37,7 @@ private:
     
     int bestMove;
     int ply;
+    Stats stat;
 };
 
 #endif /* searcher_hpp */

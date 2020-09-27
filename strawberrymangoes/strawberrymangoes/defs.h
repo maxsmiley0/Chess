@@ -101,6 +101,7 @@ class Timer
     std::chrono::high_resolution_clock::time_point m_time;
 };
 
+//For the history table
 struct History
 {
     int move;
@@ -110,10 +111,26 @@ struct History
     int enpasSquareC;
 };
 
+//For the searcher class
 struct PVNode
 {
     int posKey;
     int move;
 };
 
+//Statistics collection for move ordering and nodes visited info
+
+struct Stats
+{
+    void reset()
+    {
+        nodes = 0;
+        failHigh = 0;
+        failHighFirst = 0;
+    }
+    
+    int nodes;
+    int failHigh;
+    int failHighFirst;
+};
 #endif /* defs_h */

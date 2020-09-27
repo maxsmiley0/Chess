@@ -21,8 +21,13 @@ Searcher::~Searcher()
 
 int Searcher::quiescenceSearch(int alpha, int beta)
 {
+    //Statistics collection
+    stat.nodes++;
+    
     int score = static_eval(moveGenerator->getBoard());
-    bool gameOver = true;
+    int movesMade = 0;
+    int oldAlpha = alpha;
+    int bestMove = NOMOVE;
     
     //Standing pat
     if (score >= beta)
@@ -40,7 +45,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     {
         if (moveGenerator->makeMove(*itr))
         {
-            gameOver = false;
+            movesMade++;
             int moveScore = -quiescenceSearch(-beta, -alpha);
             moveGenerator->takeBack();
             
@@ -48,30 +53,27 @@ int Searcher::quiescenceSearch(int alpha, int beta)
             {
                 if (moveScore >= beta)
                 {
+                    //Statistics collection
+                    if (movesMade == 1)
+                    {
+                        stat.failHighFirst++;
+                    }
+                    stat.failHigh++;
+                    
                     return beta;
                 }
                 else
                 {
                     alpha = moveScore;
+                    bestMove = *itr;
                 }
             }
         }
     }
     
-    if (gameOver)
+    if (alpha != oldAlpha)
     {
-        int side = moveGenerator->getBoard()->getSide();
-        int thisSideKingR = moveGenerator->getBoard()->getKingR(side);
-        int thisSideKingC = moveGenerator->getBoard()->getKingC(side);
-        
-        if (moveGenerator->squareAttacked(thisSideKingR, thisSideKingC, side))
-        {
-            return -INFINITY;
-        }
-        else
-        {
-            return 0;
-        }
+        storePvMove(bestMove);
     }
     
     return alpha;
@@ -79,7 +81,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
 
 int Searcher::alphaBeta (int alpha, int beta, int depth)
 {
-    bool gameOver = true;       //will be set to false if any legal moves are generated
+    int movesMade = 0;
     int oldAlpha = alpha;
     int bestMove = NOMOVE;
     
@@ -87,6 +89,9 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     {
         return quiescenceSearch(alpha, beta);
     }
+    
+    //Statistics collection
+    stat.nodes++;
     
     int side = moveGenerator->getBoard()->getSide();
     int kingR = moveGenerator->getBoard()->getKingR(side);
@@ -108,7 +113,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     {
         if (moveGenerator->makeMove(*itr))
         {
-            gameOver = false;
+            movesMade++;
             int moveScore = -alphaBeta(-beta, -alpha, depth - 1);
             moveGenerator->takeBack();
             
@@ -116,6 +121,13 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
             {
                 if (moveScore >= beta)
                 {
+                    //Statistics collection purposes
+                    if (movesMade == 1)
+                    {
+                        stat.failHighFirst++;
+                    }
+                    stat.failHigh++;
+                    
                     return beta;
                 }
                 else
@@ -129,10 +141,11 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     
     //worryabout mates later... wait we have to worry about them now...
     
-    if (gameOver)
+    if (movesMade == 0)
     {
         if (inCheck)
         {
+            // + ply so mate in 2 is better than mate in 1!
             return -MATE;
         }
         else
@@ -151,8 +164,18 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
 
 void Searcher::reccomendMove(int depth)
 {
+    stat.reset();
+    
+    Timer t;
+    t.start();
+    
     std::cout << alphaBeta(-INFINITY, INFINITY, depth) << std::endl;
-    std::cout << bestMove << ' ' << printMove(bestMove) << std::endl;
+    
+    std::cout << "Nodes Searched: " << stat.nodes << std::endl;
+    std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
+    std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
+    
+    printPvLine(depth);
 }
 
 Movegen* Searcher::getMoveGenerator()
@@ -165,6 +188,28 @@ void Searcher::InitPvTable()
     for (int i = 0; i < TTABLEENTRIES; i++)
     {
         pvTable[i] = PVNode {0, 0};
+    }
+}
+
+void Searcher::printPvLine(int depth)
+{
+    int move = getPvMove();
+    int count = 0;
+    
+    //While there is still another move in the line, or the line exceeds the depth
+    while (move != NOMOVE && count < depth)
+    {
+        std::cout << printMove(move) << std::endl;    //Print out the move
+        getMoveGenerator()->makeMove(move); //Make the move on the board
+        move = getPvMove();                 //Update the pv move
+        count++;
+    }
+    
+    //Take back moves, according to the number of moves we made
+    while (count > 0)
+    {
+        moveGenerator->takeBack();
+        count--;
     }
 }
 

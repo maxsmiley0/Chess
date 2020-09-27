@@ -18,67 +18,11 @@ using namespace std;
 int main()
 {
     Timer t;
-    
-    Searcher s;
     //r2q3k/pn2bprp/4pNp1/2p1PbQ1/3p1P2/5NR1/PPP3PP/2B2RK1 b - -
     //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
-    list<int> li;
-    li.push_back(3172973);
+    Searcher s;
+    s.getMoveGenerator()->getBoard()->parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
+    s.reccomendMove(6);
     
-    /*
-     
-     3195206
-     3326734
-     3196246
-     3150914
-     3171426
-     3188258
-     */
-    s.getMoveGenerator()->printMoves(li);
-    s.getMoveGenerator()->getBoard()->parseFen("2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w KQkq -");
-    s.reccomendMove(3);
-    
-    //cout << s.getMoveGenerator()->printMoves(s.getPvMove()) << endl;
-    
-    //s.getMoveGenerator()->printMoves(s.getMoveGenerator()->generateCaptures());
-    /*
-     110
-     5 e2e4 3328294
-     4 e7e6 3197089
-     3 f1c4 3196207
-     2 e7e5 3328225
-     1 e5c6 3171491
-     -110
-     4 e7e6 3197089
-     3 f1c4 3196207
-     2 e7e5 3328225
-     1 c4f7 3172948
-     110
-     3 f1c4 3196207
-     2 e6e5 3197154
-     1 h5h7 3174011
-     -110
-     2 e6e5 3197154
-     1 c4f7 3172948
-     110
-     1 c4f7 3172948
-     */
-    //s.getMoveGenerator()->makeMove(3328294);
-    //s.reccomendMove(4);
-    //s.getMoveGenerator()->makeMove(3197089);
-    //s.reccomendMove(3);
-    //s.getMoveGenerator()->makeMove(3196207);
-    //s.reccomendMove(2);
-    //s.getMoveGenerator()->makeMove(3197154);
-    //s.reccomendMove(1);
-    //s.getMoveGenerator()->makeMove(3172948);
-    //s.getMoveGenerator()->perftTest(6);
-    //m.generateMoves(0);
-    //m.printMoves(0);
-    //m.makeMove(3158464);
-    //cout << "material: " << m.getBoard().material << endl;
-    s.getMoveGenerator()->getBoard()->printBoard();
-    //cout << static_eval(s.getMoveGenerator()->getBoard()) << endl;
-    //cout << m.getBoard().getPosKey();
     return 0;
 }
