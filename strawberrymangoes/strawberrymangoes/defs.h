@@ -38,10 +38,15 @@ class Board;
 #define BLACK 1
 #define NEITHER 2
 
+#define NOMOVE 0
 #define MAXPOSITIONMOVES 256
 #define MAXDEPTH 32
 #define MAXGAMELENGTH 1024
+#define TTABLEENTRIES 10000
+
+#define MATE 90000
 #define INFINITY 100000
+
 
 #include <string>
 
@@ -103,6 +108,12 @@ struct History
     int castlePerm;
     int enpasSquareR;
     int enpasSquareC;
+};
+
+struct PVNode
+{
+    int posKey;
+    int move;
 };
 
 #endif /* defs_h */

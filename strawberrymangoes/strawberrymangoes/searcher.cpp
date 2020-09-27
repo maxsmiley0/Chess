@@ -11,6 +11,7 @@
 Searcher::Searcher()
 {
     moveGenerator = new Movegen();
+    InitPvTable();
 }
 
 Searcher::~Searcher()
@@ -79,9 +80,8 @@ int Searcher::quiescenceSearch(int alpha, int beta)
 int Searcher::alphaBeta (int alpha, int beta, int depth)
 {
     bool gameOver = true;       //will be set to false if any legal moves are generated
-    
     int oldAlpha = alpha;
-    int bestMove = 0;
+    int bestMove = NOMOVE;
     
     if (depth <= 0)
     {
@@ -133,12 +133,17 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     {
         if (inCheck)
         {
-            return -INFINITY;
+            return -MATE;
         }
         else
         {
             return 0;
         }
+    }
+    
+    if (alpha != oldAlpha)
+    {
+        storePvMove(bestMove);
     }
     
     return alpha;
@@ -155,3 +160,33 @@ Movegen* Searcher::getMoveGenerator()
     return moveGenerator;
 }
 
+void Searcher::InitPvTable()
+{
+    for (int i = 0; i < TTABLEENTRIES; i++)
+    {
+        pvTable[i] = PVNode {0, 0};
+    }
+}
+
+int Searcher::getPvMove()
+{
+    int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
+    
+    //If this board has been stored in the pv nodes ttable
+    if (pvTable[i].posKey == moveGenerator->getBoard()->getPosKey())
+    {
+        //Compare stored move to this move
+        return pvTable[i].move;
+    }
+    else
+    {
+        return NOMOVE;
+    }
+}
+
+void Searcher::storePvMove(int move)
+{
+    int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
+    pvTable[i].move = move;
+    pvTable[i].posKey = moveGenerator->getBoard()->getPosKey();
+}

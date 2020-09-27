@@ -23,11 +23,8 @@ int main()
     //r2q3k/pn2bprp/4pNp1/2p1PbQ1/3p1P2/5NR1/PPP3PP/2B2RK1 b - -
     //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
     list<int> li;
-    li.push_back(3195206);
-    li.push_back(3326734);
-    li.push_back(3196246);
-    li.push_back(3150914);
-    li.push_back(3188258);
+    li.push_back(3172973);
+    
     /*
      
      3195206
@@ -39,7 +36,10 @@ int main()
      */
     s.getMoveGenerator()->printMoves(li);
     s.getMoveGenerator()->getBoard()->parseFen("2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w KQkq -");
-    s.reccomendMove(4);
+    s.reccomendMove(3);
+    
+    //cout << s.getMoveGenerator()->printMoves(s.getPvMove()) << endl;
+    
     //s.getMoveGenerator()->printMoves(s.getMoveGenerator()->generateCaptures());
     /*
      110
