@@ -18,7 +18,8 @@ class Movegen
 public:
     Movegen();
     ~Movegen();
-    std::list<int> generateMoves();   //returns a list of legal oves in a given position. only accounts for legal moves, without checking to see if king is in check at end
+    std::list<int> generateMoves();   //returns a list of legal moves in a given position. only accounts for pseudolegal moves, without checking to see if king is in check at end
+    std::list<int> generateCaptures();   //returns a list of legal captures in a given position. only accounts for pseudolegal captures, without checking to see if king is in check at end
     
     bool squareAttacked(int r, int c, int side);  //returns true if square is attacked, used for king checks and castling, if we specify side as WHITE, it will loop through black pieces
     void printAttacked();          //prints attacked squares for debugging purposes

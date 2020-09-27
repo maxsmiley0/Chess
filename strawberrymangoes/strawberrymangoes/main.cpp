@@ -19,10 +19,11 @@ int main()
     Timer t;
     
     Searcher s;
-    
-    s.getMoveGenerator()->getBoard()->parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
-    s.reccomendMove(6);    
-    
+    //r2q3k/pn2bprp/4pNp1/2p1PbQ1/3p1P2/5NR1/PPP3PP/2B2RK1 b - -
+    //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
+    s.getMoveGenerator()->getBoard()->parseFen("r2q3k/pn2bprp/4pNp1/2p1PbQ1/3p1P2/5NR1/PPP3PP/2B2RK1 w - -");
+    //s.reccomendMove(6);
+    s.getMoveGenerator()->printMoves(s.getMoveGenerator()->generateCaptures());
     /*
      110
      5 e2e4 3328294

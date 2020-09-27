@@ -465,6 +465,359 @@ std::list<int> Movegen::generateMoves()
     return moveList;
 }
 
+std::list<int> Movegen::generateCaptures()
+{
+    std::list<int> moveList;
+    
+    int lBound;
+    int uBound;
+    
+    //Loop through all pieces of the color whose turn it is
+    if (mBoard->getSide() == WHITE)
+    {
+        lBound = WP;
+        uBound = WK;
+    }
+    else
+    {
+        lBound = BP;
+        uBound = BK;
+    }
+    
+    //Looping through all pieces of the side
+    for (int i = lBound; i <= uBound; i++)
+    {
+        //Looping through all pieces of this type
+        for (int j = 0; j < mBoard->getPceNum(i); j++)
+        {
+            //r and c of the piece being examined
+            int r = mBoard->getPceR(i, j);
+            int c = mBoard->getPceC(i, j);
+            
+            switch (i)
+            {
+                //Separate cases for white and black pawns due to "directionality"
+                case WP:
+                    //Capture cases
+                    if (c != 0 && mBoard->getPce(r - 1, c - 1) != NOPIECE && PceCol(mBoard->getPce(r - 1, c - 1)) != mBoard->getSide())
+                    {
+                        //Promotion case
+                        if (r == 1)
+                        {
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WN));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WB));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WR));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WQ));
+                        }
+                        //General case
+                        else
+                        {
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
+                        }
+                    }
+                    if (c != 7 && mBoard->getPce(r - 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r - 1, c + 1)) != mBoard->getSide())
+                    {
+                        //Promotion case
+                        if (r == 1)
+                        {
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WN));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WB));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WR));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WQ));
+                        }
+                        //General case
+                        else
+                        {
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
+                        }
+                        
+                    }
+                    //En passant case
+                    if (c != 0 && r == 3 && mBoard->getEnpasSquareC() == c - 1 && mBoard->getEnpasSquareR() == r - 1)
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
+                    }
+                    if (c != 7 && r == 3 && mBoard->getEnpasSquareC() == c + 1 && mBoard->getEnpasSquareR() == r - 1)
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
+                    }
+                    break;
+                case BP:
+                    //Capture cases
+                    if (c != 0 && mBoard->getPce(r + 1, c - 1) != NOPIECE && PceCol(mBoard->getPce(r + 1, c - 1)) != mBoard->getSide())
+                    {
+                        //Promotion case
+                        if (r == 6)
+                        {
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BN));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BB));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BR));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BQ));
+                        }
+                        //General case
+                        else
+                        {
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
+                        }
+                    }
+                    if (c != 7 && mBoard->getPce(r + 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r + 1, c + 1)) != mBoard->getSide())
+                    {
+                        //Promotion case
+                        if (r == 6)
+                        {
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BN));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BB));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BR));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BQ));
+                        }
+                        //General case
+                        else
+                        {
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
+                        }
+                        
+                    }
+                    //En passant case
+                    if (c != 0 && r == 4 && mBoard->getEnpasSquareC() == c - 1 && mBoard->getEnpasSquareR() == r + 1)
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
+                    }
+                    if (c != 7 && r == 4 && mBoard->getEnpasSquareC() == c + 1 && mBoard->getEnpasSquareR() == r + 1)
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
+                    }
+                    break;
+                    
+                case WN:
+                case BN:
+                    //8 squares that the knight might move to
+                    //Can only move to a given square if empty or occupied by enemy pce
+                    if (r >= 1 && c <= 5 && (mBoard->getPce(r - 1, c + 2) != NOPIECE && PceCol(mBoard->getPce(r - 1, c + 2)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c + 2, NOPIECE));
+                    }
+                    if (r <= 5 && c >= 1 && (mBoard->getPce(r + 2, c - 1) != NOPIECE && PceCol(mBoard->getPce(r + 2, c - 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 2, c - 1, NOPIECE));
+                    }
+                    if (r >= 2 && c <= 6 && (mBoard->getPce(r - 2, c + 1) != NOPIECE && PceCol(mBoard->getPce(r - 2, c + 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 2, c + 1, NOPIECE));
+                    }
+                    if (r <= 6 && c >= 2 && (mBoard->getPce(r + 1, c - 2) != NOPIECE && PceCol(mBoard->getPce(r + 1, c - 2)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c - 2, NOPIECE));
+                    }
+                    if (r >= 1 && c >= 2 && (mBoard->getPce(r - 1, c - 2) != NOPIECE && PceCol(mBoard->getPce(r - 1, c - 2)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c - 2, NOPIECE));
+                    }
+                    if (r >= 2 && c >= 1 && (mBoard->getPce(r - 2, c - 1) != NOPIECE && PceCol(mBoard->getPce(r - 2, c - 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 2, c - 1, NOPIECE));
+                    }
+                    if (r <= 5 && c <= 6 && (mBoard->getPce(r + 2, c + 1) != NOPIECE && PceCol(mBoard->getPce(r + 2, c + 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 2, c + 1, NOPIECE));
+                    }
+                    if (r <= 6 && c <= 5 && (mBoard->getPce(r + 1, c + 2) != NOPIECE && PceCol(mBoard->getPce(r + 1, c + 2)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c + 2, NOPIECE));
+                    }
+                    break;
+                case WB:
+                case BB:
+                case WR:
+                case BR:
+                case WQ:
+                case BQ:
+                {
+                    if (doDiag(i))
+                    {
+                        //Loop in 4 directions until we hit a piece or go offboard
+                        int indexR = r + 1;
+                        int indexC = c + 1;
+                        //down right direction
+                        while (indexR <= 7 && indexC <= 7)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR++;
+                            indexC++;
+                        }
+                        //down left direction
+                        indexR = r - 1;
+                        indexC = c + 1;
+                        
+                        while (indexR >= 0 && indexC <= 7)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR--;
+                            indexC++;
+                        }
+                        //up right direction
+                        indexR = r + 1;
+                        indexC = c - 1;
+                        
+                        while (indexR <= 7 && indexC >= 0)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR++;
+                            indexC--;
+                        }
+                        //up left direction
+                        indexR = r - 1;
+                        indexC = c - 1;
+                        
+                        while (indexR >= 0 && indexC >= 0)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR--;
+                            indexC--;
+                        }
+                    }
+                    if (doVert(i))
+                    {
+                        //Loop in 4 directions until we hit a piece or go offboard
+                        int indexR = r;
+                        int indexC = c + 1;
+                        //right direction
+                        while (indexC <= 7)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexC++;
+                        }
+                        
+                        indexR = r;
+                        indexC = c - 1;
+                        //left direction
+                        while (indexC >= 0)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexC--;
+                        }
+                        
+                        indexR = r - 1;
+                        indexC = c;
+                        //up direction
+                        while (indexR >= 0)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR--;
+                        }
+                        
+                        indexR = r + 1;
+                        indexC = c;
+                        //down direction
+                        while (indexR <= 7)
+                        {
+                            if (mBoard->getPce(indexR, indexC) != NOPIECE)
+                            {
+                                if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
+                                {
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
+                                }
+                                break;
+                            }
+                            indexR++;
+                        }
+                    }
+                    break;
+                }
+                case WK:
+                case BK:
+                    //8 squares that the king might move to
+                    //Regular king move case
+                    if (r >= 1 && c >= 1 && (mBoard->getPce(r - 1, c - 1) != NOPIECE && PceCol(mBoard->getPce(r - 1, c - 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
+                    }
+                    if (r >= 1 && (mBoard->getPce(r - 1, c) != NOPIECE && PceCol(mBoard->getPce(r - 1, c)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c, NOPIECE));
+                    }
+                    if (r >= 1 && c <= 6 && (mBoard->getPce(r - 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r - 1, c + 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
+                    }
+                    if (c <= 6 && (mBoard->getPce(r, c + 1) != NOPIECE && PceCol(mBoard->getPce(r, c + 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r, c + 1, NOPIECE));
+                    }
+                    if (r <= 6 && c <= 6 && (mBoard->getPce(r + 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r + 1, c + 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
+                    }
+                    if (r <= 6 && (mBoard->getPce(r + 1, c) != NOPIECE && PceCol(mBoard->getPce(r + 1, c)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c, NOPIECE));
+                    }
+                    if (r <= 6 && c >= 1 && (mBoard->getPce(r + 1, c - 1) != NOPIECE && PceCol(mBoard->getPce(r + 1, c - 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
+                    }
+                    if (c >= 1 && (mBoard->getPce(r, c - 1) != NOPIECE && PceCol(mBoard->getPce(r, c - 1)) != mBoard->getSide()))
+                    {
+                        moveList.push_back(getMove(r, c, r, c - 1, NOPIECE));
+                    }
+                    break;
+                default:
+                    std::cerr << "Error in Movegen::generateThreats()" << std::endl;
+                    break;
+            }
+        }
+    }
+    return moveList;
+}
+
 void Movegen::printMoves(std::list<int> moves)
 {
     for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
