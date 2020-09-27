@@ -21,7 +21,8 @@ int main()
     Searcher s;
     
     s.getMoveGenerator()->getBoard()->parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
-    s.reccomendMove(5);
+    s.reccomendMove(6);    
+    
     /*
      110
      5 e2e4 3328294

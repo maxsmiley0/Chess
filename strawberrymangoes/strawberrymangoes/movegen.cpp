@@ -19,9 +19,10 @@ Movegen::~Movegen()
     delete mBoard;
 }
 
-void Movegen::generateMoves(int ply)
+std::list<int> Movegen::generateMoves()
 {
-    int moveIndex = ply * MAXPOSITIONMOVES;
+    std::list<int> moveList;
+    
     int lBound;
     int uBound;
     
@@ -57,26 +58,20 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 1)
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c, WN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c, WB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c, WR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c, WQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c, WN));
+                            moveList.push_back(getMove(r, c, r - 1, c, WB));
+                            moveList.push_back(getMove(r, c, r - 1, c, WR));
+                            moveList.push_back(getMove(r, c, r - 1, c, WQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c, NOPIECE));
                         }
                         //Two squares forward
                         if (r == 6 && mBoard->getPce(r - 2, c) == NOPIECE)
                         {
-                            moves[moveIndex] = getMove(r, c, r - 2, c, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 2, c, NOPIECE));
                         }
                     }
                     //Capture cases
@@ -85,20 +80,15 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 1)
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, WQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WN));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WB));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WR));
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, WQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
                         }
                     }
                     if (c != 7 && mBoard->getPce(r - 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r - 1, c + 1)) != mBoard->getSide())
@@ -106,33 +96,26 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 1)
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, WQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WN));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WB));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WR));
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, WQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
                         }
                         
                     }
                     //En passant case
                     if (c != 0 && r == 3 && mBoard->getEnpasSquareC() == c - 1 && mBoard->getEnpasSquareR() == r - 1)
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
                     }
                     if (c != 7 && r == 3 && mBoard->getEnpasSquareC() == c + 1 && mBoard->getEnpasSquareR() == r - 1)
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
                     }
                     break;
                 case BP:
@@ -142,26 +125,20 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 6)
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c, BN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c, BB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c, BR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c, BQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c, BN));
+                            moveList.push_back(getMove(r, c, r + 1, c, BB));
+                            moveList.push_back(getMove(r, c, r + 1, c, BR));
+                            moveList.push_back(getMove(r, c, r + 1, c, BQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c, NOPIECE));
                         }
                         //Two squares forward
                         if (r == 1 && mBoard->getPce(r + 2, c) == NOPIECE)
                         {
-                            moves[moveIndex] = getMove(r, c, r + 2, c, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 2, c, NOPIECE));
                         }
                     }
                     //Capture cases
@@ -170,20 +147,15 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 6)
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, BQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BN));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BB));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BR));
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, BQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
                         }
                     }
                     if (c != 7 && mBoard->getPce(r + 1, c + 1) != NOPIECE && PceCol(mBoard->getPce(r + 1, c + 1)) != mBoard->getSide())
@@ -191,33 +163,26 @@ void Movegen::generateMoves(int ply)
                         //Promotion case
                         if (r == 6)
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BN);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BB);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BR);
-                            moveIndex++;
-                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, BQ);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BN));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BB));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BR));
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, BQ));
                         }
                         //General case
                         else
                         {
-                            moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
                         }
                         
                     }
                     //En passant case
                     if (c != 0 && r == 4 && mBoard->getEnpasSquareC() == c - 1 && mBoard->getEnpasSquareR() == r + 1)
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
                     }
                     if (c != 7 && r == 4 && mBoard->getEnpasSquareC() == c + 1 && mBoard->getEnpasSquareR() == r + 1)
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
                     }
                     break;
                     
@@ -227,43 +192,35 @@ void Movegen::generateMoves(int ply)
                     //Can only move to a given square if empty or occupied by enemy pce
                     if (r >= 1 && c <= 5 && (mBoard->getPce(r - 1, c + 2) == NOPIECE || PceCol(mBoard->getPce(r - 1, c + 2)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c + 2, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c + 2, NOPIECE));
                     }
                     if (r <= 5 && c >= 1 && (mBoard->getPce(r + 2, c - 1) == NOPIECE || PceCol(mBoard->getPce(r + 2, c - 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 2, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 2, c - 1, NOPIECE));
                     }
                     if (r >= 2 && c <= 6 && (mBoard->getPce(r - 2, c + 1) == NOPIECE || PceCol(mBoard->getPce(r - 2, c + 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 2, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 2, c + 1, NOPIECE));
                     }
                     if (r <= 6 && c >= 2 && (mBoard->getPce(r + 1, c - 2) == NOPIECE || PceCol(mBoard->getPce(r + 1, c - 2)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c - 2, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c - 2, NOPIECE));
                     }
                     if (r >= 1 && c >= 2 && (mBoard->getPce(r - 1, c - 2) == NOPIECE || PceCol(mBoard->getPce(r - 1, c - 2)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c - 2, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c - 2, NOPIECE));
                     }
                     if (r >= 2 && c >= 1 && (mBoard->getPce(r - 2, c - 1) == NOPIECE || PceCol(mBoard->getPce(r - 2, c - 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 2, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 2, c - 1, NOPIECE));
                     }
                     if (r <= 5 && c <= 6 && (mBoard->getPce(r + 2, c + 1) == NOPIECE || PceCol(mBoard->getPce(r + 2, c + 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 2, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 2, c + 1, NOPIECE));
                     }
                     if (r <= 6 && c <= 5 && (mBoard->getPce(r + 1, c + 2) == NOPIECE || PceCol(mBoard->getPce(r + 1, c + 2)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c + 2, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c + 2, NOPIECE));
                     }
                     break;
                 case WB:
@@ -283,15 +240,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -306,15 +261,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -329,15 +282,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -352,15 +303,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -378,15 +327,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -400,15 +347,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -422,15 +367,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -444,15 +387,13 @@ void Movegen::generateMoves(int ply)
                         {
                             if (mBoard->getPce(indexR, indexC) == NOPIECE)
                             {
-                                moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                moveIndex++;
+                                moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                             }
                             else
                             {
                                 if (PceCol(mBoard->getPce(indexR, indexC)) != mBoard->getSide())
                                 {
-                                    moves[moveIndex] = getMove(r, c, indexR, indexC, NOPIECE);
-                                    moveIndex++;
+                                    moveList.push_back(getMove(r, c, indexR, indexC, NOPIECE));
                                 }
                                 break;
                             }
@@ -467,43 +408,35 @@ void Movegen::generateMoves(int ply)
                     //Regular king move case
                     if (r >= 1 && c >= 1 && (mBoard->getPce(r - 1, c - 1) == NOPIECE || PceCol(mBoard->getPce(r - 1, c - 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c - 1, NOPIECE));
                     }
                     if (r >= 1 && (mBoard->getPce(r - 1, c) == NOPIECE || PceCol(mBoard->getPce(r - 1, c)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c, NOPIECE));
                     }
                     if (r >= 1 && c <= 6 && (mBoard->getPce(r - 1, c + 1) == NOPIECE || PceCol(mBoard->getPce(r - 1, c + 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r - 1, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r - 1, c + 1, NOPIECE));
                     }
                     if (c <= 6 && (mBoard->getPce(r, c + 1) == NOPIECE || PceCol(mBoard->getPce(r, c + 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r, c + 1, NOPIECE));
                     }
                     if (r <= 6 && c <= 6 && (mBoard->getPce(r + 1, c + 1) == NOPIECE || PceCol(mBoard->getPce(r + 1, c + 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c + 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c + 1, NOPIECE));
                     }
                     if (r <= 6 && (mBoard->getPce(r + 1, c) == NOPIECE || PceCol(mBoard->getPce(r + 1, c)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c, NOPIECE));
                     }
                     if (r <= 6 && c >= 1 && (mBoard->getPce(r + 1, c - 1) == NOPIECE || PceCol(mBoard->getPce(r + 1, c - 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r + 1, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r + 1, c - 1, NOPIECE));
                     }
                     if (c >= 1 && (mBoard->getPce(r, c - 1) == NOPIECE || PceCol(mBoard->getPce(r, c - 1)) != mBoard->getSide()))
                     {
-                        moves[moveIndex] = getMove(r, c, r, c - 1, NOPIECE);
-                        moveIndex++;
+                        moveList.push_back(getMove(r, c, r, c - 1, NOPIECE));
                     }
                     
                     //Castling case
@@ -511,16 +444,14 @@ void Movegen::generateMoves(int ply)
                     {
                         if (mBoard->getPce(r, c + 1) == NOPIECE && mBoard->getPce(r, c + 2) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c + 1, PceCol(i)))
                         {
-                            moves[moveIndex] = getMove(r, c, r, c + 2, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r, c + 2, NOPIECE));
                         }
                     }
                     if (mBoard->hasQcPerm())
                     {
                         if (mBoard->getPce(r, c - 1) == NOPIECE && mBoard->getPce(r, c - 2) == NOPIECE && mBoard->getPce(r, c - 3) == NOPIECE && !squareAttacked(r, c, PceCol(i)) && !squareAttacked(r, c - 1, PceCol(i)))
                         {
-                            moves[moveIndex] = getMove(r, c, r, c - 2, NOPIECE);
-                            moveIndex++;
+                            moveList.push_back(getMove(r, c, r, c - 2, NOPIECE));
                         }
                     }
                     break;
@@ -530,14 +461,15 @@ void Movegen::generateMoves(int ply)
             }
         }
     }
-    moves[moveIndex] = 0;   //signalling end of move generation
+    
+    return moveList;
 }
 
-void Movegen::printMoves(int ply)
+void Movegen::printMoves(std::list<int> moves)
 {
-    for (int i = ply * MAXPOSITIONMOVES; moves[i] != 0; i++)
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
     {
-        int move = moves[i];
+        int move = *itr;
         
         std::cout << "Move: " << move << std::endl;
         std::cout << "From: " << fromR(move) << ' ' << fromC(move) << std::endl;
@@ -584,7 +516,7 @@ int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
     return moveKey;
 }
 
-bool Movegen::squareAttacked(int r, int c, int side, int move)
+bool Movegen::squareAttacked(int r, int c, int side)
 {
     int lBound;
     int uBound;
@@ -1016,7 +948,7 @@ bool Movegen::makeMove(int move)
     
     mBoard->changeSide();
     
-    if (squareAttacked(mBoard->getKingR(side), mBoard->getKingC(side), side, move))
+    if (squareAttacked(mBoard->getKingR(side), mBoard->getKingC(side), side))
     {
         takeBack();
         return false;
@@ -1159,10 +1091,11 @@ void Movegen::perft(int depth)
     }
     else
     {
-        generateMoves(depth);
-        for (int i = depth * MAXPOSITIONMOVES; moves[i] != 0; i++)
+        std::list<int> moves = generateMoves();
+        
+        for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
         {
-            if (makeMove(moves[i]))
+            if (makeMove(*itr))
             {
                 perft(depth - 1);
                 takeBack();
@@ -1175,24 +1108,19 @@ void Movegen::perftTest(int depth)
 {
     int totalNodes = 0;
     leafNodes = 0;
-    generateMoves(depth);
+    std::list<int> moves = generateMoves();
     int moveNum = 0;
-    for (int i = depth * MAXPOSITIONMOVES; moves[i] != 0; i++)
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
     {
-        if (makeMove(moves[i]))
+        if (makeMove(*itr))
         {
             moveNum++;
             int cumnodes = leafNodes;
             perft(depth - 1);
             takeBack();
             totalNodes += (leafNodes - cumnodes);
-            std::cout << "Move " << moveNum << ' ' << printMove(moves[i]) << ' ' << moves[i] << std::endl << (leafNodes - cumnodes) << std::endl;
+            std::cout << "Move " << moveNum << ' ' << printMove(*itr) << ' ' << *itr << std::endl << (leafNodes - cumnodes) << std::endl;
         }
     }
     std::cout << "Total Nodes: " << totalNodes << std::endl;
-}
-
-int Movegen::getMove(int i)
-{
-    return moves[i];
 }

@@ -11,17 +11,19 @@
 
 #include "defs.h"
 #include "board.h"
+#include <list>
 
 class Movegen
 {
 public:
     Movegen();
     ~Movegen();
-    void generateMoves(int ply);   //fills the moves and scores array with moves. only accounts for legal moves, without checking to see if king is in check at end
-    bool squareAttacked(int r, int c, int side, int move = 0);  //returns true if square is attacked, used for king checks and castling, if we specify side as WHITE, it will loop through black pieces
+    std::list<int> generateMoves();   //returns a list of legal oves in a given position. only accounts for legal moves, without checking to see if king is in check at end
+    
+    bool squareAttacked(int r, int c, int side);  //returns true if square is attacked, used for king checks and castling, if we specify side as WHITE, it will loop through black pieces
     void printAttacked();          //prints attacked squares for debugging purposes
     int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
-    void printMoves(int ply);              //prints moves to cout
+    void printMoves(std::list<int> moves);              //prints moves to cout
     Board* getBoard() {return mBoard; }
     
     //Returns true if we can make such a move, false otherwise
@@ -33,15 +35,9 @@ public:
     void perft(int depth);
     void perftTest(int depth);
     
-    int getMove(int i);     //returns the move generated in moves array at ith index
-    
 private:
     //Board from which moves and scores are generated
     Board* mBoard;
-    
-    //Indexed by MAXPOSITIONMOVES * search ply
-    int moves[MAXPOSITIONMOVES * MAXDEPTH];     //after moves have been generated, append subcontainer with '0' so we know when we are finished
-    int scores[MAXPOSITIONMOVES * MAXDEPTH];
     int leafNodes;  //perft related
 };
 

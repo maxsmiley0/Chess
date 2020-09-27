@@ -33,11 +33,11 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     //Probe PV table
     
     //Worry about move ordering later
-    moveGenerator->generateMoves(depth);
+    std::list<int> moveList = moveGenerator->generateMoves();
     //Loop through the moves generated
-    for (int i = depth * MAXPOSITIONMOVES; moveGenerator->getMove(i) != 0; i++)
+    for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
-        if (moveGenerator->makeMove(moveGenerator->getMove(i)))
+        if (moveGenerator->makeMove(*itr))
         {
             gameOver = false;
             int moveScore = -alphaBeta(-beta, -alpha, depth - 1);
@@ -52,7 +52,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                 else
                 {
                     alpha = moveScore;
-                    bestMove = moveGenerator->getMove(i);
+                    bestMove = *itr;
                 }
             }
         }
@@ -69,6 +69,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     if (alpha != oldAlpha)
     {
         pvTable[depth] = bestMove;
+        //std::cout << depth << ' ' << printMove(bestMove) << ' '<< alpha << std::endl;
     }
     
     return alpha;
