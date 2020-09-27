@@ -18,6 +18,7 @@ public:
     ~Searcher();
     
     int alphaBeta(int alpha, int beta, int depth);      //returns alpha in centipawns
+    int quiescenceSearch(int alpha, int beta);          //called at nodes of alphaBeta
     void reccomendMove(int depth);   //computer plays the move recommended by alphabeta
     Movegen* getMoveGenerator();    //returns a pointer to the move generator member
     
