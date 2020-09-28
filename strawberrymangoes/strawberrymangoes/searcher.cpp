@@ -39,6 +39,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     }
     
     std::list<int> captureList = moveGenerator->generateCaptures();
+    //does not benefit much from ordering quiescent moves...
     
     for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
     {
@@ -107,6 +108,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     
     //Worry about move ordering later
     std::list<int> moveList = moveGenerator->generateMoves();
+    moveList = orderedMoves(moveList);
     //Loop through the moves generated
     for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
@@ -166,23 +168,78 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
 
 void Searcher::reccomendMove(int depth)
 {
-    stat.reset();
+   //Presearch, clear tables
     
-    Timer t;
-    t.start();
-    
-    std::cout << alphaBeta(-INFINITY, INFINITY, depth) << std::endl;
-    
-    std::cout << "Nodes Searched: " << stat.nodes << std::endl;
-    std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
-    std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
-    
-    printPvLine(depth);
+    for (int i = 1; i <= depth; i++)
+    {
+        stat.reset();
+        Timer t;
+        t.start();
+        
+        alphaBeta(-INFINITY, INFINITY, i);
+        
+        std::cout << "Nodes Searched: " << stat.nodes << std::endl;
+        std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
+        std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
+        printPvLine(i);
+    }
 }
 
 Movegen* Searcher::getMoveGenerator()
 {
     return moveGenerator;
+}
+
+std::list<int> Searcher::orderedMoves(std::list<int> moves)
+{
+    std::list<int> li;
+    //order moves
+    for(std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        if (getPvMove() == *itr)
+        {
+            li.push_front(*itr);
+        }
+        else
+        {
+            li.push_back(*itr);
+        }
+        
+        /*
+        if (movePriority(*itr) == 1000)
+        {
+            std::cout << "pv node!" << std::endl;
+            std::cout << printMove(*itr) << std::endl;
+            getMoveGenerator()->getBoard()->printBoard();
+        }*/
+    }
+    
+    
+    
+    
+    //assigning score stage
+    
+    //rearranging stage
+    
+    //some function to assign score
+    return li;
+}
+
+int Searcher::movePriority(int move)
+{
+    //check if principal variation
+    if (getPvMove() == move)
+    {
+        return 1000;
+    }
+    
+    //mvvlva if capture
+    
+    //killer?
+    
+    //search by history heuristic
+    
+    return 0;
 }
 
 void Searcher::printPvLine(int depth)

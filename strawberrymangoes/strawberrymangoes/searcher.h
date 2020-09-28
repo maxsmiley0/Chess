@@ -23,7 +23,8 @@ public:
     void reccomendMove(int depth);   //computer plays the move recommended by alphabeta
     Movegen* getMoveGenerator();    //returns a pointer to the move generator member
     
-    void orderMoves(std::list<int>& moves);    //takes in an unordered list of legal moves, orders them
+    std::list<int> orderedMoves(std::list<int> moves);    //takes in an unordered list of legal moves, orders them
+    int movePriority(int move);     //returns the priority of a move
     
     void printPvLine(int depth);    //after recommending a move, print the pv line
     void storePvMove(int move);     //stores pv move for a particular board
