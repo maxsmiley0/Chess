@@ -10,7 +10,6 @@
 #define searcher_hpp
 
 #include "movegen.h"
-#include <list>
 
 class Searcher
 {
@@ -32,9 +31,8 @@ public:
     
 private:
     Movegen* moveGenerator;
-    std::list<PVNode> pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
+    PVNode pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
     
-    int bestMove;
     int ply;
     Stats stat;
 };
