@@ -17,7 +17,7 @@ Searcher::~Searcher()
 {
     delete moveGenerator;
 }
-/*
+
 int Searcher::quiescenceSearch(int alpha, int beta)
 {
     //Statistics collection
@@ -39,7 +39,6 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     }
     
     std::list<int> captureList = moveGenerator->generateCaptures();
-    //does not benefit much from ordering quiescent moves...
     
     for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
     {
@@ -107,178 +106,13 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     //Probe PV table
     
     //Worry about move ordering later
+    
     std::list<int> moveList = moveGenerator->generateMoves();
     moveList = orderedMoves(moveList);
-    //Loop through the moves generated
+    
     for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
-        if (moveGenerator->makeMove(*itr))
-        {
-            movesMade++;
-            int moveScore = -alphaBeta(-beta, -alpha, depth - 1);
-            moveGenerator->takeBack();
-            
-            if (moveScore > alpha)
-            {
-                if (moveScore >= beta)
-                {
-                    //Statistics collection purposes
-                    if (movesMade == 1)
-                    {
-                        stat.failHighFirst++;
-                    }
-                    stat.failHigh++;
-                    
-                    return beta;
-                }
-                else
-                {
-                    alpha = moveScore;
-                    bestMove = *itr;
-                }
-            }
-        }
-    }
-    
-    //worryabout mates later... wait we have to worry about them now...
-    
-    if (movesMade == 0)
-    {
-        if (inCheck)
-        {
-            
-             Subtract depth so mates found at lower depths are favored over higher depths
-             So the computer will treat a mate in 6 as more favorable than a mate in 2
-             
-            return -MATE - depth;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    
-    if (alpha != oldAlpha)
-    {
-        storePvMove(bestMove);
-    }
-    
-    return alpha;
-}
-
-void Searcher::reccomendMove(int depth)
-{
-   //Presearch, clear tables
-    
-    for (int i = 1; i <= depth; i++)
-    {
-        stat.reset();
-        Timer t;
-        t.start();
         
-        alphaBeta(-INFINITY, INFINITY, i);
-        
-        std::cout << "Nodes Searched: " << stat.nodes << std::endl;
-        std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
-        std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
-        printPvLine(i);
-    }
-}
-*/
-
-int Searcher::quiescenceSearch(int alpha, int beta)
-{
-    //Statistics collection
-    stat.nodes++;
-    
-    int score = static_eval(moveGenerator->getBoard());
-    int movesMade = 0;
-    int oldAlpha = alpha;
-    int bestMove = NOMOVE;
-    
-    //Standing pat
-    if (score >= beta)
-    {
-        return beta;
-    }
-    if (score >= alpha)
-    {
-        alpha = score;
-    }
-    
-    std::list<int> captureList = moveGenerator->generateCaptures();
-    
-    for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
-    {
-        if (moveGenerator->makeMove(*itr))
-        {
-            movesMade++;
-            int moveScore = -quiescenceSearch(-beta, -alpha);
-            moveGenerator->takeBack();
-            
-            if (moveScore > alpha)
-            {
-                if (moveScore >= beta)
-                {
-                    //Statistics collection
-                    if (movesMade == 1)
-                    {
-                        stat.failHighFirst++;
-                    }
-                    stat.failHigh++;
-                    
-                    return beta;
-                }
-                else
-                {
-                    alpha = moveScore;
-                    bestMove = *itr;
-                }
-            }
-        }
-    }
-    
-    if (alpha != oldAlpha)
-    {
-        storePvMove(bestMove);
-    }
-    
-    return alpha;
-}
-
-int Searcher::alphaBeta (int alpha, int beta, int depth)
-{
-    int movesMade = 0;
-    int oldAlpha = alpha;
-    int bestMove = NOMOVE;
-    
-    if (depth <= 0)
-    {
-        return quiescenceSearch(alpha, beta);
-    }
-    
-    //Statistics collection
-    stat.nodes++;
-    
-    int side = moveGenerator->getBoard()->getSide();
-    int kingR = moveGenerator->getBoard()->getKingR(side);
-    int kingC = moveGenerator->getBoard()->getKingC(side);
-    
-    bool inCheck = moveGenerator->squareAttacked(kingR, kingC, side);
-    
-    if (inCheck)
-    {
-        depth++;
-    }
-    
-    //Probe PV table
-    
-    //Worry about move ordering later
-    std::list<int> moveList = moveGenerator->generateMoves();
-    //moveList = orderedMoves(moveList);
-    //Loop through the moves generated
-    for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
-    {
         if (moveGenerator->makeMove(*itr))
         {
             movesMade++;
@@ -335,22 +169,21 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
 
 void Searcher::reccomendMove(int depth)
 {
-    /*
-    stat.reset();
-    Timer t;
-    t.start();
-    
     //Iterative deepening
     for (int i = 1; i <= depth; i++)
     {
-        alphaBeta(-INFINITY, INFINITY, depth);
+        Timer t;
+        t.start();
+        stat.reset();
+        
+        alphaBeta(-INFINITY, INFINITY, i);
+        
+        std::cout << "Nodes Searched: " << stat.nodes << std::endl;
+        std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
+        std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
+        printPvLine(depth);
     }
-    
-    std::cout << "Nodes Searched: " << stat.nodes << std::endl;
-    std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
-    std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
-    printPvLine(depth);
-     */
+     /*
     
     stat.reset();
     Timer t;
@@ -361,7 +194,7 @@ void Searcher::reccomendMove(int depth)
     std::cout << "Nodes Searched: " << stat.nodes << std::endl;
     std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
     std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
-    printPvLine(depth);
+    printPvLine(depth);*/
 }
 
 Movegen* Searcher::getMoveGenerator()
@@ -371,19 +204,22 @@ Movegen* Searcher::getMoveGenerator()
 
 std::list<int> Searcher::orderedMoves(std::list<int> moves)
 {
-    std::list<int> li;
-    //order moves
+    std::list<int> li;  //list to store ordered moves
+    
+    //Loop through the given list
     for(std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
     {
+        //If empty list, insert
         if (li.empty() == *itr)
         {
             li.push_back(*itr);
         }
         else
         {
+            //Obtain weight of move
             int weight = movePriority(*itr);
             bool inserted = false;
-            
+            //Loop through new list, insert when the weight is greater than next value, so we will have sorted this list from highest to lowest priority
             for (std::list<int>::iterator i = li.begin(); i != li.end(); i++)
             {
                 if (weight > movePriority(*i))
@@ -393,7 +229,7 @@ std::list<int> Searcher::orderedMoves(std::list<int> moves)
                     break;
                 }
             }
-            
+            //If not inserted, it never found a place, and so it must have lowest priority
             if (!inserted)
             {
                 li.push_back(*itr);
@@ -401,11 +237,6 @@ std::list<int> Searcher::orderedMoves(std::list<int> moves)
         }
     }
     
-    //assigning score stage
-    
-    //rearranging stage
-    
-    //some function to assign score
     return li;
 }
 
@@ -425,8 +256,8 @@ int Searcher::movePriority(int move)
         int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
         int weight = 150000;
         
-        weight += abs(worth(cap)) * 10000;   //primary decider is worth of captured piece
-        weight += abs(worth(pce)) * 1000;    //secondary decider is worth of capturing piece
+        weight += abs(worth(cap)) * 10;   //primary decider is worth of captured piece
+        weight += abs(worth(pce));    //secondary decider is worth of capturing piece
         
         return weight;
     }
