@@ -35,10 +35,14 @@ public:
     int getKiller1(int depth);
     int getKiller2(int depth);
     
+    void storeHistoryMove(int move, int score);
+    int getHistoryScore(int move);
+    
 private:
     Movegen* moveGenerator;
     PVNode pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
     int killerMoves[2 * MAXDEPTH + 1];     //stores killer moves, indexed by depth. For example, killer moves at depth 6 are stored in 6, 6 + MAXDEPTH
+    int historyMoves[14 * 64];      //indexed by piece type, and to square
     Stats stat;
 };
 

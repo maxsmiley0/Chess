@@ -113,7 +113,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     
     for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
-        
         if (moveGenerator->makeMove(*itr))
         {
             movesMade++;
@@ -143,6 +142,11 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                 {
                     alpha = moveScore;
                     bestMove = *itr;
+                    
+                    if (captured(*itr) == NOPIECE)
+                    {
+                        storeHistoryMove(bestMove, alpha);
+                    }
                 }
             }
         }
@@ -285,8 +289,8 @@ int Searcher::movePriority(int move, int depth)
     }
     
     //History
-    
-    return 0;
+    return getHistoryScore(move);
+    //return 0;
 }
 
 void Searcher::printPvLine(int depth)
@@ -335,6 +339,11 @@ void Searcher::prepSearch()
     {
         killerMoves[i] = 0;
     }
+    
+    for (int i = 0; i < 12 * 64; i++)
+    {
+        historyMoves[i] = 0;
+    }
 }
 
 void Searcher::storePvMove(int move)
@@ -349,6 +358,34 @@ void Searcher::storeKillerMove(int move, int depth)
     killerMoves[depth + MAXDEPTH] = killerMoves[depth];
     //Storing the new killer move as the killer 1
     killerMoves[depth] = move;
+}
+
+void Searcher::storeHistoryMove(int move, int score)
+{
+    int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
+    
+    if (pce == NOPIECE)
+    {
+        std::cerr << "something has gone horribly wrong" << std::endl;
+        exit(1);
+    }
+    
+    int index = (64 * pce) + (8 * toR(move)) + toC(move);
+    historyMoves[index] = score;
+}
+
+int Searcher::getHistoryScore(int move)
+{
+    int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
+    
+    if (pce == NOPIECE)
+    {
+        std::cerr << "something has gone horribly wrong" << std::endl;
+        exit(1);
+    }
+    
+    int index = (64 * pce) + (8 * toR(move)) + toC(move);
+    return historyMoves[index];
 }
 
 int Searcher::getKiller1(int depth)
