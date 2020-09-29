@@ -39,6 +39,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     }
     
     std::list<int> captureList = moveGenerator->generateCaptures();
+    captureList = orderedMoves(captureList);
     
     for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
     {
@@ -108,7 +109,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     //Worry about move ordering later
     
     std::list<int> moveList = moveGenerator->generateMoves();
-    moveList = orderedMoves(moveList);
+    moveList = orderedMoves(moveList, depth);
     
     for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
@@ -129,6 +130,12 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                         stat.failHighFirst++;
                     }
                     stat.failHigh++;
+                    
+                    //Storing killer move
+                    if (captured(*itr) == NOPIECE)
+                    {
+                        storeKillerMove(*itr, depth);
+                    }
                     
                     return beta;
                 }
@@ -169,6 +176,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
 
 void Searcher::reccomendMove(int depth)
 {
+    prepSearch();    
     //Iterative deepening
     for (int i = 1; i <= depth; i++)
     {
@@ -202,7 +210,7 @@ Movegen* Searcher::getMoveGenerator()
     return moveGenerator;
 }
 
-std::list<int> Searcher::orderedMoves(std::list<int> moves)
+std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth)
 {
     std::list<int> li;  //list to store ordered moves
     
@@ -217,12 +225,12 @@ std::list<int> Searcher::orderedMoves(std::list<int> moves)
         else
         {
             //Obtain weight of move
-            int weight = movePriority(*itr);
+            int weight = movePriority(*itr, depth);
             bool inserted = false;
             //Loop through new list, insert when the weight is greater than next value, so we will have sorted this list from highest to lowest priority
             for (std::list<int>::iterator i = li.begin(); i != li.end(); i++)
             {
-                if (weight > movePriority(*i))
+                if (weight > movePriority(*i, depth))
                 {
                     li.insert(i, *itr);
                     inserted = true;
@@ -240,7 +248,7 @@ std::list<int> Searcher::orderedMoves(std::list<int> moves)
     return li;
 }
 
-int Searcher::movePriority(int move)
+int Searcher::movePriority(int move, int depth)
 {
     //check if principal variation, will return value 300,000
     if (getPvMove() == move)
@@ -262,9 +270,21 @@ int Searcher::movePriority(int move)
         return weight;
     }
     
-    //killer?
+    //Killer
     
-    //search by history heuristic
+    if (depth != -1)
+    {
+        if (move == getKiller1(depth))
+        {
+            return 125000;
+        }
+        else if (move == getKiller2(depth))
+        {
+            return 100000;
+        }
+    }
+    
+    //History
     
     return 0;
 }
@@ -304,8 +324,39 @@ int Searcher::getPvMove()
     return NOMOVE;
 }
 
+void Searcher::prepSearch()
+{
+    for (int i = 0; i < TTABLEENTRIES; i++)
+    {
+        pvTable[i] = PVNode {0, 0};
+    }
+    
+    for (int i = 0; i < 2 * MAXDEPTH + 1; i++)
+    {
+        killerMoves[i] = 0;
+    }
+}
+
 void Searcher::storePvMove(int move)
 {
     int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
     pvTable[i] = PVNode {moveGenerator->getBoard()->getPosKey(), move};
+}
+
+void Searcher::storeKillerMove(int move, int depth)
+{
+    //Putting the current killer 1 into the killer 2 container
+    killerMoves[depth + MAXDEPTH] = killerMoves[depth];
+    //Storing the new killer move as the killer 1
+    killerMoves[depth] = move;
+}
+
+int Searcher::getKiller1(int depth)
+{
+    return killerMoves[depth];
+}
+
+int Searcher::getKiller2(int depth)
+{
+    return killerMoves[depth + MAXDEPTH];
 }
