@@ -11,26 +11,31 @@
 #include <random>
 #include <utility>
 
+//Returns true if a piece is a pawn
 bool isPawn(int pce)
 {
     return (pce == WP || pce == BP);
 }
 
+//Returns true if a piece is a king
 bool isKing(int pce)
 {
     return (pce == WK || pce == BK);
 }
 
+//Returns true if a piece is a bishop or a queen
 bool doDiag(int pce)
 {
     return (pce == WB || pce == BB || pce == WQ || pce == BQ);
 }
 
+//Returns true if a piece is a rook or a queen
 bool doVert(int pce)
 {
     return (pce == WR || pce == BR || pce == WQ || pce == BQ);
 }
 
+//Returns color of a piece
 int PceCol (int pce)
 {
     if (pce >= 0 && pce <= 5)
@@ -48,6 +53,7 @@ int PceCol (int pce)
     }
 }
 
+//Extracts information from a move key
 int fromR(int move)
 {
     return (move & 0x7);
@@ -92,6 +98,7 @@ bool isCastleMove(int move)
     return ((move & 0x400000) >> 22);
 }
 
+//Converts move key into readable form
 std::string printMove(int move)
 {
     std::string str = "";
@@ -103,6 +110,7 @@ std::string printMove(int move)
     return str;
 }
 
+//Returns worth of a piece
 int worth(int pce)
 {
     switch (pce)
@@ -213,6 +221,7 @@ const double KingTableEg[8][8] =
     {-50,-30,-30,-30,-30,-30,-30,-50}
 };
 
+//Static evaluation, to be called at the leaf nodes
 int static_eval(Board* b)
 {
     int score = b->getMaterial();
@@ -257,7 +266,7 @@ int static_eval(Board* b)
     {
         score += RookTable[7 - b->getPceR(WQ, i)][b->getPceC(WQ, i)];
     }
-    
+    //Use different PSTs depending on the game stage
     if (inEg)
     {
         score += KingTableEg[b->getKingR(WHITE)][b->getKingC(WHITE)];
@@ -266,7 +275,6 @@ int static_eval(Board* b)
     {
         score += KingTable[b->getKingR(WHITE)][b->getKingC(WHITE)];
     }
-    
     //Looping through all black pawns
     for(int i = 0; i < b->getPceNum(BP); i++)
     {
@@ -292,7 +300,7 @@ int static_eval(Board* b)
     {
         score -= RookTable[b->getPceR(BQ, i)][b->getPceC(BQ, i)];
     }
-    
+    //Use different PSTs depending on the game stage
     if (inEg)
     {
         score -= KingTableEg[7 - b->getKingR(BLACK)][b->getKingC(BLACK)];
@@ -308,7 +316,7 @@ int static_eval(Board* b)
 //Used for RAND32
 static std::random_device rd;
 static std::default_random_engine generator(rd());
-
+//Returns random 32 bit number
 int RAND32()
 {
     std::uniform_int_distribution<> distro(0, INT_MAX);
