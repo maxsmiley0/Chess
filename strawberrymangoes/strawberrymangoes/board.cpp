@@ -14,212 +14,15 @@ Board::Board()
     ClearBoard();
 }
 
-int Board::getPosKey()
-{
-    return posKey;
-}
-
-void Board::addPiece(int r, int c, int pce)
-{
-    //XORing out the piece at (r, c)
-    mBoard[r][c] = pce;
-    
-    //Updating piece numbers and piece lists
-    pListR[(10 * pce) + pceNum[pce]] = r;   //setting piece row to r
-    pListC[(10 * pce) + pceNum[pce]] = c;   //setting piece column to c
-    pceNum[pce]++;                          //adding another piece of that type
-    
-    //Updating posKey
-    posKey ^= pceKeys[r][c][pce];
-    
-    //Updating material
-    material += worth(pce);
-}
-
-void Board::removePiece(int r, int c)
-{
-    //XORing out the piece at (r, c)
-    int pce = mBoard[r][c];
-    
-    if (pce == NOPIECE)
-    {
-        std::cerr << "removing no piece Board::removePiece" << std::endl;
-    }
-    
-    posKey ^= pceKeys[r][c][pce];
-    pceNum[mBoard[r][c]]--;                 //decrementing piece num of that type
-    
-    for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
-    {
-        if (r == pListR[i] && c == pListC[i])
-        {
-            std::swap(pListR[i], pListR[10 * pce + pceNum[pce]]);
-            std::swap(pListC[i], pListC[10 * pce + pceNum[pce]]);
-            break;
-            //does this actually work???
-        }
-    }
-    
-    //Setting the square on mBoard
-    mBoard[r][c] = NOPIECE;
-    
-    //Updating material
-    material -= worth(pce);
-}
-
-void Board::hashInCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
-{
-    int newPerm = (this->castlePerm | castlePerm);
-    //This executes if we are trying to hash in something that is not already in there
-    if (this->castlePerm != newPerm)
-    {
-        //Change the castle perms, and then the position key
-        this->castlePerm = newPerm;
-        if (castlePerm == WKCA)
-        {
-            posKey ^= castleKeys[0];
-        }
-        else if (castlePerm == WQCA)
-        {
-            posKey ^= castleKeys[1];
-        }
-        else if (castlePerm == BKCA)
-        {
-            posKey ^= castleKeys[2];
-        }
-        else if (castlePerm == BQCA)
-        {
-            posKey ^= castleKeys[3];
-        }
-    }
-}
-
-void Board::hashOutCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
-{
-    int invCastlePerm = (castlePerm ^ INVERSE); //inverting the castle key
-    //This executes if we are trying to hash out something that is in there
-    if (this->castlePerm != (invCastlePerm & this->castlePerm))
-    {
-        //Change the castle perms, and then the position key
-        this->castlePerm &= invCastlePerm;
-        if (castlePerm == WKCA)
-        {
-            posKey ^= castleKeys[0];
-        }
-        else if (castlePerm == WQCA)
-        {
-            posKey ^= castleKeys[1];
-        }
-        else if (castlePerm == BKCA)
-        {
-            posKey ^= castleKeys[2];
-        }
-        else if (castlePerm == BQCA)
-        {
-            posKey ^= castleKeys[3];
-        }
-    }
-}
-
-void Board::hashOutEp()
-{
-    if (enpasSquareR != OFFBOARD)
-    {
-        posKey ^= enpasKey[enpasSquareR][enpasSquareC];
-        enpasSquareR = OFFBOARD;
-        enpasSquareC = OFFBOARD;
-    }
-    //We don't do anything if an en passant square was not there to begin with
-}
-
-void Board::hashInEp(int r, int c)
-{
-    //Assumes ep is empty
-    posKey ^= enpasKey[r][c];
-    enpasSquareR = r;
-    enpasSquareC = c;
-}
-
-void Board::changeSide()
-{
-    //Changes side and changes pos key
-    (side == WHITE) ? (side = BLACK) : (side = WHITE);
-    posKey ^= sideKey;
-}
-
-void Board::printBoard()
-{
-    for (int r = 0; r < 8; r++)
-    {
-        for (int c = 0; c < 8; c++)
-        {
-            std::cout << PceChar[mBoard[r][c]] << "   ";
-        }
-        std::cout << std::endl << std::endl;
-    }
-    
-    std::cout << "Side to play: ";
-    (side == WHITE) ? (std::cout << 'w' << std::endl) : (std::cout << 'b' << std::endl);
-    
-    std::cout << "En Pas Square: ";
-    if (enpasSquareC != OFFBOARD)
-    {
-        std::cout << (char)((int)'a' + enpasSquareC);
-        std::cout << 8 - enpasSquareR;
-    }
-    std::cout << std::endl;
-    
-    
-    std::cout << "Castling Perms: ";
-    if ((castlePerm & WKCA) != 0) std::cout << 'K';
-    if ((castlePerm & WQCA) != 0) std::cout << 'Q';
-    if ((castlePerm & BKCA) != 0) std::cout << 'k';
-    if ((castlePerm & BQCA) != 0) std::cout << 'q';
-    std::cout << std::endl;
-    /*
-    for (int i = 0; i < 12; i++)
-    {
-        std::cout << pceNum[i] << std::endl;
-        
-        for (int j = 0; j < pceNum[i]; j++)
-        {
-            std::cout << pListR[10 * i + j];
-            std::cout << pListC[10 * i + j] << std::endl;
-        }
-        
-        std::cout << std::endl << std::endl;
-    }
-    */
-}
-
-int Board::getPce(int r, int c)
-{
-    return mBoard[r][c];
-}
-
-int Board::getPceR(int pce, int i)
-{
-    return pListR[10 * pce + i];
-}
-
-int Board::getPceC(int pce, int i)
-{
-    return pListC[10 * pce + i];
-}
-
-int Board::getPceNum(int pce)
-{
-    return pceNum[pce];
-}
-
 void Board::parseFen(std::string fen)
 {
-    ClearBoard();
+    ClearBoard();       //clears board
     
     int section = 0;    //0 -> pieces | 1 -> side | 2 -> castle | 3 -> enpas square
     int r = 0;          //stores row we are on
     int c = 0;          //stores column we are on
     
+    //Loop through all characters of the FEN
     for (int i = 0; i < fen.length(); i++)
     {
         //putting the pieces on the board
@@ -363,33 +166,262 @@ void Board::parseFen(std::string fen)
     }
 }
 
-void Board::InitKeys()
+void Board::addPiece(int r, int c, int pce)
 {
-    sideKey = RAND32();
+    //XORing out the piece at (r, c)
+    mBoard[r][c] = pce;
     
-    for (int i = 0; i < 4; i++)
+    //Updating piece numbers and piece lists
+    pListR[(10 * pce) + pceNum[pce]] = r;   //setting piece row to r
+    pListC[(10 * pce) + pceNum[pce]] = c;   //setting piece column to c
+    pceNum[pce]++;                          //adding another piece of that type
+    
+    //Updating posKey
+    posKey ^= pceKeys[r][c][pce];
+    
+    //Updating material
+    material += worth(pce);
+}
+
+void Board::removePiece(int r, int c)
+{
+    //XORing out the piece at (r, c)
+    int pce = mBoard[r][c];
+    
+    if (pce == NOPIECE)
     {
-        castleKeys[i] = RAND32();
+        std::cerr << "removing no piece Board::removePiece" << std::endl;
     }
     
-    for (int i = 0; i < 8; i++)
+    posKey ^= pceKeys[r][c][pce];
+    pceNum[mBoard[r][c]]--;                 //decrementing piece num of that type
+    
+    for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
     {
-        for (int j = 0; j < 8; j++)
+        if (r == pListR[i] && c == pListC[i])
         {
-            enpasKey[i][j] = RAND32();
+            std::swap(pListR[i], pListR[10 * pce + pceNum[pce]]);
+            std::swap(pListC[i], pListC[10 * pce + pceNum[pce]]);
+            break;
+            //does this actually work???
         }
     }
     
-    for (int i = 0; i < 8; i++)
+    //Setting the square on mBoard
+    mBoard[r][c] = NOPIECE;
+    
+    //Updating material
+    material -= worth(pce);
+}
+
+void Board::pushHistory(int move)
+{
+    History h;
+    
+    //Updating fields of history
+    h.posKey = posKey;
+    h.move = move;
+    h.pce = mBoard[fromR(move)][fromC(move)];
+    h.castlePerm = castlePerm;
+    h.enpasSquareR = enpasSquareR;
+    h.enpasSquareC = enpasSquareC;
+    
+    history[hisPly] = h;    //update history
+    hisPly++;               //increase hisply
+    
+    if (h.pce == NOPIECE)
     {
-        for (int j = 0; j < 8; j++)
+        printBoard();
+        std::cout << printMove(move) << std::endl;
+        std::cerr << "how is this possible (pce invalid in pushHistory)" << std::endl;
+        exit(1);
+    }
+}
+
+void Board::popHistory()
+{
+    //We don't actually have to delete history, simply go back one hisPly, because if we add a new history, the previous one will be overwritten
+    hisPly--;
+}
+
+int Board::getPce(int r, int c)
+{
+    return mBoard[r][c];
+}
+
+int Board::getPceNum(int pce)
+{
+    return pceNum[pce];
+}
+
+int Board::getPceR(int pce, int i)
+{
+    return pListR[10 * pce + i];
+}
+
+int Board::getPceC(int pce, int i)
+{
+    return pListC[10 * pce + i];
+}
+
+int Board::getKingR(int color)
+{
+    if (color == WHITE)
+    {
+        return pListR[10 * WK];
+    }
+    else
+    {
+        return pListR[10 * BK];
+    }
+}
+
+int Board::getKingC(int color)
+{
+    if (color == WHITE)
+    {
+        return pListC[10 * WK];
+    }
+    else
+    {
+        return pListC[10 * BK];
+    }
+}
+
+int Board::numRep()    //returns number of repetitions
+{
+    int repCount = 0;
+    
+    if (hisPly > 7)
+    {
+        for (int i = hisPly - 1; i >= hisPly - 6; i--)
         {
-            for (int k = 0; k < 12; k++)
+            if (posKey == history[i].posKey)
             {
-                pceKeys[i][j][k] = RAND32();
+                repCount++;
+            }
+            if (repCount >= 2)
+            {
+                break;
             }
         }
     }
+    
+    return repCount;
+}
+
+bool Board::hasKcPerm()
+{
+    if (side == WHITE)
+    {
+        return ((castlePerm & WKCA) != 0);
+    }
+    else
+    {
+        return ((castlePerm & BKCA) != 0);
+    }
+}
+
+bool Board::hasQcPerm()
+{
+    if (side == WHITE)
+    {
+        return ((castlePerm & WQCA) != 0);
+    }
+    else
+    {
+        return ((castlePerm & BQCA) != 0);
+    }
+}
+
+History Board::getLastState()
+{
+    if (hisPly == 0)
+    {
+        std::cerr << "Attempting to access history with no moves made (Board::getLastMove())" << std::endl;
+        exit(1);
+    }
+    return history[hisPly - 1];
+}
+
+void Board::hashInCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
+{
+    int newPerm = (this->castlePerm | castlePerm);
+    //This executes if we are trying to hash in something that is not already in there
+    if (this->castlePerm != newPerm)
+    {
+        //Change the castle perms, and then the position key
+        this->castlePerm = newPerm;
+        if (castlePerm == WKCA)
+        {
+            posKey ^= castleKeys[0];
+        }
+        else if (castlePerm == WQCA)
+        {
+            posKey ^= castleKeys[1];
+        }
+        else if (castlePerm == BKCA)
+        {
+            posKey ^= castleKeys[2];
+        }
+        else if (castlePerm == BQCA)
+        {
+            posKey ^= castleKeys[3];
+        }
+    }
+}
+
+void Board::hashOutCastle(int castlePerm)   //assumes parameter is macro WKCA, BQCA, etc.
+{
+    int invCastlePerm = (castlePerm ^ INVERSE); //inverting the castle key
+    //This executes if we are trying to hash out something that is in there
+    if (this->castlePerm != (invCastlePerm & this->castlePerm))
+    {
+        //Change the castle perms, and then the position key
+        this->castlePerm &= invCastlePerm;
+        if (castlePerm == WKCA)
+        {
+            posKey ^= castleKeys[0];
+        }
+        else if (castlePerm == WQCA)
+        {
+            posKey ^= castleKeys[1];
+        }
+        else if (castlePerm == BKCA)
+        {
+            posKey ^= castleKeys[2];
+        }
+        else if (castlePerm == BQCA)
+        {
+            posKey ^= castleKeys[3];
+        }
+    }
+}
+
+void Board::hashInEp(int r, int c)
+{
+    //Assumes ep is empty
+    posKey ^= enpasKey[r][c];
+    enpasSquareR = r;
+    enpasSquareC = c;
+}
+
+void Board::hashOutEp()
+{
+    if (enpasSquareR != OFFBOARD)
+    {
+        posKey ^= enpasKey[enpasSquareR][enpasSquareC];
+        enpasSquareR = OFFBOARD;
+        enpasSquareC = OFFBOARD;
+    }
+    //We don't do anything if an en passant square was not there to begin with
+}
+
+void Board::changeSide()
+{
+    //Changes side and changes pos key
+    (side == WHITE) ? (side = BLACK) : (side = WHITE);
+    posKey ^= sideKey;
 }
 
 void Board::ClearBoard()
@@ -429,87 +461,70 @@ void Board::ClearBoard()
     //We don't need to reset piece coordinates, as they are accessed by piece num
 }
 
-bool Board::hasKcPerm()
+void Board::printPieces(int pce)
 {
-    if (side == WHITE)
+    for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
     {
-        return ((castlePerm & WKCA) != 0);
-    }
-    else
-    {
-        return ((castlePerm & BKCA) != 0);
+        std::cout << pListR[i] << ' ' << pListC[i] << std::endl;
     }
 }
 
-bool Board::hasQcPerm()
+void Board::printBoard()
 {
-    if (side == WHITE)
+    for (int r = 0; r < 8; r++)
     {
-        return ((castlePerm & WQCA) != 0);
+        for (int c = 0; c < 8; c++)
+        {
+            std::cout << PceChar[mBoard[r][c]] << "   ";
+        }
+        std::cout << std::endl << std::endl;
     }
-    else
-    {
-        return ((castlePerm & BQCA) != 0);
-    }
-}
-
-int Board::getKingR(int color)
-{
-    if (color == WHITE)
-    {
-        return pListR[10 * WK];
-    }
-    else
-    {
-        return pListR[10 * BK];
-    }
-}
-
-int Board::getKingC(int color)
-{
-    if (color == WHITE)
-    {
-        return pListC[10 * WK];
-    }
-    else
-    {
-        return pListC[10 * BK];
-    }
-}
-
-void Board::pushHistory(int move)
-{
-    History h;
-    h.posKey = posKey;
-    h.move = move;
-    h.pce = mBoard[fromR(move)][fromC(move)];
-    h.castlePerm = castlePerm;
-    h.enpasSquareR = enpasSquareR;
-    h.enpasSquareC = enpasSquareC;
     
-    history[hisPly] = h;
-    hisPly++;
+    std::cout << "Side to play: ";
+    (side == WHITE) ? (std::cout << 'w' << std::endl) : (std::cout << 'b' << std::endl);
     
-    if (h.pce == NOPIECE)
+    std::cout << "En Pas Square: ";
+    if (enpasSquareC != OFFBOARD)
     {
-        printBoard();
-        std::cout << printMove(move) << std::endl;
-        std::cerr << "how is this possible (pce invalid in pushHistory)" << std::endl;
-        exit(1);
+        std::cout << (char)((int)'a' + enpasSquareC);
+        std::cout << 8 - enpasSquareR;
     }
+    std::cout << std::endl;
+    
+    
+    std::cout << "Castling Perms: ";
+    if ((castlePerm & WKCA) != 0) std::cout << 'K';
+    if ((castlePerm & WQCA) != 0) std::cout << 'Q';
+    if ((castlePerm & BKCA) != 0) std::cout << 'k';
+    if ((castlePerm & BQCA) != 0) std::cout << 'q';
+    std::cout << std::endl;
 }
 
-void Board::popHistory()
+void Board::InitKeys()
 {
-    hisPly--;
-}
-
-History Board::getLastState()
-{
-    if (hisPly == 0)
+    sideKey = RAND32();
+    
+    for (int i = 0; i < 4; i++)
     {
-        std::cerr << "Attempting to access history with no moves made (Board::getLastMove())" << std::endl;
-        exit(1);
+        castleKeys[i] = RAND32();
     }
-    return history[hisPly - 1];
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            enpasKey[i][j] = RAND32();
+        }
+    }
+    
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            for (int k = 0; k < 12; k++)
+            {
+                pceKeys[i][j][k] = RAND32();
+            }
+        }
+    }
 }

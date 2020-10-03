@@ -488,7 +488,7 @@ int Searcher::getKiller2(int depth)
 
 void Searcher::checkTime()
 {
-    if (timer.elapsed() > timeAllocated && searchDepth > minDepth)
+    if (timer.elapsed() > timeAllocated && searchDepth > MINDEPTH)
     {
         stop = true;
     }

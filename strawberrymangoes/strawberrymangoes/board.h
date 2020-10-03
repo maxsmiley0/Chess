@@ -17,69 +17,43 @@ class Board
 public:
     Board();
     
-    int getPosKey();
+    //Modifies board material information
+    void parseFen(std::string fen);           //updates board according to fen, assumes valid fen
     void addPiece(int r, int c, int pce);     //adds a piece to the board, and updates the position key, assumes an empty spot, assumes pce is valid
     void removePiece(int r, int c);           //removes a piece from the board, updates the position key, assumes there is a piece in that square
-    void parseFen(std::string fen);           //updates board according to fen, assumes valid fen
-    int getPce(int r, int c);        //returns piece located at (r, c)
-    int getPceR(int pce, int i);     //returns R coord on 'ith' piece (from 0 to pceNum)
-    int getPceC(int pce, int i);     //returns C coord on 'ith' piece (from 0 to pceNum)
-    int getEnpasSquareR() {return enpasSquareR; }
-    int getEnpasSquareC() {return enpasSquareC; }
-    int getPceNum(int pce); //returns # of pieces of a given type
-    int getSide() {return side; }
-    bool hasKcPerm();   //returns if the current side still has kingside castling perms
-    bool hasQcPerm();   //returns if the current side still has queenside castling perms
-    int getKingR(int color); //returns r coord of king of a given color
-    int getKingC(int color); //returns c coord of king of a given color
-    
-    //declare hash side, ep, castle, etc
-    
     void pushHistory(int move);   //updates history with new move
     void popHistory();            //gets rid of latest move
-    History getLastState();            //returns latest move in history table
     
+    //Accessors
+    int getPce(int r, int c);        //returns piece located at (r, c)
+    int getPceNum(int pce);          //returns # of pieces of a given type
+    int getPceR(int pce, int i);     //returns R coord on 'ith' piece (from 0 to pceNum)
+    int getPceC(int pce, int i);     //returns C coord on 'ith' piece (from 0 to pceNum)
+    int getKingR(int color);         //returns r coord of king of a given color
+    int getKingC(int color);         //returns c coord of king of a given color
+    int getSide() {return side; }
+    int getPosKey() {return posKey;} //Returns position key
+    int getEnpasSquareR() {return enpasSquareR; }
+    int getEnpasSquareC() {return enpasSquareC; }
+    int getMaterial() {return material;} //returns material differential of board
+    int numRep();                        //returns number of repetitions
+    bool hasKcPerm();   //returns if the current side still has kingside castling perms
+    bool hasQcPerm();   //returns if the current side still has queenside castling perms
+    History getLastState();              //returns latest move in history table
+    
+    //Modifies en passant, castling, and side information
     void hashInCastle(int castlePerm);   //hashes in a given castle perm
     void hashOutCastle(int castlePerm);  //hashes out a given castle perm
-    void hashOutEp();                    //hashes out ep, if enpas square exists
     void hashInEp(int r, int c);         //hashes in an ep
+    void hashOutEp();                    //hashes out ep, if enpas square exists
     void changeSide();                   //changes side and hashes the pos key
     
-    int getMaterial() {return material;} //returns material differential of board
     void printBoard();      //prints char representation to couts
     
-    //For purpose of debugging, so we can see where the pieces are according to their piece list
-    void printPieces(int pce)
-    {
-        for (int i = 10 * pce; i < 10 * pce + pceNum[pce]; i++)
-        {
-            std::cout << pListR[i] << ' ' << pListC[i] << std::endl;
-        }
-    }
-    
-    int numRep()    //returns number of repetitions
-    {
-        int repCount = 0;
-        
-        if (hisPly > 7)
-        {
-            for (int i = hisPly - 1; i >= hisPly - 6; i--)
-            {
-                if (posKey == history[i].posKey)
-                {
-                    repCount++;
-                }
-                if (repCount >= 2)
-                {
-                    break;
-                }
-            }
-        }
-        
-        return repCount;
-    }
-    
 private:
+    //For purpose of debugging, so we can see where the pieces are according to their piece list
+    void printPieces(int pce);
+    
     //Initialization functions
     void ClearBoard();  //initializes all values to NOPIECE, all piece lists and nums to empty
     void InitKeys();    //initializes all keys to random 32 bit numbers
@@ -100,9 +74,9 @@ private:
     int pListC[120];    //stores column of each piece, indexed by piece type
     int enpasSquareR;   //stores the en passant square row
     int enpasSquareC;   //stores the en passant square column
-    
     int material;       //stores material differential of the board
     
+    //History
     History history[MAXGAMELENGTH]; //stores all moves made
     int hisPly;                 //stores what number ply of the game we are on
 };

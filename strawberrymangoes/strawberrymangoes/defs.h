@@ -44,6 +44,7 @@ class Board;
 //Misc
 #define NOMOVE 0
 #define MAXPOSITIONMOVES 256
+#define MINDEPTH 5
 #define MAXDEPTH 32
 #define MAXGAMELENGTH 1024
 #define TTABLEENTRIES 100000

@@ -50,8 +50,6 @@ private:
     int timeAllocated = 3000;       //allocated time to search in ms
     int searchDepth = 0;           //depth at which we are searching
     bool stop = false;
-    int minDepth = 5;              //minimum depth we search to, regardless of time allocated
-    
     int rootPosKey;                //ensures no collisions occur in the PV table
     
     Stats stat;
