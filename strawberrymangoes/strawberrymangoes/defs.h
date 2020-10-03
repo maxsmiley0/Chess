@@ -50,6 +50,9 @@ class Board;
 
 #include <string>
 
+static int totalNodes = 0;
+static double totalDepth = 0;
+
 static std::string PceChar = "PNBRQKpnbrqk.";
 static std::string RankChar = "87654321";
 static std::string FileChar = "abcdefgh";
@@ -104,6 +107,7 @@ class Timer
 //For the history table
 struct History
 {
+    int posKey;
     int move;
     int pce;
     int castlePerm;

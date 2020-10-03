@@ -189,9 +189,48 @@ const int RookTable[8][8] =
     {0    ,    0    ,    5    ,    10    ,    10    ,    5    ,    0    ,    0}
 };
 
+const int KingTable[8][8] =
+{
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-20,-30,-30,-40,-40,-30,-30,-20},
+    {-10,-20,-20,-20,-20,-20,-20,-10},
+    {20, 20,  0,  0,  0,  0, 20, 20},
+    {20, 30, 10,  0,  0, 10, 30, 20}
+};
+
+const double KingTableEg[8][8] =
+{
+    {-50,-40,-30,-20,-20,-30,-40,-50},
+    {-30,-20,-10,  0,  0,-10,-20,-30},
+    {-30,-10, 20, 30, 30, 20,-10,-30},
+    {-30,-10, 30, 40, 40, 30,-10,-30},
+    {-30,-10, 30, 40, 40, 30,-10,-30},
+    {-30,-10, 20, 30, 30, 20,-10,-30},
+    {-30,-30,  0,  0,  0,  0,-30,-30},
+    {-50,-30,-30,-30,-30,-30,-30,-50}
+};
+
 int static_eval(Board* b)
 {
     int score = b->getMaterial();
+    
+    bool inEg;          //are we in the endgame or not?
+    int pceCount = 0;   //number of non pawn / king pieces
+    
+    pceCount += b->getPceNum(WN);
+    pceCount += b->getPceNum(WB);
+    pceCount += b->getPceNum(WR);
+    pceCount += b->getPceNum(WQ);
+    
+    pceCount += b->getPceNum(BN);
+    pceCount += b->getPceNum(BB);
+    pceCount += b->getPceNum(BR);
+    pceCount += b->getPceNum(BQ);
+    
+    inEg = (pceCount <= 6);
     
     //Looping through all white pawns
     for(int i = 0; i < b->getPceNum(WP); i++)
@@ -218,6 +257,16 @@ int static_eval(Board* b)
     {
         score += RookTable[7 - b->getPceR(WQ, i)][b->getPceC(WQ, i)];
     }
+    
+    if (inEg)
+    {
+        score += KingTableEg[b->getKingR(WHITE)][b->getKingC(WHITE)];
+    }
+    else
+    {
+        score += KingTable[b->getKingR(WHITE)][b->getKingC(WHITE)];
+    }
+    
     //Looping through all black pawns
     for(int i = 0; i < b->getPceNum(BP); i++)
     {
@@ -242,6 +291,15 @@ int static_eval(Board* b)
     for(int i = 0; i < b->getPceNum(BQ); i++)
     {
         score -= RookTable[b->getPceR(BQ, i)][b->getPceC(BQ, i)];
+    }
+    
+    if (inEg)
+    {
+        score -= KingTableEg[7 - b->getKingR(BLACK)][b->getKingC(BLACK)];
+    }
+    else
+    {
+        score -= KingTable[7 - b->getKingR(BLACK)][b->getKingC(BLACK)];
     }
     
     return (b->getSide() == WHITE) ? (score) : (-score);

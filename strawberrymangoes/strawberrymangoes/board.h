@@ -57,6 +57,28 @@ public:
         }
     }
     
+    int numRep()    //returns number of repetitions
+    {
+        int repCount = 0;
+        
+        if (hisPly > 7)
+        {
+            for (int i = hisPly - 1; i >= hisPly - 6; i--)
+            {
+                if (posKey == history[i].posKey)
+                {
+                    repCount++;
+                }
+                if (repCount >= 2)
+                {
+                    break;
+                }
+            }
+        }
+        
+        return repCount;
+    }
+    
 private:
     //Initialization functions
     void ClearBoard();  //initializes all values to NOPIECE, all piece lists and nums to empty

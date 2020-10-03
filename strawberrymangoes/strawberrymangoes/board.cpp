@@ -480,6 +480,7 @@ int Board::getKingC(int color)
 void Board::pushHistory(int move)
 {
     History h;
+    h.posKey = posKey;
     h.move = move;
     h.pce = mBoard[fromR(move)][fromC(move)];
     h.castlePerm = castlePerm;
@@ -492,6 +493,7 @@ void Board::pushHistory(int move)
     if (h.pce == NOPIECE)
     {
         printBoard();
+        std::cout << printMove(move) << std::endl;
         std::cerr << "how is this possible (pce invalid in pushHistory)" << std::endl;
         exit(1);
     }

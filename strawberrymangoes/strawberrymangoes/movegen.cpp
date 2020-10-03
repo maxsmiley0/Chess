@@ -887,7 +887,7 @@ bool Movegen::squareAttacked(int r, int c, int side)
     }
     
     //Looping through all pieces of the opposite side
-    for (int i = lBound; i <= uBound; i++)
+    for (int i = uBound; i >= lBound; i--)
     {
         //Looping through all pieces of this type
         for (int j = 0; j < mBoard->getPceNum(i); j++)
@@ -1179,11 +1179,6 @@ bool Movegen::makeMove(int move)
     int tC = toC(move);
     
     int pce = mBoard->getPce(fR, fC);        //piece being moved
-    
-    if (move == 3198844 && pce == WP)
-    {
-        mBoard->printPieces(WP);
-    }
     
     //Handling special cases first
     //En passant case
