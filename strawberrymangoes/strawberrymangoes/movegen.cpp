@@ -456,7 +456,7 @@ std::list<int> Movegen::generateMoves()
                     }
                     break;
                 default:
-                    std::cerr << "Error in Movegen::generateThreats()" << std::endl;
+                    std::cerr << "Error in Movegen::generateMoves()" << std::endl;
                     break;
             }
         }
@@ -810,63 +810,12 @@ std::list<int> Movegen::generateCaptures()
                     }
                     break;
                 default:
-                    std::cerr << "Error in Movegen::generateThreats()" << std::endl;
+                    std::cerr << "Error in Movegen::generateCaptures()" << std::endl;
                     break;
             }
         }
     }
     return moveList;
-}
-
-void Movegen::printMoves(std::list<int> moves)
-{
-    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
-    {
-        int move = *itr;
-        
-        std::cout << "Move: " << move << std::endl;
-        std::cout << "From: " << fromR(move) << ' ' << fromC(move) << std::endl;
-        std::cout << "TO: " << toR(move) << ' ' << toC(move) << std::endl;
-        std::cout << "Cap: " << PceChar[captured(move)] << std::endl;
-        std::cout << "Prom: " << PceChar[promoted(move)] << std::endl;
-        std::cout << "isep: " << isEnpasMove(move) << std::endl;
-        std::cout << "ispa: " << isPawnstartMove(move) << std::endl;
-        std::cout << "isca: " << isCastleMove(move) << std::endl;
-        std::cout << std::endl;
-    }
-}
-
-int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
-{
-    int moveKey = 0;
-    //From square handling
-    moveKey |= sR;          //3 bits allocated for 8 combinations for starting rank
-    moveKey |= (sC << 3);   //3 bits allocated for 8 combinations for starting file
-    //To square handling
-    moveKey |= (eR << 6);   //3 bits allocated for 8 combinations for ending rank
-    moveKey |= (eC << 9);   //3 bits allocated for 8 combinations for ending file
-    //Capture handling
-    int capturedPce = mBoard->getPce(eR, eC);    //captured piece
-    moveKey |= (capturedPce << 12);     //4 bits allocated for 16 pieces (upper bound)
-    //Is en passant capture
-    bool pawnMove = isPawn(mBoard->getPce(sR, sC));
-    if (pawnMove && eR == mBoard->getEnpasSquareR() && eC == mBoard->getEnpasSquareC() && (sR == 3 || sR == 4))
-    {
-        moveKey |= (1 << 16);   //1 bit allocated for true or false
-    }
-    //Is pawn start move
-    if (pawnMove && abs(eR - sR) == 2)
-    {
-        moveKey |= (1 << 17);   //1 bit allocated for true or false
-    }
-    //Promoted piece
-    moveKey |= (promoted << 18);    //4 bits allocated for piece
-    //Is a castling move
-    if (isKing(mBoard->getPce(sR, sC)) && (sC == 4 && (eC == 2 || eC == 6)))
-    {
-        moveKey |= (1 << 22);
-    }
-    return moveKey;
 }
 
 bool Movegen::squareAttacked(int r, int c, int side)
@@ -1147,25 +1096,6 @@ bool Movegen::squareAttacked(int r, int c, int side)
     }
     
     return false;
-}
-
-void Movegen::printAttacked()
-{
-    for (int r = 0; r < 8; r++)
-    {
-        for (int c = 0; c < 8; c++)
-        {
-            if (squareAttacked(r, c, mBoard->getSide()))
-            {
-                std::cout << "X   ";
-            }
-            else
-            {
-                std::cout << ".   ";
-            }
-        }
-        std::cout << std::endl << std::endl;
-    }
 }
 
 bool Movegen::makeMove(int move)
@@ -1471,4 +1401,74 @@ void Movegen::perftTest(int depth)
         }
     }
     std::cout << "Total Nodes: " << totalNodes << std::endl;
+}
+
+int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
+{
+    int moveKey = 0;
+    //From square handling
+    moveKey |= sR;          //3 bits allocated for 8 combinations for starting rank
+    moveKey |= (sC << 3);   //3 bits allocated for 8 combinations for starting file
+    //To square handling
+    moveKey |= (eR << 6);   //3 bits allocated for 8 combinations for ending rank
+    moveKey |= (eC << 9);   //3 bits allocated for 8 combinations for ending file
+    //Capture handling
+    int capturedPce = mBoard->getPce(eR, eC);    //captured piece
+    moveKey |= (capturedPce << 12);     //4 bits allocated for 16 pieces (upper bound)
+    //Is en passant capture
+    bool pawnMove = isPawn(mBoard->getPce(sR, sC));
+    if (pawnMove && eR == mBoard->getEnpasSquareR() && eC == mBoard->getEnpasSquareC() && (sR == 3 || sR == 4))
+    {
+        moveKey |= (1 << 16);   //1 bit allocated for true or false
+    }
+    //Is pawn start move
+    if (pawnMove && abs(eR - sR) == 2)
+    {
+        moveKey |= (1 << 17);   //1 bit allocated for true or false
+    }
+    //Promoted piece
+    moveKey |= (promoted << 18);    //4 bits allocated for piece
+    //Is a castling move
+    if (isKing(mBoard->getPce(sR, sC)) && (sC == 4 && (eC == 2 || eC == 6)))
+    {
+        moveKey |= (1 << 22);
+    }
+    return moveKey;
+}
+
+void Movegen::printMoves(std::list<int> moves)
+{
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        int move = *itr;
+        
+        std::cout << "Move: " << move << std::endl;
+        std::cout << "From: " << fromR(move) << ' ' << fromC(move) << std::endl;
+        std::cout << "TO: " << toR(move) << ' ' << toC(move) << std::endl;
+        std::cout << "Cap: " << PceChar[captured(move)] << std::endl;
+        std::cout << "Prom: " << PceChar[promoted(move)] << std::endl;
+        std::cout << "isep: " << isEnpasMove(move) << std::endl;
+        std::cout << "ispa: " << isPawnstartMove(move) << std::endl;
+        std::cout << "isca: " << isCastleMove(move) << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+void Movegen::printAttacked()
+{
+    for (int r = 0; r < 8; r++)
+    {
+        for (int c = 0; c < 8; c++)
+        {
+            if (squareAttacked(r, c, mBoard->getSide()))
+            {
+                std::cout << "X   ";
+            }
+            else
+            {
+                std::cout << ".   ";
+            }
+        }
+        std::cout << std::endl << std::endl;
+    }
 }
