@@ -70,12 +70,12 @@
 			isa = PBXGroup;
 			children = (
 				73FC645C2518027000E3C205 /* main.cpp */,
-				731C7637251E87B500AE3099 /* searcher.cpp */,
 				731C7638251E87B500AE3099 /* searcher.h */,
-				73FC646325187CA800E3C205 /* board.h */,
-				73FC64652519216E00E3C205 /* board.cpp */,
+				731C7637251E87B500AE3099 /* searcher.cpp */,
 				73FC646C2519D0CB00E3C205 /* movegen.h */,
 				73FC646D2519D11500E3C205 /* movegen.cpp */,
+				73FC646325187CA800E3C205 /* board.h */,
+				73FC64652519216E00E3C205 /* board.cpp */,
 				73FC646425187E3E00E3C205 /* defs.h */,
 				73FC646A251924E000E3C205 /* defs.cpp */,
 			);
