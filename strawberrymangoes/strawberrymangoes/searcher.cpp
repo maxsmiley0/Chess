@@ -50,73 +50,6 @@ int Searcher::reccomendMove()
     return getPvMove();
 }
 
-int Searcher::quiescenceSearch(int alpha, int beta)
-{
-    if ((stat.nodes & 2047) == 0)
-    {
-        checkTime();
-    }
-    
-    //Statistics collection
-    stat.nodes++;
-    
-    int score = static_eval(moveGenerator->getBoard());
-    int movesMade = 0;
-    int bestMove = NOMOVE;
-    
-    //Standing pat
-    if (score >= beta)
-    {
-        return beta;
-    }
-    if (score >= alpha)
-    {
-        alpha = score;
-    }
-    
-    //Loop through all captures
-    std::list<int> captureList = moveGenerator->generateCaptures();
-    captureList = orderedMoves(captureList);
-    
-    for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
-    {
-        //Evaluate captures, recursively call quiescence search
-        if (moveGenerator->makeMove(*itr))
-        {
-            movesMade++;
-            int moveScore = -quiescenceSearch(-beta, -alpha);
-            moveGenerator->takeBack();
-            
-            if (stop)
-            {
-                return 0;
-            }
-            
-            if (moveScore > alpha)
-            {
-                if (moveScore >= beta)
-                {
-                    //Statistics collection
-                    if (movesMade == 1)
-                    {
-                        stat.failHighFirst++;
-                    }
-                    stat.failHigh++;
-                    
-                    return beta;
-                }
-                else
-                {
-                    alpha = moveScore;
-                    bestMove = *itr;
-                }
-            }
-        }
-    }
-    
-    return alpha;
-}
-
 int Searcher::alphaBeta (int alpha, int beta, int depth)
 {
     int movesMade = 0;
@@ -135,7 +68,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     }
     
     //3 move repetition
-    if (moveGenerator->getBoard()->numRep() >= 2)
+    if (getBoard()->numRep() >= 2)
     {
         return 0;
     }
@@ -143,9 +76,9 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     //Statistics collection
     stat.nodes++;
     
-    int side = moveGenerator->getBoard()->getSide();
-    int kingR = moveGenerator->getBoard()->getKingR(side);
-    int kingC = moveGenerator->getBoard()->getKingC(side);
+    int side = getBoard()->getSide();
+    int kingR = getBoard()->getKingR(side);
+    int kingC = getBoard()->getKingC(side);
     
     bool inCheck = moveGenerator->squareAttacked(kingR, kingC, side);
     //Search extension, allocate extra ply if in check
@@ -230,6 +163,73 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     return alpha;
 }
 
+int Searcher::quiescenceSearch(int alpha, int beta)
+{
+    if ((stat.nodes & 2047) == 0)
+    {
+        checkTime();
+    }
+    
+    //Statistics collection
+    stat.nodes++;
+    
+    int score = static_eval(getBoard());
+    int movesMade = 0;
+    int bestMove = NOMOVE;
+    
+    //Standing pat
+    if (score >= beta)
+    {
+        return beta;
+    }
+    if (score >= alpha)
+    {
+        alpha = score;
+    }
+    
+    //Loop through all captures
+    std::list<int> captureList = moveGenerator->generateCaptures();
+    captureList = orderedMoves(captureList);
+    
+    for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
+    {
+        //Evaluate captures, recursively call quiescence search
+        if (moveGenerator->makeMove(*itr))
+        {
+            movesMade++;
+            int moveScore = -quiescenceSearch(-beta, -alpha);
+            moveGenerator->takeBack();
+            
+            if (stop)
+            {
+                return 0;
+            }
+            
+            if (moveScore > alpha)
+            {
+                if (moveScore >= beta)
+                {
+                    //Statistics collection
+                    if (movesMade == 1)
+                    {
+                        stat.failHighFirst++;
+                    }
+                    stat.failHigh++;
+                    
+                    return beta;
+                }
+                else
+                {
+                    alpha = moveScore;
+                    bestMove = *itr;
+                }
+            }
+        }
+    }
+    
+    return alpha;
+}
+
 std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth)
 {
     std::list<int> li;  //list to store ordered moves
@@ -281,7 +281,7 @@ int Searcher::movePriority(int move, int depth)
     
     if (cap != NOPIECE)
     {
-        int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
+        int pce = getBoard()->getPce(fromR(move), fromC(move));
         int weight = 250000;
         
         weight += abs(worth(cap)) * 10;   //primary decider is worth of captured piece
@@ -313,6 +313,50 @@ int Searcher::movePriority(int move, int depth)
     return getHistoryScore(move);
 }
 
+void Searcher::storePvMove(int move)
+{
+    if (move != NOMOVE)
+    {
+        Board* b = getBoard();
+        
+        int i = b->getPosKey() % TTABLEENTRIES;
+        
+        //Trying to overwrite pv node for root position
+        if (pvTable[i].posKey == rootPosKey)
+        {
+            //Can only do so if we are overwriting it with new info about the root node
+            if (rootPosKey == b->getPosKey())
+            {
+                pvTable[i] = PVNode {getBoard()->getPosKey(), move};
+            }
+        }
+        //General case, update pv table
+        else
+        {
+            pvTable[i] = PVNode {getBoard()->getPosKey(), move};
+        }
+        
+    }
+    else
+    {
+        std::cerr << "storing null PV move" << std::endl;
+        exit(1);
+    }
+}
+
+int Searcher::getPvMove()
+{
+    int i = getBoard()->getPosKey() % TTABLEENTRIES;
+    
+    //If this board has been stored in the pv nodes ttable
+    if (pvTable[i].posKey == getBoard()->getPosKey())
+    {
+        return pvTable[i].move;
+    }
+    
+    return NOMOVE;
+}
+
 void Searcher::printPvLine(int depth)
 {
     int move = getPvMove();
@@ -335,17 +379,50 @@ void Searcher::printPvLine(int depth)
     }
 }
 
-int Searcher::getPvMove()
+void Searcher::storeKillerMove(int move, int depth)
 {
-    int i = moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES;
+    //Putting the current killer 1 into the killer 2 container
+    killerMoves[depth + MAXDEPTH] = killerMoves[depth];
+    //Storing the new killer move as the killer 1
+    killerMoves[depth] = move;
+}
+
+int Searcher::getKiller1(int depth)
+{
+    return killerMoves[depth];
+}
+
+int Searcher::getKiller2(int depth)
+{
+    return killerMoves[depth + MAXDEPTH];
+}
+
+void Searcher::storeHistoryMove(int move, int score)
+{
+    int pce = getBoard()->getPce(fromR(move), fromC(move));
     
-    //If this board has been stored in the pv nodes ttable
-    if (pvTable[i].posKey == moveGenerator->getBoard()->getPosKey())
+    if (pce == NOPIECE)
     {
-        return pvTable[i].move;
+        std::cerr << "something has gone horribly wrong" << std::endl;
+        exit(1);
     }
     
-    return NOMOVE;
+    int index = (64 * pce) + (8 * toR(move)) + toC(move);
+    historyMoves[index] = score;
+}
+
+int Searcher::getHistoryScore(int move)
+{
+    int pce = getBoard()->getPce(fromR(move), fromC(move));
+    
+    if (pce == NOPIECE)
+    {
+        std::cerr << "something has gone horribly wrong" << std::endl;
+        exit(1);
+    }
+    
+    int index = (64 * pce) + (8 * toR(move)) + toC(move);
+    return historyMoves[index];
 }
 
 void Searcher::prepSearch()
@@ -368,86 +445,9 @@ void Searcher::prepSearch()
     stat.reset();
     stop = false;
     searchDepth = 1;
-    rootPosKey = moveGenerator->getBoard()->getPosKey();
+    rootPosKey = getBoard()->getPosKey();
     
     timer.start();
-}
-
-void Searcher::storePvMove(int move)
-{
-    if (move != NOMOVE)
-    {
-        Board* b = moveGenerator->getBoard();
-        
-        int i = b->getPosKey() % TTABLEENTRIES;
-        
-        //Trying to overwrite pv node for root position
-        if (pvTable[i].posKey == rootPosKey)
-        {
-            //Can only do so if we are overwriting it with new info about the root node
-            if (rootPosKey == b->getPosKey())
-            {
-                pvTable[i] = PVNode {moveGenerator->getBoard()->getPosKey(), move};
-            }
-        }
-        //General case, update pv table
-        else
-        {
-            pvTable[i] = PVNode {moveGenerator->getBoard()->getPosKey(), move};
-        }
-        
-    }
-    else
-    {
-        std::cerr << "storing null PV move" << std::endl;
-        exit(1);
-    }
-}
-
-void Searcher::storeKillerMove(int move, int depth)
-{
-    //Putting the current killer 1 into the killer 2 container
-    killerMoves[depth + MAXDEPTH] = killerMoves[depth];
-    //Storing the new killer move as the killer 1
-    killerMoves[depth] = move;
-}
-
-void Searcher::storeHistoryMove(int move, int score)
-{
-    int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
-    
-    if (pce == NOPIECE)
-    {
-        std::cerr << "something has gone horribly wrong" << std::endl;
-        exit(1);
-    }
-    
-    int index = (64 * pce) + (8 * toR(move)) + toC(move);
-    historyMoves[index] = score;
-}
-
-int Searcher::getHistoryScore(int move)
-{
-    int pce = moveGenerator->getBoard()->getPce(fromR(move), fromC(move));
-    
-    if (pce == NOPIECE)
-    {
-        std::cerr << "something has gone horribly wrong" << std::endl;
-        exit(1);
-    }
-    
-    int index = (64 * pce) + (8 * toR(move)) + toC(move);
-    return historyMoves[index];
-}
-
-int Searcher::getKiller1(int depth)
-{
-    return killerMoves[depth];
-}
-
-int Searcher::getKiller2(int depth)
-{
-    return killerMoves[depth + MAXDEPTH];
 }
 
 void Searcher::checkTime()
