@@ -25,21 +25,21 @@ public:
     void popHistory();            //gets rid of latest move
     
     //Accessors
-    int getPce(int r, int c);        //returns piece located at (r, c)
-    int getPceNum(int pce);          //returns # of pieces of a given type
-    int getPceR(int pce, int i);     //returns R coord on 'ith' piece (from 0 to pceNum)
-    int getPceC(int pce, int i);     //returns C coord on 'ith' piece (from 0 to pceNum)
-    int getKingR(int color);         //returns r coord of king of a given color
-    int getKingC(int color);         //returns c coord of king of a given color
-    int getSide() {return side; }
-    int getPosKey() {return posKey;} //Returns position key
-    int getEnpasSquareR() {return enpasSquareR; }
-    int getEnpasSquareC() {return enpasSquareC; }
-    int getMaterial() {return material;} //returns material differential of board
-    int numRep();                        //returns number of repetitions
-    bool hasKcPerm();   //returns if the current side still has kingside castling perms
-    bool hasQcPerm();   //returns if the current side still has queenside castling perms
-    History getLastState();              //returns latest move in history table
+    int getPce(int r, int c) const;        //returns piece located at (r, c)
+    int getPceNum(int pce) const;          //returns # of pieces of a given type
+    int getPceR(int pce, int i) const;     //returns R coord on 'ith' piece (from 0 to pceNum)
+    int getPceC(int pce, int i) const;     //returns C coord on 'ith' piece (from 0 to pceNum)
+    int getKingR(int color) const;         //returns r coord of king of a given color
+    int getKingC(int color) const;         //returns c coord of king of a given color
+    int getSide() const {return side; }
+    int getPosKey() const {return posKey;} //Returns position key
+    int getEnpasSquareR() const {return enpasSquareR; }
+    int getEnpasSquareC() const {return enpasSquareC; }
+    int getMaterial() const {return material;} //returns material differential of board
+    int numRep() const;                        //returns number of repetitions
+    bool hasKcPerm() const;   //returns if the current side still has kingside castling perms
+    bool hasQcPerm() const;   //returns if the current side still has queenside castling perms
+    History getLastState() const;             //returns latest move in history table
     
     //Modifies en passant, castling, and side information
     void hashInCastle(int castlePerm);   //hashes in a given castle perm

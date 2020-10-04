@@ -244,27 +244,27 @@ void Board::popHistory()
     hisPly--;
 }
 
-int Board::getPce(int r, int c)
+int Board::getPce(int r, int c) const
 {
     return mBoard[r][c];
 }
 
-int Board::getPceNum(int pce)
+int Board::getPceNum(int pce) const
 {
     return pceNum[pce];
 }
 
-int Board::getPceR(int pce, int i)
+int Board::getPceR(int pce, int i) const
 {
     return pListR[10 * pce + i];
 }
 
-int Board::getPceC(int pce, int i)
+int Board::getPceC(int pce, int i) const
 {
     return pListC[10 * pce + i];
 }
 
-int Board::getKingR(int color)
+int Board::getKingR(int color) const
 {
     if (color == WHITE)
     {
@@ -276,7 +276,7 @@ int Board::getKingR(int color)
     }
 }
 
-int Board::getKingC(int color)
+int Board::getKingC(int color) const
 {
     if (color == WHITE)
     {
@@ -288,7 +288,7 @@ int Board::getKingC(int color)
     }
 }
 
-int Board::numRep()    //returns number of repetitions
+int Board::numRep() const
 {
     int repCount = 0;
     
@@ -310,7 +310,7 @@ int Board::numRep()    //returns number of repetitions
     return repCount;
 }
 
-bool Board::hasKcPerm()
+bool Board::hasKcPerm() const
 {
     if (side == WHITE)
     {
@@ -322,7 +322,7 @@ bool Board::hasKcPerm()
     }
 }
 
-bool Board::hasQcPerm()
+bool Board::hasQcPerm() const
 {
     if (side == WHITE)
     {
@@ -334,7 +334,7 @@ bool Board::hasQcPerm()
     }
 }
 
-History Board::getLastState()
+History Board::getLastState() const
 {
     if (hisPly == 0)
     {

@@ -230,7 +230,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     return alpha;
 }
 
-std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth)
+std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth) const
 {
     std::list<int> li;  //list to store ordered moves
     
@@ -268,7 +268,7 @@ std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth)
     return li;
 }
 
-int Searcher::movePriority(int move, int depth)
+int Searcher::movePriority(int move, int depth) const
 {
     //check if principal variation, will return value 300,000
     if (getPvMove() == move)
@@ -344,7 +344,7 @@ void Searcher::storePvMove(int move)
     }
 }
 
-int Searcher::getPvMove()
+int Searcher::getPvMove() const
 {
     int i = getBoard()->getPosKey() % TTABLEENTRIES;
     
@@ -387,12 +387,12 @@ void Searcher::storeKillerMove(int move, int depth)
     killerMoves[depth] = move;
 }
 
-int Searcher::getKiller1(int depth)
+int Searcher::getKiller1(int depth) const
 {
     return killerMoves[depth];
 }
 
-int Searcher::getKiller2(int depth)
+int Searcher::getKiller2(int depth) const
 {
     return killerMoves[depth + MAXDEPTH];
 }
@@ -411,7 +411,7 @@ void Searcher::storeHistoryMove(int move, int score)
     historyMoves[index] = score;
 }
 
-int Searcher::getHistoryScore(int move)
+int Searcher::getHistoryScore(int move) const
 {
     int pce = getBoard()->getPce(fromR(move), fromC(move));
     

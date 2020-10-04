@@ -19,7 +19,7 @@ Movegen::~Movegen()
     delete mBoard;
 }
 
-std::list<int> Movegen::generateMoves()
+std::list<int> Movegen::generateMoves() const
 {
     std::list<int> moveList;
     
@@ -465,7 +465,7 @@ std::list<int> Movegen::generateMoves()
     return moveList;
 }
 
-std::list<int> Movegen::generateCaptures()
+std::list<int> Movegen::generateCaptures() const
 {
     std::list<int> moveList;
     
@@ -818,7 +818,7 @@ std::list<int> Movegen::generateCaptures()
     return moveList;
 }
 
-bool Movegen::squareAttacked(int r, int c, int side)
+bool Movegen::squareAttacked(int r, int c, int side) const
 {
     int lBound;
     int uBound;
@@ -1360,7 +1360,7 @@ void Movegen::takeBack()
     mBoard->popHistory();
 }
 
-int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted)
+int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted) const
 {
     int moveKey = 0;
     //From square handling

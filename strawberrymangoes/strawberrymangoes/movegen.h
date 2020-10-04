@@ -20,16 +20,16 @@ public:
     ~Movegen();
     
     //Move generation related
-    std::list<int> generateMoves();   //returns a list of legal moves in a given position. only accounts for pseudolegal moves, without checking to see if king is in check at end
-    std::list<int> generateCaptures();   //returns a list of legal captures in a given position. only accounts for pseudolegal captures, without checking to see if king is in check at end
-    bool squareAttacked(int r, int c, int side);  //returns true if square is attacked, used for king checks and castling, if we specify side as WHITE, it will loop through black pieces
+    std::list<int> generateMoves() const;   //returns a list of legal moves in a given position. only accounts for pseudolegal moves, without checking to see if king is in check at end
+    std::list<int> generateCaptures() const;   //returns a list of legal captures in a given position. only accounts for pseudolegal captures, without checking to see if king is in check at end
+    bool squareAttacked(int r, int c, int side) const;  //returns true if square is attacked, used for king checks and castling, if we specify side as WHITE, it will loop through black pieces
     
     //Updates all relevant key information for board
     bool makeMove(int move);    //Returns true if we can make such a move (and makes the move), false otherwise
     void takeBack();            //Takes back the previously made move
-    int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
+    int getMove(int sR, int sC, int eR, int eC, int promoted) const;   //generates a move given from, and to, assumes valid parameters
     
-    Board* getBoard() {return mBoard; } //trivial accessor
+    Board* getBoard() const {return mBoard; } //trivial accessor
     
 private:
     //Board from which moves and scores are generated
