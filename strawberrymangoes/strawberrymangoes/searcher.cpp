@@ -173,7 +173,7 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     //Statistics collection
     stat.nodes++;
     
-    int score = static_eval(getBoard());
+    int score = static_eval(*getBoard());
     int movesMade = 0;
     int bestMove = NOMOVE;
     

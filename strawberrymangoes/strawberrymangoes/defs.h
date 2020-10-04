@@ -60,7 +60,7 @@ static std::string RankChar = "87654321";
 static std::string FileChar = "abcdefgh";
 
 //If true, calling functions that print to cout will include extra information
-static bool debugMode = false;
+static bool debugMode = true;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
@@ -85,7 +85,7 @@ std::string printMove(int move);    //converts move e2e4 form
 int worth(int pce);     //returns worth, give piece
 
 //static evaluation, to be called at the leaf nodes of the game tree
-int static_eval(Board* b);
+const int static_eval(const Board& b);
 
 //Timer class for statistics purposes
 class Timer

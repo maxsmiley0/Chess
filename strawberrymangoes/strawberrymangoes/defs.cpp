@@ -222,95 +222,95 @@ const double KingTableEg[8][8] =
 };
 
 //Static evaluation, to be called at the leaf nodes
-int static_eval(Board* b)
+const int static_eval(const Board& b)
 {
-    int score = b->getMaterial();
+    int score = b.getMaterial();
     
     bool inEg;          //are we in the endgame or not?
     int pceCount = 0;   //number of non pawn / king pieces
     
-    pceCount += b->getPceNum(WN);
-    pceCount += b->getPceNum(WB);
-    pceCount += b->getPceNum(WR);
-    pceCount += b->getPceNum(WQ);
+    pceCount += b.getPceNum(WN);
+    pceCount += b.getPceNum(WB);
+    pceCount += b.getPceNum(WR);
+    pceCount += b.getPceNum(WQ);
     
-    pceCount += b->getPceNum(BN);
-    pceCount += b->getPceNum(BB);
-    pceCount += b->getPceNum(BR);
-    pceCount += b->getPceNum(BQ);
+    pceCount += b.getPceNum(BN);
+    pceCount += b.getPceNum(BB);
+    pceCount += b.getPceNum(BR);
+    pceCount += b.getPceNum(BQ);
     
     inEg = (pceCount <= 6);
     
     //Looping through all white pawns
-    for(int i = 0; i < b->getPceNum(WP); i++)
+    for(int i = 0; i < b.getPceNum(WP); i++)
     {
-        score += PawnTable[7 - b->getPceR(WP, i)][b->getPceC(WP, i)];
+        score += PawnTable[7 - b.getPceR(WP, i)][b.getPceC(WP, i)];
     }
     //Looping through all white knights
-    for(int i = 0; i < b->getPceNum(WN); i++)
+    for(int i = 0; i < b.getPceNum(WN); i++)
     {
-        score += KnightTable[7 - b->getPceR(WN, i)][b->getPceC(WN, i)];
+        score += KnightTable[7 - b.getPceR(WN, i)][b.getPceC(WN, i)];
     }
     //Looping through all white bishops
-    for(int i = 0; i < b->getPceNum(WB); i++)
+    for(int i = 0; i < b.getPceNum(WB); i++)
     {
-        score += BishopTable[7 - b->getPceR(WB, i)][b->getPceC(WB, i)];
+        score += BishopTable[7 - b.getPceR(WB, i)][b.getPceC(WB, i)];
     }
     //Looping through all white rooks
-    for(int i = 0; i < b->getPceNum(WR); i++)
+    for(int i = 0; i < b.getPceNum(WR); i++)
     {
-        score += RookTable[7 - b->getPceR(WR, i)][b->getPceC(WR, i)];
+        score += RookTable[7 - b.getPceR(WR, i)][b.getPceC(WR, i)];
     }
     //Looping through all white queens, use a rook table
-    for(int i = 0; i < b->getPceNum(WQ); i++)
+    for(int i = 0; i < b.getPceNum(WQ); i++)
     {
-        score += RookTable[7 - b->getPceR(WQ, i)][b->getPceC(WQ, i)];
+        score += RookTable[7 - b.getPceR(WQ, i)][b.getPceC(WQ, i)];
     }
     //Use different PSTs depending on the game stage
     if (inEg)
     {
-        score += KingTableEg[b->getKingR(WHITE)][b->getKingC(WHITE)];
+        score += KingTableEg[b.getKingR(WHITE)][b.getKingC(WHITE)];
     }
     else
     {
-        score += KingTable[b->getKingR(WHITE)][b->getKingC(WHITE)];
+        score += KingTable[b.getKingR(WHITE)][b.getKingC(WHITE)];
     }
     //Looping through all black pawns
-    for(int i = 0; i < b->getPceNum(BP); i++)
+    for(int i = 0; i < b.getPceNum(BP); i++)
     {
-        score -= PawnTable[b->getPceR(BP, i)][b->getPceC(BP, i)];
+        score -= PawnTable[b.getPceR(BP, i)][b.getPceC(BP, i)];
     }
     //Looping through all black knights
-    for(int i = 0; i < b->getPceNum(BN); i++)
+    for(int i = 0; i < b.getPceNum(BN); i++)
     {
-        score -= KnightTable[b->getPceR(BN, i)][b->getPceC(BN, i)];
+        score -= KnightTable[b.getPceR(BN, i)][b.getPceC(BN, i)];
     }
     //Looping through all black bishops
-    for(int i = 0; i < b->getPceNum(BB); i++)
+    for(int i = 0; i < b.getPceNum(BB); i++)
     {
-        score -= BishopTable[b->getPceR(BB, i)][b->getPceC(BB, i)];
+        score -= BishopTable[b.getPceR(BB, i)][b.getPceC(BB, i)];
     }
     //Looping through all black rooks
-    for(int i = 0; i < b->getPceNum(BR); i++)
+    for(int i = 0; i < b.getPceNum(BR); i++)
     {
-        score -= RookTable[b->getPceR(BR, i)][b->getPceC(BR, i)];
+        score -= RookTable[b.getPceR(BR, i)][b.getPceC(BR, i)];
     }
     //Looping through all black queens
-    for(int i = 0; i < b->getPceNum(BQ); i++)
+    for(int i = 0; i < b.getPceNum(BQ); i++)
     {
-        score -= RookTable[b->getPceR(BQ, i)][b->getPceC(BQ, i)];
+        score -= RookTable[b.getPceR(BQ, i)][b.getPceC(BQ, i)];
     }
     //Use different PSTs depending on the game stage
     if (inEg)
     {
-        score -= KingTableEg[7 - b->getKingR(BLACK)][b->getKingC(BLACK)];
+        score -= KingTableEg[7 - b.getKingR(BLACK)][b.getKingC(BLACK)];
     }
     else
     {
-        score -= KingTable[7 - b->getKingR(BLACK)][b->getKingC(BLACK)];
+        score -= KingTable[7 - b.getKingR(BLACK)][b.getKingC(BLACK)];
     }
     
-    return (b->getSide() == WHITE) ? (score) : (-score);
+    return (b.getSide() == WHITE) ? (score) : (-score);
 }
 
 //Used for RAND32
