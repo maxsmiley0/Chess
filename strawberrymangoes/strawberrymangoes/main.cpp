@@ -20,10 +20,8 @@ int main()
     //r2q3k/pn2bprp/4pNp1/2p1PbQ1/3p1P2/5NR1/PPP3PP/2B2RK1 b - -
     //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
     Searcher s;
-    s.getMoveGenerator()->getBoard()->parseFen("4r1k1/1p3ppp/p2p4/3p1rP1/QP3P1P/2q1p3/R3R3/6K1 b - -");
-    cout << printMove(s.reccomendMove());
-    /*
-    
+    s.getMoveGenerator()->getBoard()->parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
+
     while (true)
     {
         s.getMoveGenerator()->getBoard()->printBoard();
@@ -41,6 +39,6 @@ int main()
         int pce = NOPIECE;
         s.getMoveGenerator()->makeMove(s.getMoveGenerator()->getMove(f1, f2, f3, f4, pce));
         s.getMoveGenerator()->makeMove(s.reccomendMove());
-    }*/
+    }
     return 0;
 }

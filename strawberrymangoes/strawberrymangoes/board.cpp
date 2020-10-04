@@ -480,24 +480,27 @@ void Board::printBoard()
         std::cout << std::endl << std::endl;
     }
     
-    std::cout << "Side to play: ";
-    (side == WHITE) ? (std::cout << 'w' << std::endl) : (std::cout << 'b' << std::endl);
-    
-    std::cout << "En Pas Square: ";
-    if (enpasSquareC != OFFBOARD)
+    if (debugMode)
     {
-        std::cout << (char)((int)'a' + enpasSquareC);
-        std::cout << 8 - enpasSquareR;
+        std::cout << "Side to play: ";
+        (side == WHITE) ? (std::cout << 'w' << std::endl) : (std::cout << 'b' << std::endl);
+        
+        std::cout << "En Pas Square: ";
+        if (enpasSquareC != OFFBOARD)
+        {
+            std::cout << (char)((int)'a' + enpasSquareC);
+            std::cout << 8 - enpasSquareR;
+        }
+        std::cout << std::endl;
+        
+        
+        std::cout << "Castling Perms: ";
+        if ((castlePerm & WKCA) != 0) std::cout << 'K';
+        if ((castlePerm & WQCA) != 0) std::cout << 'Q';
+        if ((castlePerm & BKCA) != 0) std::cout << 'k';
+        if ((castlePerm & BQCA) != 0) std::cout << 'q';
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
-    
-    
-    std::cout << "Castling Perms: ";
-    if ((castlePerm & WKCA) != 0) std::cout << 'K';
-    if ((castlePerm & WQCA) != 0) std::cout << 'Q';
-    if ((castlePerm & BKCA) != 0) std::cout << 'k';
-    if ((castlePerm & BQCA) != 0) std::cout << 'q';
-    std::cout << std::endl;
 }
 
 void Board::InitKeys()

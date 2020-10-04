@@ -18,6 +18,38 @@ Searcher::~Searcher()
     delete moveGenerator;
 }
 
+int Searcher::reccomendMove()
+{
+    prepSearch();
+    
+    //Iterative deepening
+    for (; true; searchDepth++)
+    {
+        alphaBeta(-INFINITY, INFINITY, searchDepth);
+        
+        if (stop)
+        {
+            break;
+        }
+    }
+    
+    if (debugMode)
+    {
+        std::cout << "Nodes Searched: " << stat.nodes << std::endl;
+        std::cout << "Search Speed: " << (stat.nodes / timeAllocated) << " kN/s" << std::endl;
+        std::cout << "Move Ordering: " << (100 * stat.failHighFirst / (stat.failHigh + 1)) << '%' <<  std::endl;
+        std::cout << "Depth: " << (searchDepth - 1) << std::endl;
+        printPvLine(searchDepth - 1);
+    }
+    
+    if (getPvMove() == NOMOVE)
+    {
+        //realloc time for new search..?
+    }
+    
+    return getPvMove();
+}
+
 int Searcher::quiescenceSearch(int alpha, int beta)
 {
     if ((stat.nodes & 2047) == 0)
@@ -30,7 +62,6 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     
     int score = static_eval(moveGenerator->getBoard());
     int movesMade = 0;
-    int oldAlpha = alpha;
     int bestMove = NOMOVE;
     
     //Standing pat
@@ -43,11 +74,13 @@ int Searcher::quiescenceSearch(int alpha, int beta)
         alpha = score;
     }
     
+    //Loop through all captures
     std::list<int> captureList = moveGenerator->generateCaptures();
     captureList = orderedMoves(captureList);
     
     for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
     {
+        //Evaluate captures, recursively call quiescence search
         if (moveGenerator->makeMove(*itr))
         {
             movesMade++;
@@ -90,6 +123,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     int oldAlpha = alpha;
     int bestMove = NOMOVE;
     
+    //Called at leaf nodes
     if (depth <= 0 || depth >= MAXDEPTH)
     {
         return quiescenceSearch(alpha, beta);
@@ -100,6 +134,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
         checkTime();
     }
     
+    //3 move repetition
     if (moveGenerator->getBoard()->numRep() >= 2)
     {
         return 0;
@@ -113,17 +148,20 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     int kingC = moveGenerator->getBoard()->getKingC(side);
     
     bool inCheck = moveGenerator->squareAttacked(kingR, kingC, side);
-    
+    //Search extension, allocate extra ply if in check
     if (inCheck)
     {
         depth++;
     }
     
+    //Order moves
     std::list<int> moveList = moveGenerator->generateMoves();
     moveList = orderedMoves(moveList, depth);
     
+    //Loop through all moves
     for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
     {
+        //Evaluate position by calling alpha beta recursively
         if (moveGenerator->makeMove(*itr))
         {
             movesMade++;
@@ -168,8 +206,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
         }
     }
     
-    //worryabout mates later... wait we have to worry about them now...
-    
     if (movesMade == 0)
     {
         if (inCheck)
@@ -192,73 +228,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     }
     
     return alpha;
-}
-
-int Searcher::reccomendMove()
-{
-    prepSearch();
-    
-    //Iterative deepening
-    for (; true; searchDepth++)
-    {
-        alphaBeta(-INFINITY, INFINITY, searchDepth);
-        
-        if (getPvMove() == NOMOVE)
-        {
-            //principalMove = getPvMove();
-            std::cerr << "pv move is null move" << std::endl;
-            std::cout << printMove(getPvMove()) << std::endl;
-            std::cout << printMove(pvTable[moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES].move) << std::endl;
-            std::cout << "Stored board id:  " << pvTable[moveGenerator->getBoard()->getPosKey() % TTABLEENTRIES].posKey << std::endl;
-            std::cout << "Current GameBoard Id: " << moveGenerator->getBoard()->getPosKey() << std::endl;
-            exit(1);
-        }
-        
-        if (stop)
-        {
-            break;
-        }
-    }
-    
-    std::cout << "Nodes Searched: " << stat.nodes << std::endl;
-    std::cout << "Search Speed: " << (stat.nodes / timeAllocated) << " kN/s" << std::endl;
-    std::cout << "Move Ordering: " << (100 * stat.failHighFirst / (stat.failHigh + 1)) << '%' <<  std::endl;
-    std::cout << "Depth: " << (searchDepth - 1) << std::endl;
-    printPvLine(searchDepth - 1);
-    
-    totalNodes += stat.nodes;
-    totalDepth += searchDepth - 1;
-    
-    std::cout << "Total Nodes: " << totalNodes << std::endl;
-    std::cout << "Avg Depth: " << (totalDepth / 100) << std::endl;
-    
-     /*
-    
-    stat.reset();
-    Timer t;
-    t.start();
-    
-    alphaBeta(-INFINITY, INFINITY, depth);
-    
-    std::cout << "Nodes Searched: " << stat.nodes << std::endl;
-    std::cout << "Search Speed: " << (stat.nodes / t.elapsed()) << " kN/s" << std::endl;
-    std::cout << "Move Ordering: " << (100 * stat.failHighFirst / stat.failHigh) << '%' <<  std::endl;
-    printPvLine(depth);*/
-    //best move not being updated or finding the same move?
-    std::cout << printMove(getPvMove()) << std::endl;
-    //std::cout << printMove(principalMove) << std::endl;
-    
-    if (getPvMove() == NOMOVE)
-    {
-        //realloc time
-    }
-    
-    return getPvMove();
-}
-
-Movegen* Searcher::getMoveGenerator()
-{
-    return moveGenerator;
 }
 
 std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth)
@@ -420,11 +389,6 @@ void Searcher::storePvMove(int move)
             {
                 pvTable[i] = PVNode {moveGenerator->getBoard()->getPosKey(), move};
             }
-            else
-            {
-                std::cerr << "Attempting to rewrite pv node for root pos key" << std::endl;
-            }
-            
         }
         //General case, update pv table
         else

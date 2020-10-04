@@ -54,14 +54,13 @@ class Board;
 
 #include <string>
 
-//For purposes of statistic countings
-static int totalNodes = 0;
-static double totalDepth = 0;
-
 //A quick shortcut, piece representations indexed by piece type
 static std::string PceChar = "PNBRQKpnbrqk.";
 static std::string RankChar = "87654321";
 static std::string FileChar = "abcdefgh";
+
+//If true, calling functions that print to cout will include extra information
+static bool debugMode = false;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer

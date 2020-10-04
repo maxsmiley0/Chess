@@ -27,6 +27,7 @@ public:
     //Updates all relevant key information for board
     bool makeMove(int move);    //Returns true if we can make such a move (and makes the move), false otherwise
     void takeBack();            //Takes back the previously made move
+    int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
     
     Board* getBoard() {return mBoard; } //trivial accessor
     
@@ -38,8 +39,6 @@ private:
     void perft(int depth);
     void perftTest(int depth);
     int leafNodes;  //used in perft / perftTest
-    
-    int getMove(int sR, int sC, int eR, int eC, int promoted);   //generates a move given from, and to, assumes valid parameters
     
     //Debugging related
     void printMoves(std::list<int> moves); //prints moves to cout
