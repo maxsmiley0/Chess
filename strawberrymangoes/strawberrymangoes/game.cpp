@@ -56,28 +56,6 @@ void Game::play()
     }
 }
 
-bool Game::vetMove(int move)
-{
-    bool isPseudoLegal = false;
-    std::list<int> moves = getMoveGenerator()->generateMoves();
-    //Ensure the inputted move is at least a pseudolegal move
-    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
-    {
-        if (*itr == move)
-        {
-            isPseudoLegal = true;
-            break;
-        }
-    }
-    
-    if (!isPseudoLegal)
-    {
-        return false;
-    }
-    //Otherwise, make the move
-    return getMoveGenerator()->makeMove(move);
-}
-
 void Game::chooseSide()
 {
     //Which side will the player be?
@@ -106,6 +84,28 @@ void Game::chooseSide()
             std::cout << "Invalid color" << std::endl;
         }
     }
+}
+
+bool Game::vetMove(int move)
+{
+    bool isPseudoLegal = false;
+    std::list<int> moves = getMoveGenerator()->generateMoves();
+    //Ensure the inputted move is at least a pseudolegal move
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        if (*itr == move)
+        {
+            isPseudoLegal = true;
+            break;
+        }
+    }
+    
+    if (!isPseudoLegal)
+    {
+        return false;
+    }
+    //Otherwise, make the move
+    return getMoveGenerator()->makeMove(move);
 }
 
 void Game::runGame()

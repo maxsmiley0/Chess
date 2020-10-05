@@ -16,38 +16,33 @@ class Game
 public:
     Game();
     ~Game();
-    
-    void play();
     /*
-     loops while game over, cin
-     some kind of vet function
-     */
-    //reset game
+    Description of play:
+    First: sets the board to the start fen
+    Second: prompts user for the side they want to play
+    Third: loops until game ends, with each iteration prompting the user to input a move, while the computer outputs a move
+    Fourth: prints the game result to cout
+    */
+    void play();
     
+private:
+    //Accessors
     Searcher* getSearcher() const {return mSearch; }
     Movegen* getMoveGenerator() const {return mSearch->getMoveGenerator(); }
     Board* getBoard() const {return mSearch->getBoard(); }
-    //accessors for movegen, searcher, board
     
-private:
-    
-    void chooseSide();          //
-    void runGame();             //
-    void checkGameStatus();         
+    //Components of the main play method
+    void chooseSide();          //prompts the user to choose the side
+    void runGame();             //the "back and forth" component of play
+    void checkGameStatus();     //checks if the game is over
     bool vetMove(int move);     //returns true if move is allowed
+    unsigned long legalMoves(const std::list<int> moves);  //return number of actual legal moves, discounting all pseudolegal moves that would result in king being in check
     
-    unsigned long legalMoves(const std::list<int> moves);  //
-    
-    Searcher* mSearch;
+    //Members
+    int playerColor;
     bool gameOver;
     const std::string startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";
-    int playerColor;
-    
-    //Checks when game is over
-    //Start fen
-    //vet fnct
-    //searcher
-    //player side
+    Searcher* mSearch;
 };
 
 #endif /* Game_h */
