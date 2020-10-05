@@ -30,6 +30,14 @@ public:
     //accessors for movegen, searcher, board
     
 private:
+    
+    void chooseSide();          //
+    void runGame();             //
+    void checkGameStatus();         
+    bool vetMove(int move);     //returns true if move is allowed
+    
+    unsigned long legalMoves(const std::list<int> moves);  //
+    
     Searcher* mSearch;
     bool gameOver;
     const std::string startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";

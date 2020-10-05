@@ -73,8 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				73FC645C2518027000E3C205 /* main.cpp */,
-				739E2C95252A80F900BE147A /* game.cpp */,
 				739E2C96252A80F900BE147A /* game.h */,
+				739E2C95252A80F900BE147A /* game.cpp */,
 				731C7638251E87B500AE3099 /* searcher.h */,
 				731C7637251E87B500AE3099 /* searcher.cpp */,
 				73FC646C2519D0CB00E3C205 /* movegen.h */,
