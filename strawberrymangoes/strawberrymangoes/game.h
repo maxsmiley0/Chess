@@ -9,22 +9,32 @@
 #ifndef Game_h
 #define Game_h
 
+#include "searcher.h"
+
 class Game
 {
 public:
-    //constructor
-    //destructor
+    Game();
+    ~Game();
     
-    //"play"
+    void play();
     /*
      loops while game over, cin
      some kind of vet function
      */
     //reset game
     
+    Searcher* getSearcher() const {return mSearch; }
+    Movegen* getMoveGenerator() const {return mSearch->getMoveGenerator(); }
+    Board* getBoard() const {return mSearch->getBoard(); }
     //accessors for movegen, searcher, board
     
 private:
+    Searcher* mSearch;
+    bool gameOver;
+    const std::string startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";
+    int playerColor;
+    
     //Checks when game is over
     //Start fen
     //vet fnct

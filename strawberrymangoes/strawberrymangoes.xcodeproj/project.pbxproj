@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		731C7639251E87B500AE3099 /* searcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 731C7637251E87B500AE3099 /* searcher.cpp */; };
-		739E2C97252A80F900BE147A /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739E2C95252A80F900BE147A /* Game.cpp */; };
+		739E2C97252A80F900BE147A /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739E2C95252A80F900BE147A /* game.cpp */; };
 		73FC645D2518027000E3C205 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC645C2518027000E3C205 /* main.cpp */; };
 		73FC64672519216F00E3C205 /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC64652519216E00E3C205 /* board.cpp */; };
 		73FC646B251924E000E3C205 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FC646A251924E000E3C205 /* defs.cpp */; };
@@ -30,8 +30,8 @@
 /* Begin PBXFileReference section */
 		731C7637251E87B500AE3099 /* searcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searcher.cpp; sourceTree = "<group>"; };
 		731C7638251E87B500AE3099 /* searcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searcher.h; sourceTree = "<group>"; };
-		739E2C95252A80F900BE147A /* Game.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
-		739E2C96252A80F900BE147A /* Game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
+		739E2C95252A80F900BE147A /* game.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = game.cpp; sourceTree = "<group>"; };
+		739E2C96252A80F900BE147A /* game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = game.h; sourceTree = "<group>"; };
 		73FC64592518026F00E3C205 /* strawberrymangoes */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = strawberrymangoes; sourceTree = BUILT_PRODUCTS_DIR; };
 		73FC645C2518027000E3C205 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		73FC646325187CA800E3C205 /* board.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = board.h; sourceTree = "<group>"; };
@@ -73,8 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				73FC645C2518027000E3C205 /* main.cpp */,
-				739E2C95252A80F900BE147A /* Game.cpp */,
-				739E2C96252A80F900BE147A /* Game.h */,
+				739E2C95252A80F900BE147A /* game.cpp */,
+				739E2C96252A80F900BE147A /* game.h */,
 				731C7638251E87B500AE3099 /* searcher.h */,
 				731C7637251E87B500AE3099 /* searcher.cpp */,
 				73FC646C2519D0CB00E3C205 /* movegen.h */,
@@ -147,7 +147,7 @@
 				73FC64672519216F00E3C205 /* board.cpp in Sources */,
 				73FC646E2519D11500E3C205 /* movegen.cpp in Sources */,
 				73FC645D2518027000E3C205 /* main.cpp in Sources */,
-				739E2C97252A80F900BE147A /* Game.cpp in Sources */,
+				739E2C97252A80F900BE147A /* game.cpp in Sources */,
 				731C7639251E87B500AE3099 /* searcher.cpp in Sources */,
 				73FC646B251924E000E3C205 /* defs.cpp in Sources */,
 			);

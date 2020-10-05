@@ -313,6 +313,23 @@ const int static_eval(const Board& b)
     return (b.getSide() == WHITE) ? (score) : (-score);
 }
 
+#include <cstring>
+#include <cstdlib>
+#include <unistd.h>
+#include <termios.h>
+
+static const char* ESC_SEQ = "\x1B[";  // ANSI Terminal escape sequence:  ESC [
+
+void clearScreen() 
+{
+    static const char* term = getenv("TERM");
+    if (term == nullptr  ||  strcmp(term, "dumb") == 0)
+        std::cout << std::endl;
+     else
+        std::cout << ESC_SEQ << "2J" << ESC_SEQ << "H" << std::flush;
+}
+
+
 //Used for RAND32
 static std::random_device rd;
 static std::default_random_engine generator(rd());
