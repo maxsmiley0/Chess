@@ -115,7 +115,7 @@ void Game::runGame()
         if (getBoard()->getSide() == playerColor)
         {
             clearScreen();
-            getBoard()->printBoard();
+            getBoard()->printBoard(playerColor);
             std::cout << "Enter a move: " << std::endl;
             std::string input;
             std::cin >> input;
@@ -155,18 +155,18 @@ void Game::runGame()
             }
             
             checkGameStatus();
-            if (gameOver) {clearScreen(); getBoard()->printBoard(); break;}
+            if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
         }
         else
         {
             clearScreen();
             //Computer makes move
-            getBoard()->printBoard();
+            getBoard()->printBoard(playerColor);
             std::cout << "Computer is thinking..." << std::endl;
             getMoveGenerator()->makeMove(mSearch->reccomendMove());
             
             checkGameStatus();
-            if (gameOver) {clearScreen(); getBoard()->printBoard(); break;}
+            if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
         }
     }
 }

@@ -48,7 +48,7 @@ public:
     void hashOutEp();                    //hashes out ep, if enpas square exists
     void changeSide();                   //changes side and hashes the pos key
     
-    void printBoard();      //prints char representation to couts
+    void printBoard(int side = WHITE);   //prints char representation to couts
     
 private:
     //For purpose of debugging, so we can see where the pieces are according to their piece list

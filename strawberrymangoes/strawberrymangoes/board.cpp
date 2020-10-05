@@ -469,15 +469,57 @@ void Board::printPieces(int pce)
     }
 }
 
-void Board::printBoard()
+void Board::printBoard(int side)
 {
-    for (int r = 0; r < 8; r++)
+    if (side == WHITE)
     {
-        for (int c = 0; c < 8; c++)
+        //Printing out each rank, first the character and then the pieces
+        for (int r = 0; r < 8; r++)
         {
-            std::cout << PceChar[mBoard[r][c]] << "   ";
+            std::cout << RankChar[r] << "   |   ";
+            
+            for (int c = 0; c < 8; c++)
+            {
+                std::cout << PceChar[mBoard[r][c]] << "   ";
+            }
+            std::cout << std::endl << "    |" << std::endl;
         }
+        //Divider between board and file letters
+        std::cout << "    ----------------------------------" << std::endl;
+        std::cout << "        ";
+        for (int i = 0; i < 8; i++)
+        {
+            std::cout << FileChar[i] << "   ";
+        }
+        
         std::cout << std::endl << std::endl;
+    }
+    else if (side == BLACK)
+    {
+        //Printing out each rank, first the character and then the pieces
+        for (int r = 7; r >= 0; r--)
+        {
+            std::cout << RankChar[r] << "   |   ";
+            
+            for (int c = 7; c >= 0; c--)
+            {
+                std::cout << PceChar[mBoard[r][c]] << "   ";
+            }
+            std::cout << std::endl << "    |" << std::endl;
+        }
+        //Divider between board and file letters
+        std::cout << "    ----------------------------------" << std::endl;
+        std::cout << "        ";
+        for (int i = 7; i >= 0; i--)
+        {
+            std::cout << FileChar[i] << "   ";
+        }
+        
+        std::cout << std::endl << std::endl;
+    }
+    else
+    {
+        std::cerr << "Printing board from an invalid color" << std::endl;
     }
     
     if (debugMode)
