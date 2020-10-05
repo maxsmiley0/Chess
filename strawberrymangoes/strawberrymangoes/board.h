@@ -35,6 +35,7 @@ public:
     int getPosKey() const {return posKey;} //Returns position key
     int getEnpasSquareR() const {return enpasSquareR; }
     int getEnpasSquareC() const {return enpasSquareC; }
+    int getHisPly() const {return hisPly; }
     int getMaterial() const {return material;} //returns material differential of board
     int numRep() const;                        //returns number of repetitions
     bool hasKcPerm() const;   //returns if the current side still has kingside castling perms

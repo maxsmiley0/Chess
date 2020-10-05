@@ -126,6 +126,16 @@ void Game::runGame()
                 exit(1);
             }
             
+            //Takes back last move
+            if (input == "#take")
+            {
+                if (getBoard()->getHisPly() >= 2)
+                {
+                    getMoveGenerator()->takeBack();
+                    getMoveGenerator()->takeBack();
+                }
+            }
+            
             //Maps the move string into the four move coordinates
             int f1 = 7 + (int)'1' - (int)input[1];
             int f2 = (int)input[0] - (int)'a';
