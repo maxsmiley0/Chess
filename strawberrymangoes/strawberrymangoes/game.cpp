@@ -139,7 +139,7 @@ void Game::runGame()
             {
                 pce = WQ;
             }
-            else if (f4 == 7 && isPawn(getBoard()->getPce(f1, f2)))
+            else if (f3 == 7 && isPawn(getBoard()->getPce(f1, f2)))
             {
                 pce = BQ;
             }
