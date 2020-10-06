@@ -2,7 +2,7 @@ Executing "strawberrymangoes.out" in console will load a prebuilt executable of 
 
 When prompted for input, enter the square of the piece you want to move, and the square you want to move it to. For example, moving your king pawn up two spaces for the first move is denoted "e2e4".
 
-The keyword "#take" as input takes back the previous made move. The keyword "exit" as input exits the program.
+The keyword "#take" as input takes back the previous made move. The keyword "#exit" as input exits the program.
 
 Estimated elo: ~2000 (99.86 percentile, according to Chess.com)
 
