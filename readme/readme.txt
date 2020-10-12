@@ -4,7 +4,7 @@ When prompted for input, enter the square of the piece you want to move, and the
 
 The keyword "#take" as input takes back the previous made move. The keyword "#exit" as input exits the program.
 
-Estimated elo: ~2000 (99.86 percentile, according to Chess.com)
+Estimated elo: ~1800 (98.35 percentile, according to Chess.com)
 
 Implemented:
 Zobrist hashing
@@ -23,11 +23,10 @@ Principal variation table
 MVV LVA
 Killer heuristic
 History heuristic
+Evaluation extension
 
 To be implemented?
 Aspiration windows
 Null move pruning
-Evaluation extension
 Transposition table
-
-My process:
+Improve move ordering sorting algorithm

@@ -38,6 +38,8 @@ public:
     int getHisPly() const {return hisPly; }
     int getMaterial() const {return material;} //returns material differential of board
     int numRep() const;                        //returns number of repetitions
+    int sqExposed(int r, int c) const;          //If square were a queen, returns how many legal moves that queen would have. Basic metric for king safety. Does not count horizontal squares
+    int sqExposedVert(int r, int c) const;      //Returns how many forward / backwards square exist. Used for placing rooks on (semi)open files
     bool hasKcPerm() const;   //returns if the current side still has kingside castling perms
     bool hasQcPerm() const;   //returns if the current side still has queenside castling perms
     History getLastState() const;             //returns latest move in history table

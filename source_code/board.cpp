@@ -310,6 +310,126 @@ int Board::numRep() const
     return repCount;
 }
 
+int Board::sqExposed(int r, int c) const
+{
+    int sq = 0;
+    
+    //Loop in 4 directions until we hit a piece or go offboard
+    int indexR = r + 1;
+    int indexC = c + 1;
+    //down right direction
+    while (indexR <= 7 && indexC <= 7)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR++;
+        indexC++;
+    }
+    //down left direction
+    indexR = r - 1;
+    indexC = c + 1;
+    
+    while (indexR >= 0 && indexC <= 7)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR--;
+        indexC++;
+    }
+    //up right direction
+    indexR = r + 1;
+    indexC = c - 1;
+    
+    while (indexR <= 7 && indexC >= 0)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR++;
+        indexC--;
+    }
+    //up left direction
+    indexR = r - 1;
+    indexC = c - 1;
+    
+    while (indexR >= 0 && indexC >= 0)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR--;
+        indexC--;
+    }
+    
+    //Vertical case
+    sq += sqExposedVert(r, c);
+    
+    return sq;
+}
+
+int Board::sqExposedVert(int r, int c) const
+{
+    int sq = 0;
+    
+    //Loop in 2 directions until we hit a piece or go offboard
+    
+    int indexR = r - 1;
+    int indexC = c;
+    //up direction
+    while (indexR >= 0)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR--;
+    }
+    
+    indexR = r + 1;
+    indexC = c;
+    //down direction
+    while (indexR <= 7)
+    {
+        if (getPce(indexR, indexC) == NOPIECE)
+        {
+            sq++;
+        }
+        else
+        {
+            break;
+        }
+        indexR++;
+    }
+    
+    return sq;
+}
+
 bool Board::hasKcPerm() const
 {
     if (side == WHITE)

@@ -42,6 +42,7 @@ class Board;
 #define NEITHER 2
 
 //Misc
+#define BISHOP_PAIR 20
 #define NOMOVE 0
 #define MAXPOSITIONMOVES 256
 #define MINDEPTH 5

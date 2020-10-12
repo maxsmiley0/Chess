@@ -150,14 +150,14 @@ int worth(int pce)
  */
 const int PawnTable[8][8] =
 {
-    {0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0    },
-    {10    ,    10    ,    0    ,    -10    ,    -10    ,    0    ,    10    ,    10    },
-    {5    ,    0    ,    0    ,    5    ,    5    ,    0    ,    0    ,    5    },
-    {0    ,    0    ,    10    ,    20    ,    20    ,    10    ,    0    ,    0    },
-    {5    ,    5    ,    5    ,    10    ,    10    ,    5    ,    5    ,    5    },
-    {10    ,    10    ,    10    ,    20    ,    20    ,    10    ,    10    ,    10    },
-    {20    ,    20    ,    20    ,    30    ,    30    ,    20    ,    20    ,    20   } ,
-    {0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0}
+    {0     ,    0    ,    0    ,    0     ,    0     ,    0    ,    0    ,    0    },
+    {10    ,    10   ,    0    ,    -10   ,    -10   ,    0    ,    10   ,    10    },
+    {5     ,    0    ,    0    ,    5     ,    5     ,    0    ,    0    ,    5    },
+    {0     ,    0    ,    10   ,    20    ,    20    ,    10   ,    0    ,    0    },
+    {5     ,    5    ,    5    ,    10    ,    10    ,    5    ,    5    ,    5    },
+    {20    ,    20   ,    20   ,    30    ,    30    ,    20   ,    20   ,    20    },
+    {30    ,    30   ,    30   ,    40    ,    40    ,    30   ,    30   ,    30   } ,
+    {0     ,    0    ,    0    ,    0     ,    0     ,    0    ,    0    ,    0}
 };
 
 
@@ -175,14 +175,14 @@ const int KnightTable[8][8] =
 
 const int BishopTable[8][8] =
 {
-    {0    ,    0    ,    -10    ,    0    ,    0    ,    -10    ,    0    ,    0    },
-    {0    ,    0    ,    0    ,    10    ,    10    ,    0    ,    0    ,    0    },
-    {0    ,    0    ,    10    ,    15    ,    15    ,    10    ,    0    ,    0    },
-    {0    ,    10    ,    15    ,    20    ,    20    ,    15    ,    10    ,    0   } ,
-    {0    ,    10    ,    15    ,    20    ,    20    ,    15    ,    10    ,    0   } ,
-    {0    ,    0    ,    10    ,    15    ,    15    ,    10    ,    0    ,    0    },
-    {0    ,    0    ,    0    ,    10    ,    10    ,    0    ,    0    ,    0   } ,
-    {0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0    ,    0}
+    {0    ,    0    ,    -10   ,    0     ,    0     ,    -10   ,    0     ,    0    },
+    {0    ,    0    ,    0     ,    10    ,    10    ,    0     ,    0     ,    0    },
+    {0    ,    0    ,    10    ,    10    ,    10    ,    10    ,    0     ,    0    },
+    {0    ,    10   ,    20    ,    20    ,    20    ,    20    ,    10    ,    0   } ,
+    {0    ,    15   ,    15    ,    20    ,    20    ,    15    ,    15    ,    0   } ,
+    {0    ,    0    ,    10    ,    15    ,    15    ,    10    ,    0     ,    0    },
+    {0    ,    0    ,    0     ,    10    ,    10    ,    0     ,    0     ,    0   } ,
+    {0    ,    0    ,    0     ,    0     ,    0     ,    0     ,    0     ,    0}
 };
 
 const int RookTable[8][8] =
@@ -230,12 +230,16 @@ const int static_eval(const Board& b)
     int pceCount = 0;   //number of non pawn / king pieces
     
     pceCount += b.getPceNum(WN);
-    pceCount += b.getPceNum(WB);
+    int numWB = b.getPceNum(WB);
+    pceCount += numWB;
+    if (numWB >= 2){score += BISHOP_PAIR;}
     pceCount += b.getPceNum(WR);
     pceCount += b.getPceNum(WQ);
     
     pceCount += b.getPceNum(BN);
-    pceCount += b.getPceNum(BB);
+    int numBB = b.getPceNum(BB);
+    pceCount += numBB;
+    if (numBB >= 2){score -= BISHOP_PAIR;}
     pceCount += b.getPceNum(BR);
     pceCount += b.getPceNum(BQ);
     
@@ -259,7 +263,10 @@ const int static_eval(const Board& b)
     //Looping through all white rooks
     for(int i = 0; i < b.getPceNum(WR); i++)
     {
-        score += RookTable[7 - b.getPceR(WR, i)][b.getPceC(WR, i)];
+        int rR = b.getPceR(WR, i);
+        int rC = b.getPceC(WR, i);
+        score += RookTable[7 - rR][rC];
+        score += b.sqExposedVert(rR, rC) * 3;   //bonus for (semi)open file
     }
     //Looping through all white queens, use a rook table
     for(int i = 0; i < b.getPceNum(WQ); i++)
@@ -273,7 +280,10 @@ const int static_eval(const Board& b)
     }
     else
     {
-        score += KingTable[b.getKingR(WHITE)][b.getKingC(WHITE)];
+        int kR = b.getKingR(WHITE);
+        int kC = b.getKingC(WHITE);
+        score += KingTable[kR][kC];
+        score -= b.sqExposed(kR, kC) * 3;       //king safety penalty
     }
     //Looping through all black pawns
     for(int i = 0; i < b.getPceNum(BP); i++)
@@ -293,7 +303,10 @@ const int static_eval(const Board& b)
     //Looping through all black rooks
     for(int i = 0; i < b.getPceNum(BR); i++)
     {
-        score -= RookTable[b.getPceR(BR, i)][b.getPceC(BR, i)];
+        int rR = b.getPceR(BR, i);
+        int rC = b.getPceC(BR, i);
+        score -= RookTable[rR][rC];
+        score -= b.sqExposedVert(rR, rC) * 3;   //bonus for (semi)open file
     }
     //Looping through all black queens
     for(int i = 0; i < b.getPceNum(BQ); i++)
@@ -307,7 +320,10 @@ const int static_eval(const Board& b)
     }
     else
     {
-        score -= KingTable[7 - b.getKingR(BLACK)][b.getKingC(BLACK)];
+        int kR = b.getKingR(BLACK);
+        int kC = b.getKingC(BLACK);
+        score -= KingTable[7 - kR][kC];
+        score += b.sqExposed(kR, kC) * 3;       //king safety penalty
     }
     
     return (b.getSide() == WHITE) ? (score) : (-score);
@@ -320,7 +336,7 @@ const int static_eval(const Board& b)
 
 static const char* ESC_SEQ = "\x1B[";  // ANSI Terminal escape sequence:  ESC [
 
-void clearScreen() 
+void clearScreen()
 {
     static const char* term = getenv("TERM");
     if (term == nullptr  ||  strcmp(term, "dumb") == 0)
