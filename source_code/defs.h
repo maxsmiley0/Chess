@@ -61,7 +61,7 @@ static std::string RankChar = "87654321";
 static std::string FileChar = "abcdefgh";
 
 //If true, calling functions that print to cout will include extra information
-static bool debugMode = false;
+static bool debugMode = true;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer
@@ -129,6 +129,13 @@ struct PVNode
 {
     int posKey;
     int move;
+};
+
+//Caches priority of move so we don't have re compute this
+struct Move
+{
+    int move;
+    int priority;
 };
 
 //Statistics collection for move ordering and nodes visited info

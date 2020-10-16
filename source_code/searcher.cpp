@@ -87,15 +87,14 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
         depth++;
     }
     
-    //Order moves
+    //Generate moves
     std::list<int> moveList = moveGenerator->generateMoves();
-    moveList = orderedMoves(moveList, depth);
     
-    //Loop through all moves
-    for (std::list<int>::iterator itr = moveList.begin(); itr != moveList.end(); itr++)
+    while (!moveList.empty())
     {
+        int nextMove = pickNextMove(moveList, depth);
         //Evaluate position by calling alpha beta recursively
-        if (moveGenerator->makeMove(*itr))
+        if (moveGenerator->makeMove(nextMove))
         {
             movesMade++;
             int moveScore = -alphaBeta(-beta, -alpha, depth - 1);
@@ -118,9 +117,9 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                     stat.failHigh++;
                     
                     //Storing killer move
-                    if (captured(*itr) == NOPIECE)
+                    if (captured(nextMove) == NOPIECE)
                     {
-                        storeKillerMove(*itr, depth);
+                        storeKillerMove(nextMove, depth);
                     }
                     
                     return beta;
@@ -128,9 +127,9 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                 else
                 {
                     alpha = moveScore;
-                    bestMove = *itr;
+                    bestMove = nextMove;
                     
-                    if (captured(*itr) == NOPIECE)
+                    if (captured(nextMove) == NOPIECE)
                     {
                         storeHistoryMove(bestMove, depth * depth);
                     }
@@ -138,7 +137,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
             }
         }
     }
-    
     if (movesMade == 0)
     {
         if (inCheck)
@@ -187,14 +185,14 @@ int Searcher::quiescenceSearch(int alpha, int beta)
         alpha = score;
     }
     
-    //Loop through all captures
+    //Generate captures
     std::list<int> captureList = moveGenerator->generateCaptures();
-    captureList = orderedMoves(captureList);
     
-    for (std::list<int>::iterator itr = captureList.begin(); itr != captureList.end(); itr++)
+    while (!captureList.empty())
     {
+        int nextMove = pickNextMove(captureList);
         //Evaluate captures, recursively call quiescence search
-        if (moveGenerator->makeMove(*itr))
+        if (moveGenerator->makeMove(nextMove))
         {
             movesMade++;
             int moveScore = -quiescenceSearch(-beta, -alpha);
@@ -221,51 +219,30 @@ int Searcher::quiescenceSearch(int alpha, int beta)
                 else
                 {
                     alpha = moveScore;
-                    bestMove = *itr;
+                    bestMove = nextMove;
                 }
             }
         }
     }
-    
     return alpha;
 }
 
-std::list<int> Searcher::orderedMoves(std::list<int> moves, int depth) const
+int Searcher::pickNextMove(std::list<int>& li, int depth)
 {
-    std::list<int> li;  //list to store ordered moves
+    int bestMove = NOMOVE;
+    std::list<int>::iterator toBeDeleted;
     
-    //Loop through the given list
-    for(std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    for (std::list<int>::iterator itr = li.begin(); itr != li.end(); itr++)
     {
-        //If empty list, insert
-        if (li.empty() == *itr)
+        if (bestMove == NOMOVE || movePriority(*itr, depth) > movePriority(bestMove, depth))
         {
-            li.push_back(*itr);
-        }
-        else
-        {
-            //Obtain weight of move
-            int weight = movePriority(*itr, depth);
-            bool inserted = false;
-            //Loop through new list, insert when the weight is greater than next value, so we will have sorted this list from highest to lowest priority
-            for (std::list<int>::iterator i = li.begin(); i != li.end(); i++)
-            {
-                if (weight > movePriority(*i, depth))
-                {
-                    li.insert(i, *itr);
-                    inserted = true;
-                    break;
-                }
-            }
-            //If not inserted, it never found a place, and so it must have lowest priority
-            if (!inserted)
-            {
-                li.push_back(*itr);
-            }
+            bestMove = *itr;
+            toBeDeleted = itr;
         }
     }
     
-    return li;
+    toBeDeleted = li.erase(toBeDeleted);
+    return bestMove;
 }
 
 int Searcher::movePriority(int move, int depth) const

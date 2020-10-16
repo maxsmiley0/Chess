@@ -30,7 +30,7 @@ private:
     int quiescenceSearch(int alpha, int beta);          //called at nodes of alphaBeta
     
     //Move Ordering
-    std::list<int> orderedMoves(std::list<int> moves, int depth = -1) const;    //takes in an unordered list of legal moves, orders them. Unspecified depth means '-1' (for quiescence search, since unbounded by depth), in which case we won't use killer moves
+    int pickNextMove(std::list<int>& li, int depth = -1);     //returns the next best move, deletes it from the list. Need depth for killer moves. Unspecified depth means '-1' (for quiescence search, since unbounded by depth), in which case we won't use killer moves
     int movePriority(int move, int depth) const;     //returns the priority of a move, depth is needed for killer heuristic
     
     //Related to the principal variation heuristic
