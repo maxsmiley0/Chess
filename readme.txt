@@ -25,8 +25,8 @@ Killer heuristic
 History heuristic
 Evaluation extension
 Improved move ordering sorting algorithm
+Transposition table
 
 To be implemented?
 Aspiration windows
 Null move pruning
-Transposition table
