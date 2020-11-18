@@ -152,4 +152,12 @@ struct Stats
     int failHigh;
     int failHighFirst;
 };
+
+//Transposition table
+struct Trans
+{
+    int pos;
+    int score;
+    int depth;
+};
 #endif /* defs_h */

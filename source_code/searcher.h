@@ -6,8 +6,8 @@
 //  Copyright © 2020 Max Smiley. All rights reserved.
 //
 
-#ifndef searcher_hpp
-#define searcher_hpp
+#ifndef searcher_h
+#define searcher_h
 
 #include "movegen.h"
 
@@ -45,7 +45,11 @@ private:
     
     //Related to the history heuristic
     void storeHistoryMove(int move, int score);     //stores a history move
-    int getHistoryScore(int move) const;                  //gets history score
+    int getHistoryScore(int move) const;            //gets history score
+    
+    //Related to the transposition table
+    void storeTransPos(int score, int depth);  //stores the score for a transposition at a given depth
+    int getTransScore(int depth);    //returns score associated with a transposition, infinity if otherwise
     
     //Auxiliary
     void prepSearch();              //prepares for search, clears tables, etc.
@@ -61,10 +65,11 @@ private:
     int rootPosKey;                 //ensures no collisions occur in the PV table
     
     PVNode pvTable[TTABLEENTRIES];     //stores principal variation moves indexed by position key modulo TTABLEENTRIES
+    Trans tTable[TTABLEENTRIES];       //transposition table
     int killerMoves[2 * MAXDEPTH + 1];     //stores killer moves, indexed by depth. For example, killer moves at depth 6 are stored in 6, 6 + MAXDEPTH
     int historyMoves[14 * 64];      //indexed by piece type, and to square
     
     Movegen* moveGenerator;         //Pointer to move generator
 };
 
-#endif /* searcher_hpp */
+#endif /* searcher_h */

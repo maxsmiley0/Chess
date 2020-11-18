@@ -42,16 +42,18 @@ int Searcher::reccomendMove()
         printPvLine(searchDepth - 1);
     }
     
-    if (getPvMove() == NOMOVE)
-    {
-        //realloc time for new search..?
-    }
-    
     return getPvMove();
 }
 
 int Searcher::alphaBeta (int alpha, int beta, int depth)
 {
+    int tScore = getTransScore(depth);
+    
+    if (tScore != INFINITY)
+    {
+        return tScore;
+    }
+    
     int movesMade = 0;
     int oldAlpha = alpha;
     int bestMove = NOMOVE;
@@ -152,6 +154,8 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
             return 0;
         }
     }
+    
+    storeTransPos(alpha, depth);
     
     if (alpha != oldAlpha)
     {
@@ -402,11 +406,34 @@ int Searcher::getHistoryScore(int move) const
     return historyMoves[index];
 }
 
+void Searcher::storeTransPos(int score, int depth)
+{
+    int index = getBoard()->getPosKey() % TTABLEENTRIES;
+    
+    if (depth >= tTable[index].depth)
+    {
+        tTable[index] = Trans {getBoard()->getPosKey(), score, depth};
+    }
+}
+
+int Searcher::getTransScore(int depth)
+{
+    int index = getBoard()->getPosKey() % TTABLEENTRIES;
+    
+    if (tTable[index].depth >= depth && tTable[index].pos == getBoard()->getPosKey())
+    {
+        return tTable[index].score;
+    }
+    
+    return INFINITY;
+}
+
 void Searcher::prepSearch()
 {
     for (int i = 0; i < TTABLEENTRIES; i++)
     {
         pvTable[i] = PVNode {0, 0};
+        tTable[i] = Trans {0, 0, 0};
     }
     
     for (int i = 0; i < 2 * MAXDEPTH + 1; i++)
