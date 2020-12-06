@@ -389,7 +389,7 @@ void Searcher::storeHistoryMove(int move, int score)
     }
     
     int index = (64 * pce) + (8 * toR(move)) + toC(move);
-    historyMoves[index] = score;
+    historyMoves[index] += score;
 }
 
 int Searcher::getHistoryScore(int move) const
