@@ -47,13 +47,6 @@ int Searcher::reccomendMove()
 
 int Searcher::alphaBeta (int alpha, int beta, int depth)
 {
-    int tScore = getTransScore(depth);
-    
-    if (tScore != INFINITY)
-    {
-        return tScore;
-    }
-    
     int movesMade = 0;
     int oldAlpha = alpha;
     int bestMove = NOMOVE;
@@ -122,6 +115,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                     if (captured(nextMove) == NOPIECE)
                     {
                         storeKillerMove(nextMove, depth);
+                        storeHistoryMove(nextMove, depth * depth);
                     }
                     
                     return beta;
@@ -130,11 +124,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
                 {
                     alpha = moveScore;
                     bestMove = nextMove;
-                    
-                    if (captured(nextMove) == NOPIECE)
-                    {
-                        storeHistoryMove(bestMove, depth * depth);
-                    }
                 }
             }
         }
@@ -154,8 +143,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
             return 0;
         }
     }
-    
-    storeTransPos(alpha, depth);
     
     if (alpha != oldAlpha)
     {
