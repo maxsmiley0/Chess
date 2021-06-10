@@ -25,8 +25,14 @@ Killer heuristic
 History heuristic
 Evaluation extension
 Improved move ordering sorting algorithm
-Transposition table
 
 To be implemented?
+Revamp board interface to be implemented with bit-boards
+More efficient legal move generation (priority queue..? study this)
+Opening book (run alpha beta for a long time and cache depth
+Tune parameters
+Transposition table
 Aspiration windows
+Multicut pruning
+Mate killer pruning
 Null move pruning
