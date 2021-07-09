@@ -110,62 +110,29 @@ bool Game::vetMove(int move)
 
 void Game::runGame()
 {
+    //Loops until game is over
     while (!gameOver)
     {
+        //If player's turn
         if (getBoard()->getSide() == playerColor)
         {
             clearScreen();
             getBoard()->printBoard(playerColor);
-            std::cout << "Enter a move: " << std::endl;
-            std::string input;
-            std::cin >> input;
             
-            //Exiting program special command
-            if (input == "#exit")
+            if (!computerMode)
             {
-                exit(1);
+                processPlayerMove();
+                
+                checkGameStatus();
+                if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
             }
-            
-            //Takes back last move
-            if (input == "#take")
+            else
             {
-                if (getBoard()->getHisPly() >= 2)
-                {
-                    getMoveGenerator()->takeBack();
-                    getMoveGenerator()->takeBack();
-                }
+                processComputerMove();
+                
+                checkGameStatus();
+                if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
             }
-            
-            //Maps the move string into the four move coordinates
-            int f1 = 7 + (int)'1' - (int)input[1];
-            int f2 = (int)input[0] - (int)'a';
-            int f3 = 7 + (int)'1' - (int)input[3];
-            int f4 = (int)input[2] - (int)'a';
-            
-            int pce = NOPIECE;
-            
-            //Promotion cases
-            if (f3 == 0 && isPawn(getBoard()->getPce(f1, f2)))
-            {
-                pce = WQ;
-            }
-            else if (f3 == 7 && isPawn(getBoard()->getPce(f1, f2)))
-            {
-                pce = BQ;
-            }
-            
-            //Construct the move key
-            int move = getMoveGenerator()->getMove(f1, f2, f3, f4, pce);
-            
-            //Ensure valid input (legal move)
-            if (!vetMove(move))
-            {
-                std::cout << "Illegal Move" << std::endl;
-                continue;
-            }
-            
-            checkGameStatus();
-            if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
         }
         else
         {
@@ -173,12 +140,106 @@ void Game::runGame()
             //Computer makes move
             getBoard()->printBoard(playerColor);
             std::cout << "Computer is thinking..." << std::endl;
-            getMoveGenerator()->makeMove(mSearch->reccomendMove());
+            
+            int move = mSearch->reccomendMove();
+            getMoveGenerator()->makeMove(move);
+            
+            //When a move has been calculated on this board, it is logged into the arena
+            if (computerMode)
+            {
+                FILE* port;
+                port = fopen(outSocket, "r+");
+                write(fileno(port), &move, sizeof(move));
+                fclose(port);
+            }
             
             checkGameStatus();
             if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
         }
     }
+}
+
+void Game::processPlayerMove()
+{
+    std::cout << "Enter a move: " << std::endl;
+    std::string input;
+    std::cin >> input;
+    
+    //Exiting program special command
+    if (input == "#exit")
+    {
+        exit(1);
+    }
+    
+    //Takes back last move
+    if (input == "#take")
+    {
+        if (getBoard()->getHisPly() >= 2)
+        {
+            getMoveGenerator()->takeBack();
+            getMoveGenerator()->takeBack();
+            return;
+        }
+    }
+    
+    //Maps the move string into the four move coordinates
+    int f1 = 7 + (int)'1' - (int)input[1];
+    int f2 = (int)input[0] - (int)'a';
+    int f3 = 7 + (int)'1' - (int)input[3];
+    int f4 = (int)input[2] - (int)'a';
+    
+    int pce = NOPIECE;
+    
+    //Promotion cases
+    if (f3 == 0 && isPawn(getBoard()->getPce(f1, f2)))
+    {
+        pce = WQ;
+    }
+    else if (f3 == 7 && isPawn(getBoard()->getPce(f1, f2)))
+    {
+        pce = BQ;
+    }
+    
+    //Construct the move key
+    int move = getMoveGenerator()->getMove(f1, f2, f3, f4, pce);
+    
+    //Ensure valid input (legal move)
+    if (!vetMove(move))
+    {
+        std::cout << "Illegal Move" << std::endl;
+        processPlayerMove();
+    }
+}
+
+void Game::processComputerMove()
+{
+    int move = 0;
+    int cnt = 0;
+    FILE* port;
+    
+    //Loop until the other computer has made a move
+    while (move == 0)
+    {
+        //Since syscalls are taxing, only check every 0xFFFFF iterations
+        if ((cnt & 0xFFFFF) == 0)
+        {
+            port = fopen(inSocket, "r+");
+            read(fileno(port), &move, sizeof(move));
+            fclose(port);
+        }
+        
+        cnt++;
+    }
+    
+    //Ensuring valid move from other computer
+    if (!getMoveGenerator()->makeMove(move))
+    {
+        std::cerr << "Computer input is an invalid move" << std::endl;
+        exit(1);
+    }
+    
+    port = fopen(inSocket, "w"); //clears file
+    fclose(port);
 }
 
 void Game::checkGameStatus()

@@ -10,7 +10,10 @@
 #define defs_h
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
+#include <stdio.h>
+#include <unistd.h>
 class Board;
 
 //Pieces
@@ -45,7 +48,6 @@ class Board;
 #define BISHOP_PAIR 20
 #define NOMOVE 0
 #define MAXPOSITIONMOVES 256
-#define MINDEPTH 5
 #define MAXDEPTH 32
 #define MAXGAMELENGTH 1024
 #define TTABLEENTRIES 100000
@@ -61,7 +63,14 @@ static std::string RankChar = "87654321";
 static std::string FileChar = "abcdefgh";
 
 //If true, calling functions that print to cout will include extra information
-static bool debugMode = true;
+static bool debugMode = false;
+
+/*
+ If true, the computer will monitor the text file specified. It will wait until a move is written, and it will play that move, calculate, and output a move into the given file. To setup a game between two AIs, we must have two instances of the engine running listening to the same port, have them be opposite colors and have the same start FEN.
+ */
+static bool computerMode = false;
+static char* inSocket = "/Users/maxsmiley/Desktop/arena1.txt";
+static char* outSocket = "/Users/maxsmiley/Desktop/arena.txt";
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer

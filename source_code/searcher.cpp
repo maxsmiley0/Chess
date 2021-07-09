@@ -22,10 +22,12 @@ int Searcher::reccomendMove()
 {
     prepSearch();
     
+    float* score = new float;
+    
     //Iterative deepening
     for (; true; searchDepth++)
     {
-        alphaBeta(-INFINITY, INFINITY, searchDepth);
+        score[searchDepth] = alphaBeta(-INFINITY, INFINITY, searchDepth);
         
         if (stop)
         {
@@ -40,7 +42,11 @@ int Searcher::reccomendMove()
         std::cout << "Move Ordering: " << (100 * stat.failHighFirst / (stat.failHigh + 1)) << '%' <<  std::endl;
         std::cout << "Depth: " << (searchDepth - 1) << std::endl;
         printPvLine(searchDepth - 1);
+        getBoard()->getSide() == BLACK ? score[searchDepth - 1] *= -1 : true;
+        std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
     }
+    
+    delete score;
     
     return getPvMove();
 }
@@ -443,7 +449,7 @@ void Searcher::prepSearch()
 
 void Searcher::checkTime()
 {
-    if (timer.elapsed() > timeAllocated && searchDepth > MINDEPTH)
+    if (timer.elapsed() > timeAllocated)
     {
         stop = true;
     }
