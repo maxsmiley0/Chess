@@ -32,12 +32,12 @@ private:
     Board* getBoard() const {return mSearch->getBoard(); }
     
     //Components of the main play method
-    void chooseSide();          //prompts the user to choose the side
-    void runGame();             //the "back and forth" component of play
-    void processPlayerMove();   //handles move input if not computer mode
+    void chooseSide();           //prompts the user to choose the side
+    void runGame();              //the "back and forth" component of play
+    int processPlayerMove(Movegen* mGen, Searcher* ponderSearch = nullptr);   //handles move input if not computer mode. If pondering, input the searcher used to ponder to send stop signal to, otherwise leave blank. Returns the move
     void processComputerMove(); //handles move input if computer mode
     void checkGameStatus();     //checks if the game is over
-    bool vetMove(int move);     //returns true if move is allowed
+    bool vetMove(Movegen* mGen, int move);     //returns true if move is allowed
     unsigned long legalMoves(const std::list<int> moves);  //return number of actual legal moves, discounting all pseudolegal moves that would result in king being in check
     
     //Members

@@ -17,6 +17,7 @@ class Movegen
 {
 public:
     Movegen();
+    Movegen(const Movegen& other);          //copy constructor for dummy ponder board
     ~Movegen();
     
     //Move generation related
@@ -31,13 +32,13 @@ public:
     
     Board* getBoard() const {return mBoard; } //trivial accessor
     
+    //Perft functions, used to verify the integrity of the legal move generator
+    void perft(int depth);
+    void perftTest(int depth);
 private:
     //Board from which moves and scores are generated
     Board* mBoard;
     
-    //Perft functions, used to verify the integrity of the legal move generator
-    void perft(int depth);
-    void perftTest(int depth);
     int leafNodes;  //used in perft / perftTest
     
     //Debugging related

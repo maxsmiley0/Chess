@@ -10,8 +10,8 @@
 #define defs_h
 
 #include <iostream>
-#include <fstream>
 #include <chrono>
+#include <thread>
 #include <stdio.h>
 #include <unistd.h>
 class Board;
@@ -71,6 +71,9 @@ static bool debugMode = false;
 static bool computerMode = false;
 static char* inSocket = "/Users/maxsmiley/Desktop/arena1.txt";
 static char* outSocket = "/Users/maxsmiley/Desktop/arena.txt";
+
+//When turned on, the computer will use the player's time to perform calculations
+static bool ponder = false;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer

@@ -22,7 +22,7 @@ int Searcher::reccomendMove()
 {
     prepSearch();
     
-    float* score = new float;
+    float* score = new float;   //To print out position score for debug info
     
     //Iterative deepening
     for (; true; searchDepth++)
@@ -44,6 +44,11 @@ int Searcher::reccomendMove()
         printPvLine(searchDepth - 1);
         getBoard()->getSide() == BLACK ? score[searchDepth - 1] *= -1 : true;
         std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
+        
+        if (searchDepth > 0)
+        {
+            std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
+        }
     }
     
     delete score;
@@ -222,6 +227,29 @@ int Searcher::quiescenceSearch(int alpha, int beta)
         }
     }
     return alpha;
+}
+
+void Searcher::ponder()
+{
+    prepSearch();
+    
+    float* score = new float;   //To print out position score for debug info
+    timeAllocated += 1000000000;//Effectively infinite time to ponder (until interrupt)
+    
+    //Iterative deepening
+    for (; true; searchDepth++)
+    {
+        score[searchDepth] = alphaBeta(-INFINITY, INFINITY, searchDepth);
+        std::cout << "reached depth " << searchDepth << std::endl;
+        
+        if (stop)
+        {
+            break;
+        }
+    }
+    timeAllocated -= 1000000000;//Restore to its default
+    
+    delete score;
 }
 
 int Searcher::pickNextMove(std::list<int>& li, int depth)

@@ -12,6 +12,13 @@ Movegen::Movegen()
 {
     mBoard = new Board();
     leafNodes = 0;
+    
+    perftTest(6);
+}
+
+Movegen::Movegen(const Movegen& other)
+{
+    this->mBoard = new Board(*other.getBoard());
 }
 
 Movegen::~Movegen()
@@ -1433,7 +1440,6 @@ void Movegen::perftTest(int depth)
             std::cout << "Move " << moveNum << ' ' << printMove(*itr) << ' ' << *itr << std::endl << (leafNodes - cumnodes) << std::endl;
         }
     }
-    std::cout << "Total Nodes: " << totalNodes << std::endl;
 }
 
 void Movegen::printMoves(std::list<int> moves)

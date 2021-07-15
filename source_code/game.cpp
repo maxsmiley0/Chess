@@ -86,10 +86,10 @@ void Game::chooseSide()
     }
 }
 
-bool Game::vetMove(int move)
+bool Game::vetMove(Movegen* mGen, int move)
 {
     bool isPseudoLegal = false;
-    std::list<int> moves = getMoveGenerator()->generateMoves();
+    std::list<int> moves = mGen->generateMoves();
     //Ensure the inputted move is at least a pseudolegal move
     for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
     {
@@ -105,7 +105,7 @@ bool Game::vetMove(int move)
         return false;
     }
     //Otherwise, make the move
-    return getMoveGenerator()->makeMove(move);
+    return mGen->makeMove(move);
 }
 
 void Game::runGame()
@@ -121,7 +121,31 @@ void Game::runGame()
             
             if (!computerMode)
             {
-                processPlayerMove();
+                if (ponder)
+                {
+                    //Dummy board to input moves on while real board is pondering
+                    Movegen* dummyInput = new Movegen(*getMoveGenerator());
+                    int move;
+                    
+                    //Thread 1: Ponder
+                    std::thread ponderThread([this]{getSearcher()->ponder();});
+                    //Thread 2: Await for user input. When valid input is given, send a signal to our searcher to stop pondering, and return the move so we can make it on the "real board"
+                    std::thread awaitIO([&, this]{move = processPlayerMove(dummyInput, mSearch);});
+                    
+                    //In this body, the engine is calculating while waiting on input
+                    //Join the threads
+                    awaitIO.join();
+                    ponderThread.join();
+                    
+                    //Make the move
+                    getMoveGenerator()->makeMove(move);
+                    //Cleanup dummy board
+                    delete dummyInput;
+                }
+                else
+                {
+                    processPlayerMove(getMoveGenerator());
+                }
                 
                 checkGameStatus();
                 if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
@@ -159,7 +183,7 @@ void Game::runGame()
     }
 }
 
-void Game::processPlayerMove()
+int Game::processPlayerMove(Movegen* mGen, Searcher* ponderSearch)
 {
     std::cout << "Enter a move: " << std::endl;
     std::string input;
@@ -171,17 +195,6 @@ void Game::processPlayerMove()
         exit(1);
     }
     
-    //Takes back last move
-    if (input == "#take")
-    {
-        if (getBoard()->getHisPly() >= 2)
-        {
-            getMoveGenerator()->takeBack();
-            getMoveGenerator()->takeBack();
-            return;
-        }
-    }
-    
     //Maps the move string into the four move coordinates
     int f1 = 7 + (int)'1' - (int)input[1];
     int f2 = (int)input[0] - (int)'a';
@@ -191,23 +204,32 @@ void Game::processPlayerMove()
     int pce = NOPIECE;
     
     //Promotion cases
-    if (f3 == 0 && isPawn(getBoard()->getPce(f1, f2)))
+    if (f3 == 0 && isPawn(mGen->getBoard()->getPce(f1, f2)))
     {
         pce = WQ;
     }
-    else if (f3 == 7 && isPawn(getBoard()->getPce(f1, f2)))
+    else if (f3 == 7 && isPawn(mGen->getBoard()->getPce(f1, f2)))
     {
         pce = BQ;
     }
     
     //Construct the move key
-    int move = getMoveGenerator()->getMove(f1, f2, f3, f4, pce);
+    int move = mGen->getMove(f1, f2, f3, f4, pce);
     
     //Ensure valid input (legal move)
-    if (!vetMove(move))
+    if (!vetMove(mGen, move))
     {
         std::cout << "Illegal Move" << std::endl;
-        processPlayerMove();
+        return processPlayerMove(mGen, ponderSearch);
+    }
+    else
+    {
+        //Legal move case
+        if (ponderSearch)
+        {
+            ponderSearch->sendSIGSTOP();
+        }
+        return move;
     }
 }
 

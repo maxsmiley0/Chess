@@ -19,6 +19,10 @@ public:
     
     //Returns principal variation move after an alpha beta search
     int reccomendMove();
+    //Passively calculates (used when not player's turn)
+    void ponder();
+    //Sends signal to stop searching
+    void sendSIGSTOP() { if (stop) {std::cerr << "SIGSTOP err" << std::endl; exit(1);} stop = true;}
     
     //Accessors
     Board* getBoard() const {return moveGenerator->getBoard(); } //returns a pointer to the board
@@ -60,7 +64,7 @@ private:
     Stats stat;                     //statistics collection
     
     int searchDepth;                //depth at which we are searching
-    const int timeAllocated = 3000; //allocated time to search in ms
+    int timeAllocated = 3000;       //allocated time to search in ms
     bool stop;                      //have we exceeded time alloc while hitting mindepth?
     int rootPosKey;                 //ensures no collisions occur in the PV table
     
