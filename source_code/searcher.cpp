@@ -20,9 +20,14 @@ Searcher::~Searcher()
 
 int Searcher::reccomendMove()
 {
-    prepSearch();
+    //if (!ponderMode)
+    //{
+        prepSearch(); //If we're pondering, we don't clear the table, as it is filled while pondering. We need these values for the pondering time to be of use
+    //}
     
-    float* score = new float;   //To print out position score for debug info
+    //If ponder hit somehow join the results
+    
+    float score[MAXDEPTH];   //To print out position score for debug info
     
     //Iterative deepening
     for (; true; searchDepth++)
@@ -44,14 +49,7 @@ int Searcher::reccomendMove()
         printPvLine(searchDepth - 1);
         getBoard()->getSide() == BLACK ? score[searchDepth - 1] *= -1 : true;
         std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
-        
-        if (searchDepth > 0)
-        {
-            std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
-        }
     }
-    
-    delete score;
     
     return getPvMove();
 }
@@ -231,6 +229,9 @@ int Searcher::quiescenceSearch(int alpha, int beta)
 
 void Searcher::ponder()
 {
+    //Get info about PV's here...
+    //std::cout << "Recommended move: " << printMove(getPvMove()) << std::endl;
+    
     prepSearch();
     
     float* score = new float;   //To print out position score for debug info

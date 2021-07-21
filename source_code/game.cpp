@@ -121,7 +121,7 @@ void Game::runGame()
             
             if (!computerMode)
             {
-                if (ponder)
+                if (ponderMode)
                 {
                     //Dummy board to input moves on while real board is pondering
                     Movegen* dummyInput = new Movegen(*getMoveGenerator());
@@ -152,7 +152,7 @@ void Game::runGame()
             }
             else
             {
-                processComputerMove();
+                processComputerMove(getMoveGenerator());
                 
                 checkGameStatus();
                 if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
@@ -171,10 +171,7 @@ void Game::runGame()
             //When a move has been calculated on this board, it is logged into the arena
             if (computerMode)
             {
-                FILE* port;
-                port = fopen(outSocket, "r+");
-                write(fileno(port), &move, sizeof(move));
-                fclose(port);
+                writeMove(move);
             }
             
             checkGameStatus();
@@ -233,35 +230,73 @@ int Game::processPlayerMove(Movegen* mGen, Searcher* ponderSearch)
     }
 }
 
-void Game::processComputerMove()
+void Game::processComputerMove(Movegen* mGen)
 {
-    int move = 0;
+    std::string move = "";
     int cnt = 0;
-    FILE* port;
+    std::ifstream file;
+    file.open(inSocket);
+    
+    //Does the file exist?
+    if (file.fail())
+    {
+        std::cerr << "Socket '" << inSocket << "' failed to open" << std::endl;
+        exit(1);
+    }
+    
+    file.close();
     
     //Loop until the other computer has made a move
-    while (move == 0)
+    while (move == "")
     {
         //Since syscalls are taxing, only check every 0xFFFFF iterations
         if ((cnt & 0xFFFFF) == 0)
         {
-            port = fopen(inSocket, "r+");
-            read(fileno(port), &move, sizeof(move));
-            fclose(port);
+            //Only read if not empty
+            file.open(inSocket);
+            if (file.peek() != std::ifstream::traits_type::eof())
+            {
+                file >> move;
+            }
+            file.close();
         }
         
         cnt++;
     }
     
     //Ensuring valid move from other computer
-    if (!getMoveGenerator()->makeMove(move))
+    if (!vetMove(mGen, std::stoi(move)))
     {
         std::cerr << "Computer input is an invalid move" << std::endl;
         exit(1);
     }
     
-    port = fopen(inSocket, "w"); //clears file
-    fclose(port);
+    clearSocket(inSocket);
+}
+
+void Game::writeMove(int move)
+{
+    std::ofstream file;
+    file.open(outSocket);
+    //Error checking pointless as it will simply create the file
+    file << move;
+    
+    file.close();
+}
+
+void Game::clearSocket(std::string socket)
+{
+    std::ofstream file;
+    file.open(socket, std::ofstream::out | std::ofstream::trunc);
+    
+    //Does the file exist?
+    if (file.fail())
+    {
+        std::cerr << "Socket '" << socket << "' failed to open" << std::endl;
+        exit(1);
+    }
+    
+    file.close();
 }
 
 void Game::checkGameStatus()

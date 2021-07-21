@@ -10,10 +10,14 @@
 #define defs_h
 
 #include <iostream>
+#include <fstream>
+
 #include <chrono>
+#include <random>
+#include <string>
 #include <thread>
-#include <stdio.h>
-#include <unistd.h>
+#include <utility>
+
 class Board;
 
 //Pieces
@@ -55,8 +59,6 @@ class Board;
 #define MATE 90000
 #define INFINITY 100000
 
-#include <string>
-
 //A quick shortcut, piece representations indexed by piece type
 static std::string PceChar = "PNBRQKpnbrqk.";
 static std::string RankChar = "87654321";
@@ -69,11 +71,11 @@ static bool debugMode = false;
  If true, the computer will monitor the text file specified. It will wait until a move is written, and it will play that move, calculate, and output a move into the given file. To setup a game between two AIs, we must have two instances of the engine running listening to the same port, have them be opposite colors and have the same start FEN.
  */
 static bool computerMode = false;
-static char* inSocket = "/Users/maxsmiley/Desktop/arena1.txt";
-static char* outSocket = "/Users/maxsmiley/Desktop/arena.txt";
+static std::string inSocket = "/Users/maxsmiley/arena.txt";
+static std::string outSocket = "/Users/maxsmiley/arena1.txt";
 
 //When turned on, the computer will use the player's time to perform calculations
-static bool ponder = false;
+static bool ponderMode = false;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer

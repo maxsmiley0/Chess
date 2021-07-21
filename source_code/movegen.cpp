@@ -12,8 +12,6 @@ Movegen::Movegen()
 {
     mBoard = new Board();
     leafNodes = 0;
-    
-    perftTest(6);
 }
 
 Movegen::Movegen(const Movegen& other)
