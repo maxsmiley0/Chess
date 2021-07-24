@@ -64,7 +64,7 @@ private:
     Stats stat;                     //statistics collection
     
     int searchDepth;                //depth at which we are searching
-    int timeAllocated = 300;       //allocated time to search in ms
+    int timeAllocated = 50;       //allocated time to search in ms
     bool stop;                      //have we exceeded time alloc while hitting mindepth?
     int rootPosKey;                 //ensures no collisions occur in the PV table
     

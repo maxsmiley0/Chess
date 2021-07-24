@@ -8,10 +8,21 @@
 
 #include "game.h"
 
-Game::Game()
+Game::Game(std::string initFen, int pColor)
 {
     mSearch = new Searcher();
     gameOver = false;
+    
+    startFen = initFen;
+    if (pColor != WHITE && pColor != BLACK && pColor != NEITHER)
+    {
+        std::cerr << "Invalid color in game initializer" << std::endl;
+        exit(1);
+    }
+    else
+    {
+        playerColor = pColor;
+    }
 }
 
 Game::~Game()
@@ -22,42 +33,12 @@ Game::~Game()
 void Game::play()
 {
     getBoard()->parseFen(startFen);     //Resetting board to starting position
-    chooseSide();                       //Prompts the user to input a side
+    if (playerColor == NEITHER)
+    {
+        chooseSide();                       //Prompts the user to input a side
+    }
     runGame();                          //Loop while game is not over
-    
-    //Output who won
-    int side = getBoard()->getSide();
-    int kingR = getBoard()->getKingR(side);
-    int kingC = getBoard()->getKingC(side);
-    
-    bool inCheck = getMoveGenerator()->squareAttacked(kingR, kingC, side);
-    //If no legal moves and in check
-    if (inCheck && getBoard()->numRep() < 2 && (getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
-    {
-        if (getBoard()->getSide() == WHITE)
-        {
-            std::cout << "Black wins by checkmate" << std::endl;
-        }
-        else
-        {
-            std::cout << "White wins by checkmate" << std::endl;
-        }
-    }
-    else
-    {
-        if (getBoard()->numRep() >= 2)
-        {
-            std::cout << "Game Drawn: 3 fold repetition" << std::endl;
-        }
-        else if ((getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
-        {
-            std::cout << "Game Drawn: 50 move violation" << std::endl;
-        }
-        else
-        {
-            std::cout << "Game Drawn: stalemate" << std::endl;
-        }
-    }
+    printResult();                      //Prints if white/black won/drew and the method
 }
 
 void Game::chooseSide()
@@ -118,7 +99,7 @@ void Game::runGame()
     while (!gameOver)
     {
         //If player's turn
-        if (/*getBoard()->getSide() == playerColor*/false)
+        if (getBoard()->getSide() == playerColor)
         {
             clearScreen();
             getBoard()->printBoard(playerColor);
@@ -330,4 +311,41 @@ unsigned long Game::legalMoves(const std::list<int> moves)
     }
     
     return size;
+}
+
+void Game::printResult()
+{
+    //Output who won
+    int side = getBoard()->getSide();
+    int kingR = getBoard()->getKingR(side);
+    int kingC = getBoard()->getKingC(side);
+    
+    bool inCheck = getMoveGenerator()->squareAttacked(kingR, kingC, side);
+    //If no legal moves and in check
+    if (inCheck && getBoard()->numRep() < 2 && (getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
+    {
+        if (getBoard()->getSide() == WHITE)
+        {
+            std::cout << "Black wins by checkmate" << std::endl;
+        }
+        else
+        {
+            std::cout << "White wins by checkmate" << std::endl;
+        }
+    }
+    else
+    {
+        if (getBoard()->numRep() >= 2)
+        {
+            std::cout << "Game Drawn: 3 fold repetition" << std::endl;
+        }
+        else if ((getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
+        {
+            std::cout << "Game Drawn: 50 move violation" << std::endl;
+        }
+        else
+        {
+            std::cout << "Game Drawn: stalemate" << std::endl;
+        }
+    }
 }

@@ -70,7 +70,7 @@ static bool debugMode = false;
 /*
  If true, the computer will monitor the text file specified. It will wait until a move is written, and it will play that move, calculate, and output a move into the given file. To setup a game between two AIs, we must have two instances of the engine running listening to the same port, have them be opposite colors and have the same start FEN.
  */
-static bool computerMode = false;
+static bool computerMode = true;
 static std::string inSocket = "/Users/maxsmiley/arena1.txt";
 static std::string outSocket = "/Users/maxsmiley/arena.txt";
 

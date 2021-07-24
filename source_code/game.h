@@ -14,7 +14,7 @@
 class Game
 {
 public:
-    Game();
+    Game(std::string initFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -", int pColor = NEITHER);
     ~Game();
     /*
     Description of play:
@@ -47,11 +47,12 @@ private:
     void checkGameStatus();     //checks if the game is over
     bool vetMove(Movegen* mGen, int move);     //returns true if move is allowed
     unsigned long legalMoves(const std::list<int> moves);  //return number of actual legal moves, discounting all pseudolegal moves that would result in king being in check
+    void printResult();
     
     //Members
     int playerColor;
     bool gameOver;
-    const std::string startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";
+    std::string startFen;
     Searcher* mSearch;
 };
 
