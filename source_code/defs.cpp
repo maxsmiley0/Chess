@@ -8,8 +8,6 @@
 
 #include "defs.h"
 #include "board.h"
-#include <random>
-#include <utility>
 
 //Returns true if a piece is a pawn
 bool isPawn(int pce)
@@ -107,7 +105,7 @@ std::string printMove(int move)
     str += FileChar[toC(move)];
     str += RankChar[toR(move)];
     
-    return str;
+    return (move == NOMOVE ? "NOMOVE" : str);
 }
 
 //Returns worth of a piece
