@@ -9,7 +9,6 @@
 #ifndef movegen_h
 #define movegen_h
 
-#include "defs.h"
 #include "board.h"
 #include <list>
 

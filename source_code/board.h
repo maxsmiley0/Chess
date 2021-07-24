@@ -42,6 +42,8 @@ public:
     int sqExposedVert(int r, int c) const;      //Returns how many forward / backwards square exist. Used for placing rooks on (semi)open files
     bool hasKcPerm() const;   //returns if the current side still has kingside castling perms
     bool hasQcPerm() const;   //returns if the current side still has queenside castling perms
+    int getFiftyMove() const; //returns last ply when a pawn was moved, or a capture / promotion occured
+    void updateFiftyMove();   //updates fiftyMove ply to hisPly
     History getLastState() const;             //returns latest move in history table
     
     //Modifies en passant, castling, and side information
@@ -82,6 +84,7 @@ private:
     //History
     History history[MAXGAMELENGTH]; //stores all moves made
     int hisPly;                 //stores what number ply of the game we are on
+    int fiftyMove;              //Last ply when moving pawn or capture or promotion
 };
 
 #endif /* board_h */

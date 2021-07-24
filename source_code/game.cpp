@@ -32,7 +32,7 @@ void Game::play()
     
     bool inCheck = getMoveGenerator()->squareAttacked(kingR, kingC, side);
     //If no legal moves and in check
-    if (inCheck && getBoard()->numRep() < 2)
+    if (inCheck && getBoard()->numRep() < 2 && (getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
     {
         if (getBoard()->getSide() == WHITE)
         {
@@ -48,6 +48,10 @@ void Game::play()
         if (getBoard()->numRep() >= 2)
         {
             std::cout << "Game Drawn: 3 fold repetition" << std::endl;
+        }
+        else if ((getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
+        {
+            std::cout << "Game Drawn: 50 move violation" << std::endl;
         }
         else
         {
@@ -114,7 +118,7 @@ void Game::runGame()
     while (!gameOver)
     {
         //If player's turn
-        if (getBoard()->getSide() == playerColor)
+        if (/*getBoard()->getSide() == playerColor*/false)
         {
             clearScreen();
             getBoard()->printBoard(playerColor);
@@ -303,7 +307,7 @@ void Game::checkGameStatus()
 {
     //If no legal moves, or 3 fold repetition is true
     
-    if (legalMoves(getMoveGenerator()->generateMoves()) <= 0 || getBoard()->numRep() >= 2)
+    if (legalMoves(getMoveGenerator()->generateMoves()) <= 0 || getBoard()->numRep() >= 2 || (getBoard()->getHisPly() - getBoard()->getFiftyMove()) >= 100)
     {
         gameOver = true;
     }

@@ -1231,6 +1231,12 @@ bool Movegen::makeMove(int move)
     
     mBoard->changeSide();
     
+    //Update 50 move here if necessary
+    if (captured(move) != NOPIECE || pce == WP || pce == BP)
+    {
+        mBoard->updateFiftyMove();
+    }
+    
     if (squareAttacked(mBoard->getKingR(side), mBoard->getKingC(side), side))
     {
         takeBack();

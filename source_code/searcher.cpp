@@ -34,7 +34,7 @@ int Searcher::reccomendMove()
     {
         score[searchDepth] = alphaBeta(-INFINITY, INFINITY, searchDepth);
         
-        if (stop)
+        if (stop || searchDepth >= MAXDEPTH)
         {
             break;
         }
@@ -69,12 +69,6 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     if ((stat.nodes & 2047) == 0)
     {
         checkTime();
-    }
-    
-    //3 move repetition
-    if (getBoard()->numRep() >= 2)
-    {
-        return 0;
     }
     
     //Statistics collection

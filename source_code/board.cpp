@@ -225,6 +225,7 @@ void Board::pushHistory(int move)
     h.castlePerm = castlePerm;
     h.enpasSquareR = enpasSquareR;
     h.enpasSquareC = enpasSquareC;
+    h.fiftyMove = fiftyMove;
     
     history[hisPly] = h;    //update history
     hisPly++;               //increase hisply
@@ -242,6 +243,7 @@ void Board::popHistory()
 {
     //We don't actually have to delete history, simply go back one hisPly, because if we add a new history, the previous one will be overwritten
     hisPly--;
+    fiftyMove = history[hisPly].fiftyMove;
 }
 
 int Board::getPce(int r, int c) const
@@ -292,18 +294,16 @@ int Board::numRep() const
 {
     int repCount = 0;
     
-    if (hisPly > 7)
+    //Remember - only need to check moves up to the fiftyMove counter
+    for (int i = hisPly; i >= fiftyMove; i--)
     {
-        for (int i = hisPly - 1; i >= hisPly - 6; i--)
+        if (posKey == history[i].posKey)
         {
-            if (posKey == history[i].posKey)
-            {
-                repCount++;
-            }
-            if (repCount >= 2)
-            {
-                break;
-            }
+            repCount++;
+        }
+        if (repCount >= 2)
+        {
+            break;
         }
     }
     
@@ -454,6 +454,16 @@ bool Board::hasQcPerm() const
     }
 }
 
+int Board::getFiftyMove() const
+{
+    return fiftyMove;
+}
+
+void Board::updateFiftyMove()
+{
+    fiftyMove = hisPly;
+}
+
 History Board::getLastState() const
 {
     if (hisPly == 0)
@@ -551,6 +561,7 @@ void Board::ClearBoard()
     
     //Resetting history
     hisPly = 0;
+    fiftyMove = 0;
     
     //Resetting material
     material = 0;
@@ -654,13 +665,8 @@ void Board::printBoard(int side)
             std::cout << 8 - enpasSquareR;
         }
         std::cout << std::endl;
-        
-        
-        std::cout << "Castling Perms: ";
-        if ((castlePerm & WKCA) != 0) std::cout << 'K';
-        if ((castlePerm & WQCA) != 0) std::cout << 'Q';
-        if ((castlePerm & BKCA) != 0) std::cout << 'k';
-        if ((castlePerm & BQCA) != 0) std::cout << 'q';
+        std::cout << "Current ply: " << hisPly << std::endl;
+        std::cout << "Fifty move ply: " << fiftyMove << std::endl;
         std::cout << std::endl;
     }
 }
