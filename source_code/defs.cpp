@@ -222,12 +222,6 @@ const double KingTableEg[8][8] =
 //Static evaluation, to be called at the leaf nodes
 const int static_eval(const Board& b)
 {
-    //Check for 50 move violation or 3 fold repetition
-    if (b.numRep() >= 2 || (b.getHisPly() - b.getFiftyMove() >= 100))
-    {
-        return 0;
-    }
-    
     int score = b.getMaterial();
     
     bool inEg;          //are we in the endgame or not?

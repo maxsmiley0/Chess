@@ -26,15 +26,21 @@ int Searcher::reccomendMove()
     //}
     
     //If ponder hit somehow join the results
-    
-    float score[MAXDEPTH];   //To print out position score for debug info
+    //This is the score of the position considering a given depth
+    float score = 0;
     
     //Iterative deepening
     for (; true; searchDepth++)
     {
-        score[searchDepth] = alphaBeta(-INFINITY, INFINITY, searchDepth);
+        int tempScore = alphaBeta(-INFINITY, INFINITY, searchDepth);
         
-        if (stop || searchDepth >= MAXDEPTH)
+        //Only update the score if we weren't stopped due to time... because this always returns 0 by default
+        if (!stop && searchDepth <= MAXDEPTH)
+        {
+            score = tempScore;
+        }
+        //If we are stopped or somehow exceed MAXDEPTH, exit loop
+        else
         {
             break;
         }
@@ -47,8 +53,8 @@ int Searcher::reccomendMove()
         std::cout << "Move Ordering: " << (100 * stat.failHighFirst / (stat.failHigh + 1)) << '%' <<  std::endl;
         std::cout << "Depth: " << (searchDepth - 1) << std::endl;
         printPvLine(searchDepth - 1);
-        getBoard()->getSide() == BLACK ? score[searchDepth - 1] *= -1 : true;
-        std::cout << "Score: " << score[searchDepth - 1] / 100 << std::endl;
+        if (getBoard()->getSide() == BLACK){score *= -1;}
+        std::cout << "Score: " << score / 100 << std::endl;
     }
     
     return getPvMove();
@@ -73,6 +79,12 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     
     //Statistics collection
     stat.nodes++;
+    
+    //Check for 50 move violation or 3 fold repetition
+    if (getBoard()->numRep() >= 2 || (getBoard()->getHisPly() - getBoard()->getFiftyMove() >= 100))
+    {
+        return 0;
+    }
     
     int side = getBoard()->getSide();
     int kingR = getBoard()->getKingR(side);
@@ -164,6 +176,12 @@ int Searcher::quiescenceSearch(int alpha, int beta)
     
     //Statistics collection
     stat.nodes++;
+    
+    //Check for 50 move violation or 3 fold repetition
+    if (getBoard()->numRep() >= 2 || (getBoard()->getHisPly() - getBoard()->getFiftyMove() >= 100))
+    {
+        return 0;
+    }
     
     int score = static_eval(*getBoard());
     int movesMade = 0;

@@ -30,7 +30,7 @@ Game::~Game()
     delete mSearch;
 }
 
-void Game::play()
+int Game::play()
 {
     getBoard()->parseFen(startFen);     //Resetting board to starting position
     if (playerColor == NEITHER)
@@ -38,7 +38,7 @@ void Game::play()
         chooseSide();                       //Prompts the user to input a side
     }
     runGame();                          //Loop while game is not over
-    printResult();                      //Prints if white/black won/drew and the method
+    return printResult();               //Prints if white/black won/drew and the method
 }
 
 void Game::chooseSide()
@@ -313,7 +313,7 @@ unsigned long Game::legalMoves(const std::list<int> moves)
     return size;
 }
 
-void Game::printResult()
+int Game::printResult()
 {
     //Output who won
     int side = getBoard()->getSide();
@@ -327,11 +327,23 @@ void Game::printResult()
         if (getBoard()->getSide() == WHITE)
         {
             std::cout << "Black wins by checkmate" << std::endl;
+            
+            if (playerColor == WHITE)
+            {
+                return 1;
+            }
         }
         else
         {
             std::cout << "White wins by checkmate" << std::endl;
+            
+            if (playerColor == BLACK)
+            {
+                return 1;
+            }
         }
+        
+        return -1;
     }
     else
     {
@@ -339,7 +351,7 @@ void Game::printResult()
         {
             std::cout << "Game Drawn: 3 fold repetition" << std::endl;
         }
-        else if ((getBoard()->getHisPly() - getBoard()->getFiftyMove()) < 100)
+        else if ((getBoard()->getHisPly() - getBoard()->getFiftyMove()) >= 100)
         {
             std::cout << "Game Drawn: 50 move violation" << std::endl;
         }
@@ -347,5 +359,7 @@ void Game::printResult()
         {
             std::cout << "Game Drawn: stalemate" << std::endl;
         }
+        
+        return 0;
     }
 }

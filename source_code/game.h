@@ -23,7 +23,7 @@ public:
     Third: loops until game ends, with each iteration prompting the user to input a move, while the computer outputs a move
     Fourth: prints the game result to cout
     */
-    void play();
+    int play();     //Return 1 if computer won, -1 if computer lost, 0 if draw
     
 private:
     //Accessors
@@ -47,7 +47,7 @@ private:
     void checkGameStatus();     //checks if the game is over
     bool vetMove(Movegen* mGen, int move);     //returns true if move is allowed
     unsigned long legalMoves(const std::list<int> moves);  //return number of actual legal moves, discounting all pseudolegal moves that would result in king being in check
-    void printResult();
+    int printResult();      //returns same scoring scheme as Game::play()
     
     //Members
     int playerColor;

@@ -294,17 +294,24 @@ int Board::numRep() const
 {
     int repCount = 0;
     
-    //Remember - only need to check moves up to the fiftyMove counter
-    for (int i = hisPly; i >= fiftyMove; i--)
+    if (hisPly != 0)
     {
-        if (posKey == history[i].posKey)
+        //Remember - only need to check moves up to the fiftyMove counter
+        for (int i = hisPly - 1; i >= fiftyMove; i--)
         {
-            repCount++;
+            if (posKey == history[i].posKey)
+            {
+                repCount++;
+            }
+            if (repCount >= 2)
+            {
+                break;
+            }
         }
-        if (repCount >= 2)
-        {
-            break;
-        }
+    }
+    else
+    {
+        return 0;
     }
     
     return repCount;
