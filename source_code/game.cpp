@@ -111,6 +111,7 @@ void Game::runGame()
                     //Dummy board to input moves on while real board is pondering
                     Movegen* dummyInput = new Movegen(*getMoveGenerator());
                     int move;
+                    int initPvMove = mSearch->getPvMove();
                     
                     //Thread 1: Ponder
                     std::thread ponderThread([this]{getSearcher()->ponder();});
@@ -122,10 +123,22 @@ void Game::runGame()
                     awaitIO.join();
                     ponderThread.join();
                     
+                    //Check if ponder hit
+                    if (initPvMove != NOMOVE)
+                    {
+                        //Take back the move that the ponder board made to ponder position
+                        getMoveGenerator()->takeBack();
+                    }
+                    
                     //Make the move
                     getMoveGenerator()->makeMove(move);
                     //Cleanup dummy board
                     delete dummyInput;
+                    
+                    if (initPvMove == move)
+                    {
+                        continue;   //Ponder hit case
+                    }
                 }
                 else
                 {
@@ -162,6 +175,7 @@ void Game::runGame()
             checkGameStatus();
             if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
         }
+        getSearcher()->prepSearch();
     }
 }
 

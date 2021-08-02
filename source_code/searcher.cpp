@@ -11,6 +11,7 @@
 Searcher::Searcher()
 {
     moveGenerator = new Movegen();
+    prepSearch();
 }
 
 Searcher::~Searcher()
@@ -20,11 +21,6 @@ Searcher::~Searcher()
 
 int Searcher::reccomendMove()
 {
-    //if (!ponderMode)
-    //{
-        prepSearch(); //If we're pondering, we don't clear the table, as it is filled while pondering. We need these values for the pondering time to be of use
-    //}
-    
     //If ponder hit somehow join the results
     //This is the score of the position considering a given depth
     float score = 0;
@@ -32,7 +28,7 @@ int Searcher::reccomendMove()
     //Iterative deepening
     for (; true; searchDepth++)
     {
-        int tempScore = alphaBeta(-INFINITY, INFINITY, searchDepth);
+        int tempScore = alphaBeta(-INFINITE, INFINITE, searchDepth);
         
         //Only update the score if we weren't stopped due to time... because this always returns 0 by default
         if (!stop && searchDepth <= MAXDEPTH)
@@ -241,19 +237,19 @@ int Searcher::quiescenceSearch(int alpha, int beta)
 
 void Searcher::ponder()
 {
-    //Get info about PV's here...
-    //std::cout << "Recommended move: " << printMove(getPvMove()) << std::endl;
+    int initPvMove = getPvMove();
     
-    prepSearch();
+    if (initPvMove != NOMOVE)
+    {
+        getMoveGenerator()->makeMove(initPvMove);
+    }
     
-    float* score = new float;   //To print out position score for debug info
     timeAllocated += 1000000000;//Effectively infinite time to ponder (until interrupt)
     
     //Iterative deepening
     for (; true; searchDepth++)
     {
-        score[searchDepth] = alphaBeta(-INFINITY, INFINITY, searchDepth);
-        std::cout << "reached depth " << searchDepth << std::endl;
+        alphaBeta(-INFINITE, INFINITE, searchDepth);
         
         if (stop)
         {
@@ -261,8 +257,21 @@ void Searcher::ponder()
         }
     }
     timeAllocated -= 1000000000;//Restore to its default
+    timer.start();              //So it can think in addition to the ponder time
+    stop = false;
+}
+
+void Searcher::prepSearch()
+{
+    //We only clear the history table
+    std::memset(historyMoves, 0, sizeof(historyMoves));
     
-    delete score;
+    stat.reset();
+    stop = false;
+    searchDepth = 1;
+    rootPosKey = getBoard()->getPosKey();
+    
+    timer.start();
 }
 
 int Searcher::pickNextMove(std::list<int>& li, int depth)
@@ -459,33 +468,7 @@ int Searcher::getTransScore(int depth)
         return tTable[index].score;
     }
     
-    return INFINITY;
-}
-
-void Searcher::prepSearch()
-{
-    for (int i = 0; i < TTABLEENTRIES; i++)
-    {
-        pvTable[i] = PVNode {0, 0};
-        tTable[i] = Trans {0, 0, 0};
-    }
-    
-    for (int i = 0; i < 2 * MAXDEPTH + 1; i++)
-    {
-        killerMoves[i] = 0;
-    }
-    
-    for (int i = 0; i < 12 * 64; i++)
-    {
-        historyMoves[i] = 0;
-    }
-    
-    stat.reset();
-    stop = false;
-    searchDepth = 1;
-    rootPosKey = getBoard()->getPosKey();
-    
-    timer.start();
+    return INFINITE;
 }
 
 void Searcher::checkTime()

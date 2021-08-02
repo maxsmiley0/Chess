@@ -57,7 +57,7 @@ class Board;
 #define TTABLEENTRIES 100000
 
 #define MATE 90000
-#define INFINITY 100000
+#define INFINITE 100000
 
 //A quick shortcut, piece representations indexed by piece type
 static std::string PceChar = "PNBRQKpnbrqk.";
@@ -70,12 +70,12 @@ static bool debugMode = true;
 /*
  If true, the computer will monitor the text file specified. It will wait until a move is written, and it will play that move, calculate, and output a move into the given file. To setup a game between two AIs, we must have two instances of the engine running listening to the same port, have them be opposite colors and have the same start FEN.
  */
-static bool computerMode = true;
+static bool computerMode = false;
 static std::string inSocket = "/Users/maxsmiley/arena.txt";
 static std::string outSocket = "/Users/maxsmiley/arena1.txt";
 
 //When turned on, the computer will use the player's time to perform calculations
-static bool ponderMode = false;
+static bool ponderMode = true;
 
 int PceCol (int pce);   //Returns color, given a piece
 int RAND32 ();          //Returns a random 32 bit integer

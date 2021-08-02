@@ -21,8 +21,12 @@ public:
     int reccomendMove();
     //Passively calculates (used when not player's turn)
     void ponder();
+    //Auxiliary
+    void prepSearch();
     //Sends signal to stop searching
     void sendSIGSTOP() { if (stop) {std::cerr << "SIGSTOP err" << std::endl; exit(1);} stop = true;}
+    //Returns PV move for a given position
+    int getPvMove() const;
     
     //Accessors
     Board* getBoard() const {return moveGenerator->getBoard(); } //returns a pointer to the board
@@ -39,7 +43,6 @@ private:
     
     //Related to the principal variation heuristic
     void storePvMove(int move);     //stores pv move for a particular board
-    int getPvMove() const;                //returns PV move for a given position
     void printPvLine(int depth);    //after recommending a move, print the pv line
     
     //Related to the killer heuristic
@@ -56,7 +59,6 @@ private:
     int getTransScore(int depth);    //returns score associated with a transposition, infinity if otherwise
     
     //Auxiliary
-    void prepSearch();              //prepares for search, clears tables, etc.
     void checkTime();               //updates "stop" bool if time alloc exceeded
     
     //Members
@@ -64,7 +66,7 @@ private:
     Stats stat;                     //statistics collection
     
     int searchDepth;                //depth at which we are searching
-    int timeAllocated = 500;       //allocated time to search in ms
+    int timeAllocated = 3000;       //allocated time to search in ms
     bool stop;                      //have we exceeded time alloc while hitting mindepth?
     int rootPosKey;                 //ensures no collisions occur in the PV table
     
