@@ -150,7 +150,44 @@ void Game::runGame()
             }
             else
             {
-                processComputerMove(getMoveGenerator());
+                if (ponderMode)
+                {
+                    //Dummy board to input moves on while real board is pondering
+                    Movegen* dummyInput = new Movegen(*getMoveGenerator());
+                    int move;
+                    int initPvMove = mSearch->getPvMove();
+                    
+                    //Thread 1: Ponder
+                    std::thread ponderThread([this]{getSearcher()->ponder();});
+                    //Thread 2: Await for user input. When valid input is given, send a signal to our searcher to stop pondering, and return the move so we can make it on the "real board"
+                    std::thread awaitIO([&, this]{move = processComputerMove(dummyInput, mSearch);});
+                    
+                    //In this body, the engine is calculating while waiting on input
+                    //Join the threads
+                    awaitIO.join();
+                    ponderThread.join();
+                    
+                    //Check if ponder hit
+                    if (initPvMove != NOMOVE)
+                    {
+                        //Take back the move that the ponder board made to ponder position
+                        getMoveGenerator()->takeBack();
+                    }
+                    
+                    //Make the move
+                    getMoveGenerator()->makeMove(move);
+                    //Cleanup dummy board
+                    delete dummyInput;
+                    
+                    if (initPvMove == move)
+                    {
+                        continue;   //Ponder hit case
+                    }
+                }
+                else 
+                {
+                    processComputerMove(getMoveGenerator());
+                }
                 
                 checkGameStatus();
                 if (gameOver) {clearScreen(); getBoard()->printBoard(playerColor); break;}
@@ -229,7 +266,7 @@ int Game::processPlayerMove(Movegen* mGen, Searcher* ponderSearch)
     }
 }
 
-void Game::processComputerMove(Movegen* mGen)
+int Game::processComputerMove(Movegen* mGen, Searcher* ponderSearch)
 {
     std::string move = "";
     int cnt = 0;
@@ -269,8 +306,17 @@ void Game::processComputerMove(Movegen* mGen)
         std::cerr << "Computer input is an invalid move" << std::endl;
         exit(1);
     }
-    
+    else 
+    {
+        //Legal move case
+        if (ponderSearch)
+        {
+            ponderSearch->sendSIGSTOP();
+        }
+    }
+
     clearSocket(inSocket);
+    return std::stoi(move);
 }
 
 void Game::writeMove(int move)

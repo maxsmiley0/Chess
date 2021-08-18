@@ -9,6 +9,8 @@
 #include "defs.h"
 #include "board.h"
 
+#include <climits> 
+
 //Returns true if a piece is a pawn
 bool isPawn(int pce)
 {

@@ -37,7 +37,7 @@ private:
     
     //Processing moves
     int processPlayerMove(Movegen* mGen, Searcher* ponderSearch = nullptr);   //handles move input if not computer mode. If pondering, input the searcher used to ponder to send stop signal to, otherwise leave blank. Returns the move
-    void processComputerMove(Movegen* mGen); //handles move input if computer mode, with respect to a given Move Generator
+    int processComputerMove(Movegen* mGen, Searcher* ponderSearch = nullptr); //handles move input if computer mode. If pondering, input the searcher used to ponder to send stop signal to, otherwise leave blank. Returns the move
     
     //Writes and clears files. Methods are responsible for error checking
     void writeMove(int move);             //Always writes to outSocket

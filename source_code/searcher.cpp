@@ -24,12 +24,13 @@ int Searcher::reccomendMove()
     //If ponder hit somehow join the results
     //This is the score of the position considering a given depth
     float score = 0;
-    
+    timer.start();
+    int initPvMove = getPvMove();
+
     //Iterative deepening
     for (; true; searchDepth++)
     {
         int tempScore = alphaBeta(-INFINITE, INFINITE, searchDepth);
-        
         //Only update the score if we weren't stopped due to time... because this always returns 0 by default
         if (!stop && searchDepth <= MAXDEPTH)
         {
@@ -37,7 +38,7 @@ int Searcher::reccomendMove()
         }
         //If we are stopped or somehow exceed MAXDEPTH, exit loop
         else
-        {
+        {   
             break;
         }
     }
@@ -51,6 +52,15 @@ int Searcher::reccomendMove()
         printPvLine(searchDepth - 1);
         if (getBoard()->getSide() == BLACK){score *= -1;}
         std::cout << "Score: " << score / 100 << std::endl;
+    }
+
+    if (getPvMove() == NOMOVE)
+    {
+        if (initPvMove == NOMOVE)
+        {
+            std::cerr << "pv move and init pv move are both null" << std::endl;
+        }
+        return initPvMove;
     }
     
     return getPvMove();
@@ -264,7 +274,10 @@ void Searcher::ponder()
 void Searcher::prepSearch()
 {
     //We only clear the history table
-    std::memset(historyMoves, 0, sizeof(historyMoves));
+    for (int i = 0; i < 14 * 64; i++)
+    {
+        historyMoves[i] = 0;
+    }
     
     stat.reset();
     stop = false;
@@ -359,7 +372,6 @@ void Searcher::storePvMove(int move)
         {
             pvTable[i] = PVNode {getBoard()->getPosKey(), move};
         }
-        
     }
     else
     {
