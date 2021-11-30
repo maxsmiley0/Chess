@@ -97,11 +97,17 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     int kingC = getBoard()->getKingC(side);
     
     bool inCheck = moveGenerator->squareAttacked(kingR, kingC, side);
-    //Search extension, allocate extra ply if in check
+
+    if (multicut(alpha, beta, depth, 2, 3, 10))
+    {
+        return beta;
+    }
+
+    /*//Search extension, allocate extra ply if in check
     if (inCheck)
     {
         depth++;
-    }
+    }*/
     
     //Generate moves
     std::list<int> moveList = moveGenerator->generateMoves();
@@ -243,6 +249,41 @@ int Searcher::quiescenceSearch(int alpha, int beta)
         }
     }
     return alpha;
+}
+
+bool Searcher::multicut(int alpha, int beta, int depth, int r, int c, int m)
+{
+    //Only do it in children of root nodes
+    if (depth == searchDepth - 1 && depth > r + 1)
+    {
+        std::list<int> moveList = moveGenerator->generateMoves();
+
+        if (moveList.size() < m)
+        {
+            return false;
+        }
+
+        int cnt = 0;
+        while (c > 0 && !moveList.empty())
+        {
+            int nextMove = pickNextMove(moveList, depth);
+            if (moveGenerator->makeMove(nextMove))
+            {
+                int moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r);
+                moveGenerator->takeBack();
+                if (moveScore >= beta)
+                {
+                    cnt++;
+                    if (cnt == c)
+                    {
+                        return true;
+                    }
+                }
+                c--;
+            }
+        }
+    }
+    return false;
 }
 
 void Searcher::ponder()

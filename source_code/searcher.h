@@ -36,6 +36,7 @@ private:
     //Main searching algorithms
     int alphaBeta(int alpha, int beta, int depth);      //returns alpha in centipawns
     int quiescenceSearch(int alpha, int beta);          //called at nodes of alphaBeta
+    bool multicut(int alpha, int beta, int depth, int r, int c, int m); //returns true if m moves have produced c cutoffs at a d reduced depth search
     
     //Move Ordering
     int pickNextMove(std::list<int>& li, int depth = -1);     //returns the next best move, deletes it from the list. Need depth for killer moves. Unspecified depth means '-1' (for quiescence search, since unbounded by depth), in which case we won't use killer moves

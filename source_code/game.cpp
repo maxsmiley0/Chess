@@ -101,7 +101,6 @@ void Game::runGame()
         //If player's turn
         if (getBoard()->getSide() == playerColor)
         {
-            clearScreen();
             getBoard()->printBoard(playerColor);
             
             if (!computerMode)
@@ -195,8 +194,8 @@ void Game::runGame()
         }
         else
         {
-            clearScreen();
             //Computer makes move
+            clearScreen();
             getBoard()->printBoard(playerColor);
             std::cout << "Computer is thinking..." << std::endl;
             
