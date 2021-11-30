@@ -27,6 +27,8 @@ public:
     void sendSIGSTOP() { if (stop) {std::cerr << "SIGSTOP err" << std::endl; exit(1);} stop = true;}
     //Returns PV move for a given position
     int getPvMove() const;
+    //Returns PV score for a given position
+    int getPvScore() const;
     
     //Accessors
     Board* getBoard() const {return moveGenerator->getBoard(); } //returns a pointer to the board
@@ -43,7 +45,7 @@ private:
     int movePriority(int move, int depth) const;     //returns the priority of a move, depth is needed for killer heuristic
     
     //Related to the principal variation heuristic
-    void storePvMove(int move);     //stores pv move for a particular board
+    void storePvMove(int move, int score);     //stores pv move for a particular board
     void printPvLine(int depth);    //after recommending a move, print the pv line
     
     //Related to the killer heuristic

@@ -145,6 +145,7 @@ struct PVNode
 {
     int posKey;
     int move;
+    int score;
 };
 
 //Caches priority of move so we don't have re compute this

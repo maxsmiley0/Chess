@@ -173,7 +173,7 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     
     if (alpha != oldAlpha)
     {
-        storePvMove(bestMove);
+        storePvMove(bestMove, alpha);
     }
     
     return alpha;
@@ -269,7 +269,8 @@ bool Searcher::multicut(int alpha, int beta, int depth, int r, int c, int m)
             int nextMove = pickNextMove(moveList, depth);
             if (moveGenerator->makeMove(nextMove))
             {
-                int moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r);
+                int moveScore;
+                getPvMove() == NOMOVE ? moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r) : moveScore = getPvScore();
                 moveGenerator->takeBack();
                 if (moveScore >= beta)
                 {
@@ -391,7 +392,7 @@ int Searcher::movePriority(int move, int depth) const
     return getHistoryScore(move);
 }
 
-void Searcher::storePvMove(int move)
+void Searcher::storePvMove(int move, int score)
 {
     if (move != NOMOVE)
     {
@@ -405,13 +406,13 @@ void Searcher::storePvMove(int move)
             //Can only do so if we are overwriting it with new info about the root node
             if (rootPosKey == b->getPosKey())
             {
-                pvTable[i] = PVNode {getBoard()->getPosKey(), move};
+                pvTable[i] = PVNode {getBoard()->getPosKey(), move, score};
             }
         }
         //General case, update pv table
         else
         {
-            pvTable[i] = PVNode {getBoard()->getPosKey(), move};
+            pvTable[i] = PVNode {getBoard()->getPosKey(), move, score};
         }
     }
     else
@@ -432,6 +433,20 @@ int Searcher::getPvMove() const
     }
     
     return NOMOVE;
+}
+
+int Searcher::getPvScore() const
+{
+    int i = getBoard()->getPosKey() % TTABLEENTRIES;
+    
+    //If this board has been stored in the pv nodes ttable
+    if (pvTable[i].posKey == getBoard()->getPosKey())
+    {
+        return pvTable[i].score;
+    }
+    
+    std::cerr << "Querying unstored position score - need to validate with getPvMove" << std::endl;
+    exit(1);
 }
 
 void Searcher::printPvLine(int depth)
