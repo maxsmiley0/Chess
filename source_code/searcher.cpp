@@ -60,7 +60,8 @@ int Searcher::reccomendMove()
         {
             std::cerr << "pv move and init pv move are both null" << std::endl;
         }
-        return initPvMove;
+        prepSearch();
+        return reccomendMove();
     }
     
     return getPvMove();
@@ -269,8 +270,8 @@ bool Searcher::multicut(int alpha, int beta, int depth, int r, int c, int m)
             int nextMove = pickNextMove(moveList, depth);
             if (moveGenerator->makeMove(nextMove))
             {
-                int moveScore;
-                getPvMove() == NOMOVE ? moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r) : moveScore = getPvScore();
+                int moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r);
+                //getPvMove() == NOMOVE ? moveScore = -alphaBeta(-beta, -alpha, depth - 1 - r) : moveScore = getPvScore();
                 moveGenerator->takeBack();
                 if (moveScore >= beta)
                 {
