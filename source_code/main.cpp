@@ -14,7 +14,6 @@ int main()
     {
         Timer t1;
         t1.start();
-        
         Game g1("1rbq1rk1/p1b1nppp/1p2p3/8/1B1pN3/P2B4/1P3PPP/2RQ1R1K w - -", WHITE);
         Game g2("3r2k1/p2r1p1p/1p2p1p1/q4n2/3P4/PQ5P/1P1RNPP1/3R2K1 b - -", BLACK);
         Game g3("3r2k1/1p3ppp/2pq4/p1n5/P6P/1P6/1PB2QP1/1K2R3 w - -", WHITE);

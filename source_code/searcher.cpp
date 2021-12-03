@@ -98,11 +98,11 @@ int Searcher::alphaBeta (int alpha, int beta, int depth)
     int kingC = getBoard()->getKingC(side);
     
     bool inCheck = moveGenerator->squareAttacked(kingR, kingC, side);
-
+    /*
     if (multicut(alpha, beta, depth, 2, 3, 10))
     {
         return beta;
-    }
+    }*/
 
     /*//Search extension, allocate extra ply if in check
     if (inCheck)
