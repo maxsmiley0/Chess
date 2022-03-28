@@ -9,6 +9,19 @@
 #define pop_bit(bitboard, square) ((bitboard) &= ~(1ULL << (square)))
 #define count_bits(bitboard) __builtin_popcountll(bitboard)
 
+#define BP 0
+#define BN 1
+#define BB 2
+#define BR 3
+#define BQ 4
+#define BK 5
+#define WP 6
+#define WN 7
+#define WB 8
+#define WR 9
+#define WQ 10
+#define WK 11
+
 void print_bitboard(map bitboard)
 {
     for (int rank = 0; rank < 8; rank++)
@@ -215,9 +228,11 @@ enum {
 
 int main()
 {
-    Board brd = parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
-    print_bitboard(brd.WBishop);
-    print_bitboard(get_queen_attacks<f6>(brd.WPawn));
+    Board brd = parseFen("rn1r2k1/pp2qppp/8/8/3N2n1/1N2P3/P1Q2PPP/R4RK1");
+    print_bitboard(brd.Black);
+    //print_bitboard(Lookup<BP, f2>(brd.Occ));
+    std::cout << is_square_attacked<d4, true>(brd) << std::endl;
+    std::cout << is_square_attacked<d3, true>(brd) << std::endl;
     std::ofstream o; //ofstream is the class for fstream package
     o.open("lol"); //open is the method of ofstream
     o << "hi";

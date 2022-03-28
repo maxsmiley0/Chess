@@ -1,7 +1,22 @@
 #ifndef MOVEMAP_H
 #define MOVEMAP_H
 
+#include <iostream>
+
 #define map unsigned long long 
+
+#define BP 0
+#define BN 1
+#define BB 2
+#define BR 3
+#define BQ 4
+#define BK 5
+#define WP 6
+#define WN 7
+#define WB 8
+#define WR 9
+#define WQ 10
+#define WK 11
 
 static constexpr map pawn_attacks[2][64] = {
     {
@@ -613,6 +628,36 @@ static constexpr map get_queen_attacks(map occupancy)
     queen_attacks |= rook_attacks[square][rook_occupancy];
 
     return queen_attacks;
+}
+
+template <int piece, int square>
+static constexpr map Lookup(map occupancy)
+{
+    switch (piece)
+    {
+        case WP:
+            return pawn_attacks[0][square];
+        case BP:
+            return pawn_attacks[1][square];
+        case WN:
+        case BN:
+            return knight_attacks[square];
+        case WB:
+        case BB:
+            return get_bishop_attacks<square>(occupancy);
+        case WR:
+        case BR:
+            return get_rook_attacks<square>(occupancy);
+        case WQ:
+        case BQ:
+            return get_queen_attacks<square>(occupancy);
+        case WK:
+        case BK:
+            return king_attacks[square];
+        default:
+            std::cerr << "Bad piece in lookup" << std::endl;
+            exit(1);
+    }
 }
 
 
