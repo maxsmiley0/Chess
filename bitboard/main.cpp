@@ -69,7 +69,6 @@ Board parseFen(std::string fen)
                     break;
                 case 'p':
                     set_bit(bp, r * 8 + c);
-                    print_bitboard(bp);
                     c++;
                     break;
                 case 'n':
@@ -226,43 +225,212 @@ enum {
     a1, b1, c1, d1, e1, f1, g1, h1, no_sq
 };
 
+
+/*
+          binary move bits                               hexidecimal constants
+    
+    0000 0000 0000 0000 0011 1111    source square       0x3f
+    0000 0000 0000 1111 1100 0000    target square       0xfc0
+    0000 0000 1111 0000 0000 0000    piece               0xf000
+    0000 1111 0000 0000 0000 0000    promoted piece      0xf0000
+    0001 0000 0000 0000 0000 0000    capture flag        0x100000
+    0010 0000 0000 0000 0000 0000    double push flag    0x200000
+    0100 0000 0000 0000 0000 0000    enpassant flag      0x400000
+    1000 0000 0000 0000 0000 0000    castling flag       0x800000
+*/
+
+// encode move
+#define encode_move(source, target, piece, promoted, capture, double, enpas, castling) \
+    (source) |          \
+    (target << 6) |     \
+    (piece << 12) |     \
+    (promoted << 16) |  \
+    (capture << 20) |   \
+    (double << 21) |    \
+    (enpas << 22) | \
+    (castling << 23)    \
+    
+// extract source square
+#define get_move_source(move) (move & 0x3f)
+
+// extract target square
+#define get_move_target(move) ((move & 0xfc0) >> 6)
+
+// extract piece
+#define get_move_piece(move) ((move & 0xf000) >> 12)
+
+// extract promoted piece
+#define get_move_promoted(move) ((move & 0xf0000) >> 16)
+
+// extract capture flag
+#define get_move_capture(move) (move & 0x100000)
+
+// extract double pawn push flag
+#define get_move_double(move) (move & 0x200000)
+
+// extract enpassant flag
+#define get_move_enpas(move) (move & 0x400000)
+
+// extract castling flag
+#define get_move_castling(move) (move & 0x800000)
+
+// move list structure
+typedef struct {
+    // moves
+    int moves[256];
+    
+    // move count
+    int count;
+} moves;
+
+// add move to the move list
+static inline void add_move(moves *move_list, int move)
+{
+    // strore move
+    move_list->moves[move_list->count] = move;
+    
+    // increment move count
+    move_list->count++;
+}
+
+
+/*
+                           castling   move     in      in
+                              right update     binary  decimal
+ king & rooks didn't move:     1111 & 1111  =  1111    15
+        white king  moved:     1111 & 1100  =  1100    12
+  white king's rook moved:     1111 & 1110  =  1110    14
+ white queen's rook moved:     1111 & 1101  =  1101    13
+     
+         black king moved:     1111 & 0011  =  1011    3
+  black king's rook moved:     1111 & 1011  =  1011    11
+ black queen's rook moved:     1111 & 0111  =  0111    7
+*/
+
+// castling rights update constants
+const int castling_rights[64] = {
+     7, 15, 15, 15,  3, 15, 15, 11,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    13, 15, 15, 15, 12, 15, 15, 14
+};
+
+template <bool IsWhite>
+static constexpr void genmoves(Board brd)
+{
+    if (IsWhite)
+    {
+        //how tf do we do check / pinmask
+        
+        //pawn moves
+        //One move aheads
+        //map pawns_one_forward = (brd.WPawn >> 8) & ~brd.Occ
+        //print_bitboard((brd.WPawn >> 8) & ~brd.Occ);
+        //Two move aheads
+        //glean prev bitboard & RANK_3
+        //print_bitboard((prev) >> 8 & ~brd.Occ);
+        
+        //(Noncapture) Promotions
+        //Captures
+        //Enpassants
+        //Capture promotions
+    }
+    else
+    {
+
+    }
+}
+
 int main()
 {
-    Board brd = parseFen("rn1r2k1/pp2qppp/8/8/3N2n1/1N2P3/P1Q2PPP/R4RK1");
-    print_bitboard(brd.Black);
-    //print_bitboard(Lookup<BP, f2>(brd.Occ));
-    std::cout << is_square_attacked<d4, true>(brd) << std::endl;
-    std::cout << is_square_attacked<d3, true>(brd) << std::endl;
-    std::ofstream o; //ofstream is the class for fstream package
-    o.open("lol"); //open is the method of ofstream
-    o << "hi";
-    int maxi = 64;
-    for (int i = 0; i < maxi; i++)
+    //indexed by (bishop, king) square
+    map bishop[64][64];
+    map rook[64][64]; //given piece and king squares, returns a checkmask
+
+    //we will do a piece lookup to see who can see the king, enumerate number of attackers, and if one can & moves with checkmask!
+    
+    for (int i = 0; i < 64; i++)
     {
-        o << "{\n";
-        
-        int maxj = 4096;
-        for (int j = 0; j < maxj; j++)
+        for (int j = 0; j < 64; j++)
         {
-            if (j < maxj - 1)
-            {
-                o << rook_attacks[i][j] << "ULL, ";
-            }
-            else 
-            {
-                o << rook_attacks[i][j] << "ULL";
-            }
-        }
-        if (i < maxi - 1)
-        {  
-            o << "\n},\n";
-        }
-        else 
-        {
-            o << "\n}\n";
+            bishop[i][j] = 0;
         }
     }
-    o.close();
-    //print_bitboard(EnemyOrEmpty<true>(brd));
+    for (int r = 0; r < 8; r++)
+    {
+        for (int c = 0; c < 8; c++)
+        {
+            int b_square = r * 8 + c;
+            for (int r1 = 0; r1 < 8; r1++)
+            {
+                for (int c1 = 0; c1 < 8; c1++)
+                {
+                    int k_square = r1 * 8 + c1;
+                    if (r1 - r == c1 - c)
+                    {
+                        int tempr = r;
+                        int tempc = c;
+                        map set = 0ULL;
+                        if (r > r1)
+                        {
+                            while (tempr > r1)
+                            {
+                                set_bit(set, tempr * 8 + tempc);
+                                tempr--;
+                                tempc--;
+                            }
+                        }
+                        else if (r < r1)
+                        {
+                            while (tempr < r1)
+                            {
+                                set_bit(set, tempr * 8 + tempc);
+                                tempr++;
+                                tempc++;
+                            }
+                        }
+                        bishop[b_square][k_square] = set;
+                    }
+                    else if (r1 - r == c - c1)
+                    {
+                        int tempr = r;
+                        int tempc = c;
+                        map set = 0ULL;
+                        if (r > r1)
+                        {
+                            while (tempr > r1)
+                            {
+                                set_bit(set, tempr * 8 + tempc);
+                                tempr--;
+                                tempc++;
+                            }
+                        }
+                        else if (r < r1)
+                        {
+                            while (tempr < r1)
+                            {
+                                set_bit(set, tempr * 8 + tempc);
+                                tempr++;
+                                tempc--;
+                            }
+                        }
+                        bishop[b_square][k_square] = set;
+                    }
+                }
+            }    
+        }
+    }
+    
+    Board brd = parseFen("rn1r2k1/pp2qppp/8/8/3N2n1/1N2P3/P1Q2PPP/R4RK1");
+    genmoves<true>(brd);
+    int rb = 6;
+    int cb = 6;
+    int rk = 2;
+    int ck = 2;
+    print_bitboard(bishop[rb * 8 + cb][rk * 8 + ck]);
     return 0;
 }
