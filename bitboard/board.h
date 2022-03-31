@@ -16,9 +16,9 @@
 #define WQ 10
 #define WK 11
 
-enum {wk = 1, wq = 2, bk = 4, bq = 8};
-
 #define map unsigned long long
+
+enum {wk = 1, wq = 2, bk = 4, bq = 8};
 
 struct Board {
     map BPawn; map BKnight; map BBishop; map BRook; 
@@ -77,22 +77,96 @@ static constexpr bool is_square_attacked(Board brd)
 
 //check, double check, pin
 
+//for ls1b de bruijn multiplication
+static constexpr int index64[64] = {
+    0,  1, 48,  2, 57, 49, 28,  3,
+   61, 58, 50, 42, 38, 29, 17,  4,
+   62, 55, 59, 36, 53, 51, 43, 22,
+   45, 39, 33, 30, 24, 18, 12,  5,
+   63, 47, 56, 27, 60, 41, 37, 16,
+   54, 35, 52, 21, 44, 32, 23, 11,
+   46, 26, 40, 15, 34, 20, 31, 10,
+   25, 14, 19,  9, 13,  8,  7,  6
+};
+
+static constexpr int get_ls1b_index(map bitboard) {
+   return index64[((bitboard & -bitboard) * 0x03f79d71b4cb0a89) >> 58];
+}
+
 //checkmask - how tf do we deal with double check?
+//King will be passed in as an arg
+//Assumes legal fen, may break otherwise...
+
+//from now on no worry abt tmp just try this scheme
+//Assumes LEGAL positions... may give wrong answer if checked by 6 bishops which should never happen irl
 template <int square, bool IsWhite>
-static constexpr map checkmask(Board brd)
+static constexpr map checkmask(Board brd, int& numatk)
 {
     map chkmsk = 0ULL;
+    numatk = 0;
     if (IsWhite)
     {
-        chkmsk |= (Lookup<WP, square>(0ULL) & brd.BPawn);
-        chkmsk |= (Lookup<BN, square>(0ULL) & brd.BKnight);
-        //Need to fill in between bits for slider pieces
+        map pawnmask = Lookup<WP, square>(0ULL) & brd.BPawn;
+        chkmsk |= pawnmask;
+        if (pawnmask) numatk++;
+
+        map knightmask = Lookup<BN, square>(0ULL) & brd.BKnight;
+        chkmsk |= knightmask;
+        if (knightmask) numatk++;
+
+        map bishops = Lookup<BB, square>(brd.Occ) & brd.BBishop;
+        if (bishops)
+        {
+            chkmsk |= bishop_checkmask[get_ls1b_index(bishops)][square];
+            numatk++;
+        }
+
+        map rooks = Lookup<BR, square>(brd.Occ) & brd.BRook;
+        if (rooks)
+        {
+            chkmsk |= rook_checkmask[get_ls1b_index(rooks)][square];
+            numatk++;
+        }
+
+        map queens = Lookup<BQ, square>(brd.Occ) & brd.BQueen;
+        if (queens)
+        {
+            chkmsk |= queen_checkmask[get_ls1b_index(queens)][square];
+            numatk++;
+        }
     }
     else 
     {
+        map pawnmask = Lookup<BP, square>(0ULL) & brd.WPawn;
+        chkmsk |= pawnmask;
+        if (pawnmask) numatk++;
 
+        map knightmask = Lookup<WN, square>(0ULL) & brd.WKnight;
+        chkmsk |= knightmask;
+        if (knightmask) numatk++;
+
+        map bishops = Lookup<WB, square>(brd.Occ) & brd.WBishop;
+        if (bishops)
+        {
+            chkmsk |= bishop_checkmask[get_ls1b_index(bishops)][square];
+            numatk++;
+        }
+
+        map rooks = Lookup<WR, square>(brd.Occ) & brd.WRook;
+        if (rooks)
+        {
+            chkmsk |= rook_checkmask[get_ls1b_index(rooks)][square];
+            numatk++;
+        }
+
+        map queens = Lookup<WQ, square>(brd.Occ) & brd.WQueen;
+        if (queens)
+        {
+            chkmsk |= queen_checkmask[get_ls1b_index(queens)][square];
+            numatk++;
+        }
     }
-    return 0ULL;
+    return chkmsk;
 }
 
 #endif

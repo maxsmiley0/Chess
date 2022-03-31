@@ -202,18 +202,6 @@ Board parseFen(std::string fen)
     return Board(bp, bn, bb, br, bq, bk, wp, wn, wb, wr, wq, wk);
 }
 
-//for ls1b de bruijn multiplication
-const int index64[64] = {
-    0,  1, 48,  2, 57, 49, 28,  3,
-   61, 58, 50, 42, 38, 29, 17,  4,
-   62, 55, 59, 36, 53, 51, 43, 22,
-   45, 39, 33, 30, 24, 18, 12,  5,
-   63, 47, 56, 27, 60, 41, 37, 16,
-   54, 35, 52, 21, 44, 32, 23, 11,
-   46, 26, 40, 15, 34, 20, 31, 10,
-   25, 14, 19,  9, 13,  8,  7,  6
-};
-
 enum {
     a8, b8, c8, d8, e8, f8, g8, h8,      
     a7, b7, c7, d7, e7, f7, g7, h7,      
@@ -346,11 +334,10 @@ static constexpr void genmoves(Board brd)
 }
 
 int main()
-{
-    //indexed by (bishop, king) square
+{/*
     map bishop[64][64];
-    map rook[64][64]; //given piece and king squares, returns a checkmask
-
+    map rook[64][64];
+    map queen[64][64];
     //we will do a piece lookup to see who can see the king, enumerate number of attackers, and if one can & moves with checkmask!
     
     for (int i = 0; i < 64; i++)
@@ -358,6 +345,7 @@ int main()
         for (int j = 0; j < 64; j++)
         {
             bishop[i][j] = 0;
+            rook[i][j] = 0;
         }
     }
     for (int r = 0; r < 8; r++)
@@ -424,13 +412,149 @@ int main()
             }    
         }
     }
+
+
+    for (int r = 0; r < 8; r++)
+    {
+        for (int c = 0; c < 8; c++)
+        {
+            int r_square = r * 8 + c;
+            for (int r1 = 0; r1 < 8; r1++)
+            {
+                for (int c1 = 0; c1 < 8; c1++)
+                {
+                    int k_square = r1 * 8 + c1;
+                    if (r1 == r)
+                    {
+                        int tempc = c;
+                        map set = 0ULL;
+                        if (c < c1)
+                        {
+                            while (tempc < c1)
+                            {
+                                set_bit(set, r * 8 + tempc);
+                                tempc++;
+                            }
+                        }
+                        else if (c > c1)
+                        {
+                            while (tempc > c1)
+                            {
+                                set_bit(set, r * 8 + tempc);
+                                tempc--;
+                            }
+                        }
+                        rook[r_square][k_square] = set;
+                    }
+                    else if (c == c1)
+                    {
+                        int tempr = r;
+                        map set = 0ULL;
+                        if (r > r1)
+                        {
+                            while (tempr > r1)
+                            {
+                                set_bit(set, tempr * 8 + c);
+                                tempr--;
+                            }
+                        }
+                        else if (r < r1)
+                        {
+                            while (tempr < r1)
+                            {
+                                set_bit(set, tempr * 8 + c);
+                                tempr++;
+                            }
+                        }
+                        rook[r_square][k_square] = set;
+                    }
+                }
+            }    
+        }
+    }
+
+    for (int i = 0; i < 64; i++)
+    {
+        for (int j = 0; j < 64; j++)
+        {
+            if (bishop[i][j] != 0 && rook[i][j] != 0)
+            {
+                std::cerr << "fucked up" << std::endl;
+                exit(1);
+            }
+            else if (bishop[i][j] != 0)
+            {
+                queen[i][j] = bishop[i][j];
+            }
+            else if (rook[i][j] != 0)
+            {
+                queen[i][j] = rook[i][j];
+            }
+            else 
+            {
+                queen[i][j] = 0;
+            }
+        }
+    }
     
-    Board brd = parseFen("rn1r2k1/pp2qppp/8/8/3N2n1/1N2P3/P1Q2PPP/R4RK1");
-    genmoves<true>(brd);
-    int rb = 6;
-    int cb = 6;
-    int rk = 2;
-    int ck = 2;
-    print_bitboard(bishop[rb * 8 + cb][rk * 8 + ck]);
+    //Board brd = parseFen("rn1r2k1/pp2qppp/8/8/3N2n1/1N2P3/P1Q2PPP/R4RK1");
+    //genmoves<true>(brd);
+    int rb = 1;
+    int cb = 7;
+    int rk = 4;
+    int ck = 4;
+    print_bitboard(queen[rb * 8 + cb][rk * 8 + ck]);
+    
+    std::ofstream o; //ofstream is the class for fstream package
+    o.open("lol"); //open is the method of ofstream
+    o << "hi";
+    
+    for (int i = 0; i < 64; i++)
+    {
+        o << "{\n";
+        
+        for (int j = 0; j < 64; j++)
+        {
+            if (j < 64 - 1)
+            {
+                o << queen[i][j] << "ULL, ";
+            }
+            else 
+            {
+                o << queen[i][j] << "ULL";
+            }
+        }
+        if (i < 64 - 1)
+        {  
+            o << "\n},\n";
+        }
+        else 
+        {
+            o << "\n}\n";
+        }
+    }
+    
+    o.close();
+    */
+    Board brd = parseFen("r3k2r/1pqn1ppp/p1p1pnb1/2b5/6P1/P1NP1N1P/1PPBQPB1/2KRR3 w kq - 0 1");
+    print_bitboard(brd.WKing);
+    int numatk;
+    print_bitboard(checkmask<a1, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a2, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a3, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a4, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a5, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a6, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a7, false>(brd, numatk));
+    std::cout << numatk << std::endl;
+    print_bitboard(checkmask<a8, false>(brd, numatk));
+    std::cout << numatk << std::endl;
     return 0;
+    //need to change template metaprogramming to only bools
 }
