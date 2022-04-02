@@ -333,18 +333,8 @@ static constexpr void genmoves(Board brd)
     }
 }
 
+
 int main()
 {
-    /*constexpr BoardStatus brd(true, false, false, false, false, false);
-    std::cout << well<brd.PawnPush()>() << std::endl;
-    *//*
-   
-    Board brd = parseFen("r3k2r/1pqn1ppp/p1p1pnb1/2b5/6P1/P1NP1N1P/1PPBQPB1/2KRR3 w kq - 0 1");
-    print_bitboard(brd.WKing);
-    int numatk;
-    print_bitboard(checkmask<true>(a1, brd, numatk));
-    std::cout << numatk << std::endl;
-    print_bitboard(checkmask<true>(e5, brd, numatk));
-    std::cout << numatk << std::endl;
-    return 0;
+    print_bitboard(pinmask_2[f3]);
 }
