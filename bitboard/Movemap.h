@@ -1173,8 +1173,7 @@ static constexpr map queen_checkmask[64][64] = {
     }
 };
 
-template <int square>
-static constexpr map get_bishop_attacks(map occupancy)
+static inline map get_bishop_attacks(int square, map occupancy)
 {
     occupancy &= bishop_masks[square];
     occupancy *= bishop_magic_numbers[square];
@@ -1182,8 +1181,7 @@ static constexpr map get_bishop_attacks(map occupancy)
     return bishop_attacks[square][occupancy];
 }
 
-template <int square>
-static constexpr map get_rook_attacks(map occupancy)
+static inline map get_rook_attacks(int square, map occupancy)
 {
     occupancy &= rook_masks[square];
     occupancy *= (rook_magic_numbers[square]);
@@ -1191,8 +1189,7 @@ static constexpr map get_rook_attacks(map occupancy)
     return rook_attacks[square][occupancy];
 }
 
-template <int square>
-static constexpr map get_queen_attacks(map occupancy)
+static inline map get_queen_attacks(int square, map occupancy)
 {
     map queen_attacks = 0ULL;
 
@@ -1214,8 +1211,7 @@ static constexpr map get_queen_attacks(map occupancy)
     return queen_attacks;
 }
 
-template <int piece, int square>
-static constexpr map Lookup(map occupancy)
+static inline map Lookup(int piece, int square, map occupancy)
 {
     switch (piece)
     {
@@ -1228,17 +1224,20 @@ static constexpr map Lookup(map occupancy)
             return knight_attacks[square];
         case WB:
         case BB:
-            return get_bishop_attacks<square>(occupancy);
+            return get_bishop_attacks(square, occupancy);
         case WR:
         case BR:
-            return get_rook_attacks<square>(occupancy);
+            return get_rook_attacks(square, occupancy);
         case WQ:
         case BQ:
-            return get_queen_attacks<square>(occupancy);
+            return get_queen_attacks(square, occupancy);
         case WK:
         case BK:
             return king_attacks[square];
     }
+
+    //should never get here
+    return 0ULL;
 }
 
 #endif
