@@ -60,6 +60,11 @@ char pce_on_square(int square, Brd brd)
 
 Brd parse_fen(std::string fen)
 {
+    Brd brd;
+
+    int castlePerms = 0;
+    int enpas = 0;
+    
     int section = 0;    //0 -> pieces | 1 -> side | 2 -> castle | 3 -> enpas square
     int r = 0;          //stores row we are on
     int c = 0;          //stores column we are on
@@ -146,18 +151,17 @@ Brd parse_fen(std::string fen)
             }
         }
         //side to move
-        /*
         else if (section == 1)
         {
             if (fen[i] == 'w')
             {
+                brd.color = WHITE;
                 section++;
                 i++;
             }
             else if (fen[i] == 'b')
             {
-                side = BLACK;
-                posKey ^= sideKey;
+                brd.color = BLACK;
                 section++;
                 i++;
             }
@@ -174,20 +178,16 @@ Brd parse_fen(std::string fen)
                 case '-':
                     break;
                 case 'K':
-                    posKey ^= castleKeys[0];
-                    castlePerm |= WKCA;
+                    castlePerms |= WKCA;
                     break;
                 case 'Q':
-                    posKey ^= castleKeys[1];
-                    castlePerm |= WQCA;
+                    castlePerms |= WQCA;
                     break;
                 case 'k':
-                    posKey ^= castleKeys[2];
-                    castlePerm |= BKCA;
+                    castlePerms |= BKCA;
                     break;
                 case 'q':
-                    posKey ^= castleKeys[3];
-                    castlePerm |= BQCA;
+                    castlePerms |= BQCA;
                     break;
                 default:
                     std::cerr << "Invalid FEN" << std::endl;
@@ -202,15 +202,11 @@ Brd parse_fen(std::string fen)
             {
                 //update position key
                 //update en passant square
-                enpasSquareC = (int)fen[i] - (int)'a';
-                enpasSquareR = 8 - ((int)fen[i + 1] - (int)'0');
-                posKey ^= enpasKey[enpasSquareR][enpasSquareC];
+                enpas = (8 - ((int)fen[i + 1] - (int)'0')) * 8 + (int)fen[i] - (int)'a';
             }
             section++;
-        }*/
+        }
     }
-
-    Brd brd;
 
     brd.pce[WP] = wp;
     brd.pce[WN] = wn;
@@ -230,13 +226,15 @@ Brd parse_fen(std::string fen)
     brd.side[BLACK] = bp | bn | bb | br | bq | bk;
     brd.occ = brd.side[WHITE] | brd.side[BLACK];
 
-    brd.color = WHITE;
+    brd.enpas = enpas;
+    brd.castleperms = castlePerms;
 
     return brd;
 }
 
 void print_board(Brd brd)
 {
+    //Prints ranks, pieces, files
     for (int rank = 0; rank < 8; rank++)
     {
         for (int file = 0; file < 8; file++)
@@ -259,22 +257,132 @@ void print_board(Brd brd)
         std::cout << std::endl;
     }
 
+    //Prints auxiliary information
     std::cout << std::endl << "      a  b  c  d  e  f  g  h" << std::endl << std::endl;
-    brd.color ? std::cout << "      Color: Black" : std::cout << "      Color: White" << std::endl << std::endl;
+    brd.color ? std::cout << "      Color: Black" : std::cout << "      Color: White" << std::endl;
+    std::cout << "Castle Perms: ";
+    if (brd.castleperms & WKCA)
+    {
+        std::cout << "K";
+    }
+    if (brd.castleperms & WQCA)
+    {
+        std::cout << "Q";
+    }
+    if (brd.castleperms & BKCA)
+    {
+        std::cout << "k";
+    }
+    if (brd.castleperms & BQCA)
+    {
+        std::cout << "q";
+    }
+    std::cout << std::endl;
+    std::cout << "Enpas: " << brd.enpas << std::endl << std::endl;
 }
 
 void print_move(int move)
 {
-    std::cout << "From: " << get_move_source(move) << std::endl;
-    std::cout << "To: " << get_move_target(move) << std::endl;
-    std::cout << "Piece: " << get_move_piece(move) << std::endl;
+    std::cout << "From: " << square_to_coordinates[get_move_source(move)] << std::endl;
+    std::cout << "To: " << square_to_coordinates[get_move_target(move)] << std::endl;
+    std::cout << "Piece: " << pce_char[get_move_piece(move)] << std::endl;
 }
 
+//Given a board, returns a list of generated (pseudo-legal) moves in the position
 std::list<int> generate_moves(Brd brd)
 {
     std::list<int> li;
-    li.push_back(2);
-    //Generate moves here...
+
+    //Pce current / future position
+    int src_sq, tar_sq;
+    //Current piece map copy and its attack squares
+    map bitboard, attacks;
+    //Loop through WP->WK / BP->BK depending on side
+    int start_pce, end_pce;
+    if (brd.color == WHITE)
+    {
+        start_pce = WP; 
+        end_pce = WK;
+    }
+    else 
+    {
+        start_pce = BP; 
+        end_pce = BK;
+    }
+
+    //Loop through all piece bitboards and all attacks
+    for (int pce = start_pce; pce <= end_pce; pce++)
+    {
+        bitboard = brd.pce[pce];
+        
+        //Pawn & castling moves
+        if (pce == WP)
+        {
+            //Loop over all WP
+            while (bitboard)
+            {
+                src_sq = get_ls1b_index(bitboard);
+                tar_sq = src_sq - 8;
+
+                //generate quiet pawn moves
+                if (!(tar_sq < a8) && !get_bit(brd.occ, tar_sq))
+                {
+                    //pawn promotion
+                    if (src_sq >= a7 && src_sq <= h7)
+                    {
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WQ, 0, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WR, 0, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WB, 0, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WN, 0, 0, 0, 0));
+                    }
+                    else 
+                    {
+                        //One ahead
+                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 0, 0, 0, 0));
+                        //Two ahead
+                        if ((src_sq >= a2 && src_sq <= h2) && !get_bit(brd.occ, tar_sq - 8))
+                        {
+                            li.push_back(encode_move(src_sq, tar_sq - 8, pce, 0, 0, 1, 0, 0));
+                        }
+                    }
+                }
+                //generate attack pawn moves
+                attacks = pawn_attacks[WHITE][src_sq] & brd.side[BLACK];
+                while (attacks)
+                {
+                    tar_sq = get_ls1b_index(attacks);
+
+                    //Pawn promotion / capture
+                    if (src_sq >= a7 && src_sq <= h7)
+                    {
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WQ, 1, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WR, 1, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WB, 1, 0, 0, 0));
+                        li.push_back(encode_move(src_sq, tar_sq, pce, WN, 1, 0, 0, 0));
+                    }
+                    else 
+                    {
+                        //Regular capture case
+                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 1, 0, 0, 0));  
+                    }
+
+                    pop_bit(attacks, tar_sq);
+                }
+
+                //Enpas
+                if (brd.enpas)
+                {
+                    map enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
+                    if (enpas_attack)
+                    {
+                        li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), pce, 0, 1, 0, 1, 0));
+                    }
+                }
+
+                pop_bit(bitboard, src_sq);
+            }
+        }
+    }
 
     for (std::list<int>::iterator itr = li.begin(); itr != li.end(); itr++)
     {
