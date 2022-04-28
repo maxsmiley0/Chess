@@ -1,216 +1,286 @@
-#ifndef BOARD_H
-#define BOARD_H
+#ifndef board_h
+#define board_h
 
+#include <list>
+#include "defs.h"
 #include "Movemap.h"
-
-#define BP 0
-#define BN 1
-#define BB 2
-#define BR 3
-#define BQ 4
-#define BK 5
-#define WP 6
-#define WN 7
-#define WB 8
-#define WR 9
-#define WQ 10
-#define WK 11
-
-#define map unsigned long long
 
 enum {wk = 1, wq = 2, bk = 4, bq = 8};
 
-struct Board {
-    map BPawn; map BKnight; map BBishop; map BRook; 
-    map BQueen; map BKing;
-    map WPawn; map WKnight; map WBishop; map WRook; 
-    map WQueen; map WKing;
+struct Brd {
+    //Pieces
+    map pce[12];    //piece map, indexed by piece type
+    map side[2];    //side map, indexed by side
+    map occ;        //all occupancies
 
-    map Black;
-    map White;
-    map Occ;
-
-    int enpas = 0;
-    int castleperms = wk | wq | bk | bq;
-    int side = 0;
-
-    constexpr Board(
-        map bp, map bn, map bb, map br, map bq, map bk,
-        map wp, map wn, map wb, map wr, map wq, map wk) :
-        BPawn(bp), BKnight(bn), BBishop(bb), BRook(br), BQueen(bq), BKing(bk),
-        WPawn(wp), WKnight(wn), WBishop(wb), WRook(wr), WQueen(wq), WKing(wk),
-        Black(bp | bn | bb | br | bq | bk),
-        White(wp | wn | wb | wr | wq | wk),
-        Occ(Black | White)
-    {
-    }
+    //State
+    int color;
+    int enpas;
+    int castleperms;
 };
 
-template <bool IsWhite>
-constexpr map EnemyOrEmpty(const Board& brd)
+//Returns true if the side to move is in check
+static inline bool in_check(Brd brd)
 {
-    if (IsWhite) 
+    map occ = brd.occ;
+    int k_square;
+
+    if (brd.color == WHITE)
     {
-        return ~brd.White;
-    }
-    return ~brd.Black;
-}
-
-
-template <int square, bool IsWhite>
-static inline bool is_square_attacked(Board brd)
-{
-    if (IsWhite)
-    {
-        return Lookup<WP, square>(0ULL) & brd.BPawn | Lookup<BN, square>(0ULL) & brd.BKnight | Lookup<BB, square>(brd.Occ) & brd.BBishop | 
-               Lookup<BR, square>(brd.Occ) & brd.BRook | Lookup<BQ, square>(brd.Occ) & brd.BQueen | Lookup<BK, square>(0ULL) & brd.BKing;
-
+        k_square = get_ls1b_index(brd.pce[WK]);
+        return lookup(BQ, k_square, occ) & brd.pce[BQ] || lookup(BR, k_square, occ) & brd.pce[BR] || lookup(BB, k_square, occ) & brd.pce[BB] || 
+               lookup(BN, k_square, occ) & brd.pce[BN] || lookup(WP, k_square, occ) & brd.pce[BP] || lookup(BK, k_square, occ) & brd.pce[BK];
     }
     else 
     {
-        return Lookup<BP, square>(0ULL) & brd.WPawn | Lookup<WN, square>(0ULL) & brd.WKnight | Lookup<WB, square>(brd.Occ) & brd.WBishop | 
-               Lookup<WR, square>(brd.Occ) & brd.WRook | Lookup<WQ, square>(brd.Occ) & brd.WQueen | Lookup<WK, square>(0ULL) & brd.WKing;
+        k_square = get_ls1b_index(brd.pce[BK]);
+        return lookup(WQ, k_square, occ) & brd.pce[WQ] || lookup(WR, k_square, occ) & brd.pce[WR] || lookup(WB, k_square, occ) & brd.pce[WB] || 
+               lookup(WN, k_square, occ) & brd.pce[WN] || lookup(BP, k_square, occ) & brd.pce[WP] || lookup(WK, k_square, occ) & brd.pce[WK];
     }
+    
+    return false;
 }
 
-//define a function that, given a board and a slider piece(s), fills in squares
-
-//check, double check, pin
-
-//for ls1b de bruijn multiplication
-static constexpr int index64[64] = {
-    0,  1, 48,  2, 57, 49, 28,  3,
-   61, 58, 50, 42, 38, 29, 17,  4,
-   62, 55, 59, 36, 53, 51, 43, 22,
-   45, 39, 33, 30, 24, 18, 12,  5,
-   63, 47, 56, 27, 60, 41, 37, 16,
-   54, 35, 52, 21, 44, 32, 23, 11,
-   46, 26, 40, 15, 34, 20, 31, 10,
-   25, 14, 19,  9, 13,  8,  7,  6
-};
-
-static inline int get_ls1b_index(map bitboard) {
-   return index64[((bitboard & -bitboard) * 0x03f79d71b4cb0a89) >> 58];
-}
-
-//checkmask - how tf do we deal with double check?
-//King will be passed in as an arg
-//Assumes legal fen, may break otherwise...
-
-//from now on no worry abt tmp just try this scheme
-//Assumes LEGAL positions... may give wrong answer if checked by 6 bishops which should never happen irl
-
-//start thinking about board / boardstatus
-
-template <bool IsWhite>
-static constexpr map checkmask(int square, Board brd, int& numatk)
+//Given a square return character of piece on it
+char pce_on_square(int square, Brd brd)
 {
-    map chkmsk = 0ULL;
-    numatk = 0;
-    if (IsWhite)
+    map sq = 0ULL;
+    set_bit(sq, square);
+
+    for (int pce = WP; pce <= BK; pce++)
     {
-        map pawnmask = (WP, square, 0ULL) & brd.BPawn;
-        chkmsk |= pawnmask;
-        if (pawnmask) numatk++;
-
-        map knightmask = Lookup(BN, square, 0ULL) & brd.BKnight;
-        chkmsk |= knightmask;
-        if (knightmask) numatk++;
-
-        map bishops = Lookup(BB, square, brd.Occ) & brd.BBishop;
-        if (bishops)
+        if (sq & brd.pce[pce])
         {
-            chkmsk |= bishop_checkmask[get_ls1b_index(bishops)][square];
-            numatk++;
-        }
-
-        map rooks = Lookup(BR, square, brd.Occ) & brd.BRook;
-        if (rooks)
-        {
-            chkmsk |= rook_checkmask[get_ls1b_index(rooks)][square];
-            numatk++;
-        }
-
-        map queens = Lookup(BQ, square, brd.Occ) & brd.BQueen;
-        if (queens)
-        {
-            chkmsk |= queen_checkmask[get_ls1b_index(queens)][square];
-            numatk++;
+            return pce_char[pce];
         }
     }
-    else 
+
+    return '.';
+}
+
+Brd parse_fen(std::string fen)
+{
+    int section = 0;    //0 -> pieces | 1 -> side | 2 -> castle | 3 -> enpas square
+    int r = 0;          //stores row we are on
+    int c = 0;          //stores column we are on
+
+    map bp = 0, bn = 0, bb = 0, br = 0, bq = 0, bk = 0, wp = 0, wn = 0, wb = 0, wr = 0, wq = 0, wk = 0;
+    
+    //Loop through all characters of the FEN
+    for (int i = 0; i < fen.length(); i++)
     {
-        map pawnmask = Lookup(BP, square, 0ULL) & brd.WPawn;
-        chkmsk |= pawnmask;
-        if (pawnmask) numatk++;
-
-        map knightmask = Lookup(WN, square, 0ULL) & brd.WKnight;
-        chkmsk |= knightmask;
-        if (knightmask) numatk++;
-
-        map bishops = Lookup(WB, square, brd.Occ) & brd.WBishop;
-        if (bishops)
+        //putting the pieces on the board
+        if (section == 0)
         {
-            chkmsk |= bishop_checkmask[get_ls1b_index(bishops)][square];
-            numatk++;
+            switch (fen[i])
+            {
+                case ' ':
+                    section++;
+                    break;
+                case 'p':
+                    set_bit(bp, r * 8 + c);
+                    c++;
+                    break;
+                case 'n':
+                    set_bit(bn, r * 8 + c);
+                    c++;
+                    break;
+                case 'b':
+                    set_bit(bb, r * 8 + c);
+                    c++;
+                    break;
+                case 'r':
+                    set_bit(br, r * 8 + c);
+                    c++;
+                    break;
+                case 'q':
+                    set_bit(bq, r * 8 + c);
+                    c++;
+                    break;
+                case 'k':
+                    set_bit(bk, r * 8 + c);
+                    c++;
+                    break;
+                case 'P':
+                    set_bit(wp, r * 8 + c);
+                    c++;
+                    break;
+                case 'N':
+                    set_bit(wn, r * 8 + c);
+                    c++;
+                    break;
+                case 'B':
+                    set_bit(wb, r * 8 + c);
+                    c++;
+                    break;
+                case 'R':
+                    set_bit(wr, r * 8 + c);
+                    c++;
+                    break;
+                case 'Q':
+                    set_bit(wq, r * 8 + c);
+                    c++;
+                    break;
+                case 'K':
+                    set_bit(wk, r * 8 + c);
+                    c++;
+                    break;
+                case '/':
+                    c = 0;
+                    r++;
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                    c += (int)fen[i] - (int)'0';
+                    break;
+                default:
+                    std::cerr << "Invalid FEN" << std::endl;
+                    exit(1);
+                    break;
+            }
         }
-
-        map rooks = Lookup(WR, square, brd.Occ) & brd.WRook;
-        if (rooks)
+        //side to move
+        /*
+        else if (section == 1)
         {
-            chkmsk |= rook_checkmask[get_ls1b_index(rooks)][square];
-            numatk++;
+            if (fen[i] == 'w')
+            {
+                section++;
+                i++;
+            }
+            else if (fen[i] == 'b')
+            {
+                side = BLACK;
+                posKey ^= sideKey;
+                section++;
+                i++;
+            }
         }
-
-        map queens = Lookup(WQ, square, brd.Occ) & brd.WQueen;
-        if (queens)
+        //castle perm
+        else if (section == 2)
         {
-            chkmsk |= queen_checkmask[get_ls1b_index(queens)][square];
-            numatk++;
+            //updating position key, and castling perms
+            switch (fen[i])
+            {
+                case ' ':
+                    section++;
+                    break;
+                case '-':
+                    break;
+                case 'K':
+                    posKey ^= castleKeys[0];
+                    castlePerm |= WKCA;
+                    break;
+                case 'Q':
+                    posKey ^= castleKeys[1];
+                    castlePerm |= WQCA;
+                    break;
+                case 'k':
+                    posKey ^= castleKeys[2];
+                    castlePerm |= BKCA;
+                    break;
+                case 'q':
+                    posKey ^= castleKeys[3];
+                    castlePerm |= BQCA;
+                    break;
+                default:
+                    std::cerr << "Invalid FEN" << std::endl;
+                    exit(1);
+                    break;
+            }
         }
+        //en pas square
+        else if (section == 3)
+        {
+            if (fen[i] != '-')
+            {
+                //update position key
+                //update en passant square
+                enpasSquareC = (int)fen[i] - (int)'a';
+                enpasSquareR = 8 - ((int)fen[i + 1] - (int)'0');
+                posKey ^= enpasKey[enpasSquareR][enpasSquareC];
+            }
+            section++;
+        }*/
     }
-    return chkmsk;
+
+    Brd brd;
+
+    brd.pce[WP] = wp;
+    brd.pce[WN] = wn;
+    brd.pce[WB] = wb;
+    brd.pce[WR] = wr;
+    brd.pce[WQ] = wq;
+    brd.pce[WK] = wk;
+
+    brd.pce[BP] = bp;
+    brd.pce[BN] = bn;
+    brd.pce[BB] = bb;
+    brd.pce[BR] = br;
+    brd.pce[BQ] = bq;
+    brd.pce[BK] = bk;
+
+    brd.side[WHITE] = wp | wn | wb | wr | wq | wk;
+    brd.side[BLACK] = bp | bn | bb | br | bq | bk;
+    brd.occ = brd.side[WHITE] | brd.side[BLACK];
+
+    brd.color = WHITE;
+
+    return brd;
 }
 
-//few things can be inlined, mainly bools, and we have to specify state transitions...
-//how to get pinmask? give up on tmp
-//pinmask - if piece & blockers yields a path to the king, move forward, otherwsise return 0
-//determine ray from before. ie hdvl/1234. then get diagonal blockers and & to see if queen or bishop lies there
-//ezmoney
-
-//finally need a function to return all attacked squares
-
-//need a table that given king square, returns bb HV and D12
-
-//4 pinmasks - H, V, D1, D2
-/*template <bool IsWhite>
-static inline map pinmaskH(Board brd)
+void print_board(Brd brd)
 {
-    if (IsWhite)
+    for (int rank = 0; rank < 8; rank++)
     {
-        //Are there even any rooks / queens on the same rank / file as king?
-        map candidate = rook_checkmask[brd.BRook | brd.BQueen][get_ls1b_index(brd.WKing)];
+        for (int file = 0; file < 8; file++)
+        {
+            //Convert file & rank into square index
+            int square = rank * 8 + file;
+
+            //print ranks
+            if (!file)
+            {
+                std::cout << "  " << 8 - rank << "  ";
+            }
+
+            //shifts left to get the nth bit value, prints 1 if hits 0 if misses
+            std::cout << " ";
+            std::cout << pce_on_square(square, brd);
+            //get_bit(bitboard, square) ? std::cout << 1 : std::cout << 0;
+            std::cout << " ";
+        }
+        std::cout << std::endl;
     }
-    else
+
+    std::cout << std::endl << "      a  b  c  d  e  f  g  h" << std::endl << std::endl;
+    brd.color ? std::cout << "      Color: Black" : std::cout << "      Color: White" << std::endl << std::endl;
+}
+
+void print_move(int move)
+{
+    std::cout << "From: " << get_move_source(move) << std::endl;
+    std::cout << "To: " << get_move_target(move) << std::endl;
+    std::cout << "Piece: " << get_move_piece(move) << std::endl;
+}
+
+std::list<int> generate_moves(Brd brd)
+{
+    std::list<int> li;
+    li.push_back(2);
+    //Generate moves here...
+
+    for (std::list<int>::iterator itr = li.begin(); itr != li.end(); itr++)
     {
-
+        print_move(*itr);
     }
-}*/
-/*
-static inline map pinmaskV(Board brd)
-{
-
+    return li;
 }
-
-static inline map pinmask1(Board brd)
-{
-
-}
-
-static inline map pinmask2(Board brd)
-{
-
-}
-*/
 
 #endif

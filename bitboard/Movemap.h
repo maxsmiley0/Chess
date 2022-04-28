@@ -1,20 +1,7 @@
 #ifndef MOVEMAP_H
 #define MOVEMAP_H
 
-#define map unsigned long long 
-
-#define BP 0
-#define BN 1
-#define BB 2
-#define BR 3
-#define BQ 4
-#define BK 5
-#define WP 6
-#define WN 7
-#define WB 8
-#define WR 9
-#define WQ 10
-#define WK 11
+#include "defs.h"
 
 static constexpr map pawn_attacks[2][64] = {
     {
@@ -1222,7 +1209,7 @@ static inline map get_queen_attacks(int square, map occupancy)
     return queen_attacks;
 }
 
-static inline map Lookup(int piece, int square, map occupancy)
+static inline map lookup(int piece, int square, map occupancy)
 {
     switch (piece)
     {
