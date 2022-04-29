@@ -2,26 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-// move list structure
-typedef struct {
-    // moves
-    int moves[256];
-    
-    // move count
-    int count;
-} moves;
-
-// add move to the move list
-static inline void add_move(moves *move_list, int move)
-{
-    // strore move
-    move_list->moves[move_list->count] = move;
-    
-    // increment move count
-    move_list->count++;
-}
-
-
 /*
                            castling   move     in      in
                               right update     binary  decimal
@@ -49,16 +29,13 @@ const int castling_rights[64] = {
 
 int main()
 {
-    Brd brd = parse_fen("3r4/3rP3/3P1P2/5P2/3P4/3PP3/1P2P3/8 w - e6 0 1");
+    Brd brd = parse_fen("rnbqk1nr/pppppppp/8/8/8/8/PPPPb1PP/R3K2R w KQkq - 0 1");
     print_board(brd);
     generate_moves(brd);
-    std::cout << in_check(brd) << std::endl;
 }
 
 /*
 For moves:
-need to set castle perms and enpas square (in parse fen too!)
-add / encode / remove piece
 make move
 generate move
 organize
