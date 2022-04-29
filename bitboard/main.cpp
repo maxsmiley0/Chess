@@ -29,7 +29,7 @@ const int castling_rights[64] = {
 
 int main()
 {
-    Brd brd = parse_fen("rnbqk1nr/pppppppp/8/8/8/8/PPPPb1PP/R3K2R w KQkq - 0 1");
+    Brd brd = parse_fen("rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq - 0 1");
     print_board(brd);
     generate_moves(brd);
 }

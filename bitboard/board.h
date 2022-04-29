@@ -307,7 +307,7 @@ void print_move(int move)
 }
 
 //Given a board, returns a list of generated (pseudo-legal) moves in the position
-std::list<int> generate_moves(Brd brd)
+inline std::list<int> generate_moves(Brd brd)
 {
     std::list<int> li;
 
@@ -413,6 +413,114 @@ std::list<int> generate_moves(Brd brd)
             }
             pop_bit(attacks, tar_sq);
         }
+
+        //Knight moves
+        bitboard = brd.pce[WN];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = knight_attacks[src_sq] & ~brd.side[WHITE];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[BLACK], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WN, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WN, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Bishop moves
+        bitboard = brd.pce[WB];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_bishop_attacks(src_sq, brd.occ) & ~brd.side[WHITE];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[BLACK], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WB, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WB, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Rook moves
+        bitboard = brd.pce[WR];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_rook_attacks(src_sq, brd.occ) & ~brd.side[WHITE];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[BLACK], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WR, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WR, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Queen moves
+        bitboard = brd.pce[WQ];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_queen_attacks(src_sq, brd.occ) & ~brd.side[WHITE];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[BLACK], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WQ, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WQ, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
     }
     else 
     {
@@ -510,6 +618,114 @@ std::list<int> generate_moves(Brd brd)
                 li.push_back(encode_move(src_sq, tar_sq, BK, 0, 1, 0, 0, 0));
             }
             pop_bit(attacks, tar_sq);
+        }
+
+        //Knight moves
+        bitboard = brd.pce[BN];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = knight_attacks[src_sq] & ~brd.side[BLACK];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[WHITE], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BN, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BN, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Bishop moves
+        bitboard = brd.pce[BB];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_bishop_attacks(src_sq, brd.occ) & ~brd.side[BLACK];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[WHITE], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BB, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BB, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Rook moves
+        bitboard = brd.pce[BR];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_rook_attacks(src_sq, brd.occ) & ~brd.side[BLACK];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[WHITE], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BR, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BR, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Queen moves
+        bitboard = brd.pce[BQ];
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            
+            attacks = get_queen_attacks(src_sq, brd.occ) & ~brd.side[BLACK];
+            
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+                //Quiet
+                if (!get_bit(brd.side[WHITE], tar_sq))
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BQ, 0, 0, 0, 0, 0));
+                }
+                //Capture
+                else 
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BQ, 0, 1, 0, 0, 0));
+                }
+                pop_bit(attacks, tar_sq);
+            }
+
+            pop_bit(bitboard, src_sq);
         }
     }
     //Now test and add rest of moves... what's the deal with enpas having capture & enpas flag???
