@@ -315,191 +315,209 @@ std::list<int> generate_moves(Brd brd)
     int src_sq, tar_sq;
     //Current piece map copy and its attack squares
     map bitboard, attacks;
-    //Loop through WP->WK / BP->BK depending on side
-    int start_pce, end_pce;
+    
     if (brd.color == WHITE)
     {
-        start_pce = WP; 
-        end_pce = WK;
+        //White pawns
+        bitboard = brd.pce[WP];
+        //Loop over all WP
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            tar_sq = src_sq - 8;
+
+            //generate quiet pawn moves
+            if (!(tar_sq < a8) && !get_bit(brd.occ, tar_sq))
+            {
+                //pawn promotion
+                if (src_sq >= a7 && src_sq <= h7)
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WQ, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WR, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WB, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WN, 0, 0, 0, 0));
+                }
+                else 
+                {
+                    //One ahead
+                    li.push_back(encode_move(src_sq, tar_sq, WP, 0, 0, 0, 0, 0));
+                    //Two ahead
+                    if ((src_sq >= a2 && src_sq <= h2) && !get_bit(brd.occ, tar_sq - 8))
+                    {
+                        li.push_back(encode_move(src_sq, tar_sq - 8, WP, 0, 0, 1, 0, 0));
+                    }
+                }
+            }
+            //generate attack pawn moves
+            attacks = pawn_attacks[WHITE][src_sq] & brd.side[BLACK];
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+
+                //Pawn promotion / capture
+                if (src_sq >= a7 && src_sq <= h7)
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WQ, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WR, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WB, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, WP, WN, 1, 0, 0, 0));
+                }
+                else 
+                {
+                    //Regular capture case
+                    li.push_back(encode_move(src_sq, tar_sq, WP, 0, 1, 0, 0, 0));  
+                }
+
+                pop_bit(attacks, tar_sq);
+            }
+
+            //Enpas
+            if (brd.enpas)
+            {
+                map enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
+                if (enpas_attack)
+                {
+                    li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), WP, 0, 1, 0, 1, 0));
+                }
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //White king
+        //Castle
+        if (brd.castleperms & WKCA && !get_bit(brd.occ, f1) && !get_bit(brd.occ, g1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, f1, WHITE))
+        {
+            li.push_back(encode_move(e1, g1, WK, 0, 0, 0, 0, 1));
+        }
+        if (brd.castleperms & WQCA && !get_bit(brd.occ, d1) && !get_bit(brd.occ, c1) && !get_bit(brd.occ, b1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, d1, WHITE))
+        {
+            li.push_back(encode_move(e1, c1, WK, 0, 0, 0, 0, 1));
+        }
+        //Regular move
+        src_sq = get_ls1b_index(brd.pce[WK]);
+        attacks = king_attacks[src_sq] & ~brd.side[WHITE];
+        //Loop over all WK attacks
+        while (attacks)
+        {
+            tar_sq = get_ls1b_index(attacks);
+            //Quiet
+            if (!get_bit(brd.side[BLACK], tar_sq))
+            {
+                li.push_back(encode_move(src_sq, tar_sq, WK, 0, 0, 0, 0, 0));
+            }
+            //Capture
+            else 
+            {
+                li.push_back(encode_move(src_sq, tar_sq, WK, 0, 1, 0, 0, 0));
+            }
+            pop_bit(attacks, tar_sq);
+        }
     }
     else 
     {
-        start_pce = BP; 
-        end_pce = BK;
+        //Black pawns
+        bitboard = brd.pce[BP];
+        //Loop over all BP
+        while (bitboard)
+        {
+            src_sq = get_ls1b_index(bitboard);
+            tar_sq = src_sq + 8;
+
+            //generate quiet pawn moves
+            if (!(tar_sq > h1) && !get_bit(brd.occ, tar_sq))
+            {
+                //pawn promotion
+                if (src_sq >= a2 && src_sq <= h2)
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BQ, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BR, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BB, 0, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BN, 0, 0, 0, 0));
+                }
+                else 
+                {
+                    //One ahead
+                    li.push_back(encode_move(src_sq, tar_sq, BP, 0, 0, 0, 0, 0));
+                    //Two ahead
+                    if ((src_sq >= a7 && src_sq <= h7) && !get_bit(brd.occ, tar_sq + 8))
+                    {
+                        li.push_back(encode_move(src_sq, tar_sq + 8, BP, 0, 0, 1, 0, 0));
+                    }
+                }
+            }
+            //generate attack pawn moves
+            attacks = pawn_attacks[BLACK][src_sq] & brd.side[WHITE];
+            while (attacks)
+            {
+                tar_sq = get_ls1b_index(attacks);
+
+                //Pawn promotion / capture
+                if (src_sq >= a2 && src_sq <= h2)
+                {
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BQ, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BR, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BB, 1, 0, 0, 0));
+                    li.push_back(encode_move(src_sq, tar_sq, BP, BN, 1, 0, 0, 0));
+                }
+                else 
+                {
+                    //Regular capture case
+                    li.push_back(encode_move(src_sq, tar_sq, BP, 0, 1, 0, 0, 0));  
+                }
+
+                pop_bit(attacks, tar_sq);
+            }
+
+            //Enpas
+            if (brd.enpas)
+            {
+                map enpas_attack = pawn_attacks[BLACK][src_sq] & (1ULL << brd.enpas);
+                if (enpas_attack)
+                {
+                    li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), BP, 0, 1, 0, 1, 0));
+                }
+            }
+
+            pop_bit(bitboard, src_sq);
+        }
+
+        //Black king
+        //Castle
+        if (brd.castleperms & BKCA && !get_bit(brd.occ, f8) && !get_bit(brd.occ, g8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, f8, WHITE))
+        {
+            li.push_back(encode_move(e8, g8, BK, 0, 0, 0, 0, 1));
+        }
+        if (brd.castleperms & BQCA && !get_bit(brd.occ, d8) && !get_bit(brd.occ, c8) && !get_bit(brd.occ, b8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, d8, WHITE))
+        {
+            li.push_back(encode_move(e8, c8, BK, 0, 0, 0, 0, 1));
+        }
+        //Regular move
+        src_sq = get_ls1b_index(brd.pce[BK]);
+        attacks = king_attacks[src_sq] & ~brd.side[BLACK];
+        //Loop over all BK attacks
+        while (attacks)
+        {
+            tar_sq = get_ls1b_index(attacks);
+            //Quiet
+            if (!get_bit(brd.side[WHITE], tar_sq))
+            {
+                li.push_back(encode_move(src_sq, tar_sq, BK, 0, 0, 0, 0, 0));
+            }
+            //Capture
+            else 
+            {
+                li.push_back(encode_move(src_sq, tar_sq, BK, 0, 1, 0, 0, 0));
+            }
+            pop_bit(attacks, tar_sq);
+        }
     }
-
-    //Loop through all piece bitboards and all attacks
-    for (int pce = start_pce; pce <= end_pce; pce++)
-    {
-        bitboard = brd.pce[pce];
-        
-        //Pawn & castling moves
-        if (pce == WP)
-        {
-            //Loop over all WP
-            while (bitboard)
-            {
-                src_sq = get_ls1b_index(bitboard);
-                tar_sq = src_sq - 8;
-
-                //generate quiet pawn moves
-                if (!(tar_sq < a8) && !get_bit(brd.occ, tar_sq))
-                {
-                    //pawn promotion
-                    if (src_sq >= a7 && src_sq <= h7)
-                    {
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WQ, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WR, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WB, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WN, 0, 0, 0, 0));
-                    }
-                    else 
-                    {
-                        //One ahead
-                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 0, 0, 0, 0));
-                        //Two ahead
-                        if ((src_sq >= a2 && src_sq <= h2) && !get_bit(brd.occ, tar_sq - 8))
-                        {
-                            li.push_back(encode_move(src_sq, tar_sq - 8, pce, 0, 0, 1, 0, 0));
-                        }
-                    }
-                }
-                //generate attack pawn moves
-                attacks = pawn_attacks[WHITE][src_sq] & brd.side[BLACK];
-                while (attacks)
-                {
-                    tar_sq = get_ls1b_index(attacks);
-
-                    //Pawn promotion / capture
-                    if (src_sq >= a7 && src_sq <= h7)
-                    {
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WQ, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WR, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WB, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, WN, 1, 0, 0, 0));
-                    }
-                    else 
-                    {
-                        //Regular capture case
-                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 1, 0, 0, 0));  
-                    }
-
-                    pop_bit(attacks, tar_sq);
-                }
-
-                //Enpas
-                if (brd.enpas)
-                {
-                    map enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
-                    if (enpas_attack)
-                    {
-                        li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), pce, 0, 1, 0, 1, 0));
-                    }
-                }
-
-                pop_bit(bitboard, src_sq);
-            }
-        }
-
-        else if (pce == BP)
-        {
-            //Loop over all WP
-            while (bitboard)
-            {
-                src_sq = get_ls1b_index(bitboard);
-                tar_sq = src_sq + 8;
-
-                //generate quiet pawn moves
-                if (!(tar_sq > h1) && !get_bit(brd.occ, tar_sq))
-                {
-                    //pawn promotion
-                    if (src_sq >= a2 && src_sq <= h2)
-                    {
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BQ, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BR, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BB, 0, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BN, 0, 0, 0, 0));
-                    }
-                    else 
-                    {
-                        //One ahead
-                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 0, 0, 0, 0));
-                        //Two ahead
-                        if ((src_sq >= a7 && src_sq <= h7) && !get_bit(brd.occ, tar_sq + 8))
-                        {
-                            li.push_back(encode_move(src_sq, tar_sq + 8, pce, 0, 0, 1, 0, 0));
-                        }
-                    }
-                }
-                //generate attack pawn moves
-                attacks = pawn_attacks[BLACK][src_sq] & brd.side[WHITE];
-                while (attacks)
-                {
-                    tar_sq = get_ls1b_index(attacks);
-
-                    //Pawn promotion / capture
-                    if (src_sq >= a2 && src_sq <= h2)
-                    {
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BQ, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BR, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BB, 1, 0, 0, 0));
-                        li.push_back(encode_move(src_sq, tar_sq, pce, BN, 1, 0, 0, 0));
-                    }
-                    else 
-                    {
-                        //Regular capture case
-                        li.push_back(encode_move(src_sq, tar_sq, pce, 0, 1, 0, 0, 0));  
-                    }
-
-                    pop_bit(attacks, tar_sq);
-                }
-
-                //Enpas
-                if (brd.enpas)
-                {
-                    map enpas_attack = pawn_attacks[BLACK][src_sq] & (1ULL << brd.enpas);
-                    if (enpas_attack)
-                    {
-                        li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), pce, 0, 1, 0, 1, 0));
-                    }
-                }
-
-                pop_bit(bitboard, src_sq);
-            }
-        }
-
-        else if (pce == WK)
-        {
-            if (brd.castleperms & WKCA && !get_bit(brd.occ, f1) && !get_bit(brd.occ, g1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, f1, WHITE))
-            {
-                li.push_back(encode_move(e1, g1, pce, 0, 0, 0, 0, 1));
-            }
-            if (brd.castleperms & WQCA && !get_bit(brd.occ, d1) && !get_bit(brd.occ, c1) && !get_bit(brd.occ, b1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, d1, WHITE))
-            {
-                li.push_back(encode_move(e1, c1, pce, 0, 0, 0, 0, 1));
-            }
-        }
-
-        else if (pce == BK)
-        {
-            if (brd.castleperms & BKCA && !get_bit(brd.occ, f8) && !get_bit(brd.occ, g8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, f8, WHITE))
-            {
-                li.push_back(encode_move(e8, g8, pce, 0, 0, 0, 0, 1));
-            }
-            if (brd.castleperms & BQCA && !get_bit(brd.occ, d8) && !get_bit(brd.occ, c8) && !get_bit(brd.occ, b8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, d8, WHITE))
-            {
-                li.push_back(encode_move(e8, c8, pce, 0, 0, 0, 0, 1));
-            }
-        }
-
-        //All other moves
-        if (pce == WN || pce == )
-    }
-
+    //Now test and add rest of moves... what's the deal with enpas having capture & enpas flag???
     for (std::list<int>::iterator itr = li.begin(); itr != li.end(); itr++)
     {
         print_move(*itr);
     }
+
     return li;
 }
 

@@ -36,6 +36,7 @@ int main()
 
 /*
 For moves:
+//optimize pawn moves at end..?
 make move
 generate move
 organize
