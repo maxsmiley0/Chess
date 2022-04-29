@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <string>
+#include <list>
+#include <cstring>
+
+class Brd;
 
 #define WP 0
 #define WN 1
@@ -77,6 +81,37 @@
 // extract castling flag
 #define get_move_castling(move) (move & 0x800000)
 
+//gets nth bit of square
+#define get_bit(bitboard, square) ((bitboard) & (1ULL << (square)))
+#define set_bit(bitboard, square) ((bitboard) |= (1ULL << (square)))
+#define pop_bit(bitboard, square) ((bitboard) &= ~(1ULL << (square)))
+#define count_bits(bitboard) __builtin_popcountll(bitboard)
+
+/*
+                           castling   move     in      in
+                              right update     binary  decimal
+ king & rooks didn't move:     1111 & 1111  =  1111    15
+        white king  moved:     1111 & 1100  =  1100    12
+  white king's rook moved:     1111 & 1110  =  1110    14
+ white queen's rook moved:     1111 & 1101  =  1101    13
+     
+         black king moved:     1111 & 0011  =  1011    3
+  black king's rook moved:     1111 & 1011  =  1011    11
+ black queen's rook moved:     1111 & 0111  =  0111    7
+*/
+
+// castling rights update constants
+const int castling_rights[64] = {
+     7, 15, 15, 15,  3, 15, 15, 11,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    13, 15, 15, 15, 12, 15, 15, 14
+};
+
 static std::string pce_char = "PNBRQKpnbrqk.";
 
 //for ls1b de bruijn multiplication
@@ -117,12 +152,11 @@ static inline int get_ls1b_index(map bitboard) {
    return index64[((bitboard & -bitboard) * 0x03f79d71b4cb0a89) >> 58];
 }
 
-//gets nth bit of square
-#define get_bit(bitboard, square) ((bitboard) & (1ULL << (square)))
-#define set_bit(bitboard, square) ((bitboard) |= (1ULL << (square)))
-#define pop_bit(bitboard, square) ((bitboard) &= ~(1ULL << (square)))
-#define count_bits(bitboard) __builtin_popcountll(bitboard)
+//Prints board to cout
+void print_board(Brd brd);
 
 void print_bitboard(map bitboard);
+
+void print_move(int move);
 
 #endif

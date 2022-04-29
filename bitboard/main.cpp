@@ -1,42 +1,19 @@
-#include "Board.h"
-#include <iostream>
-#include <fstream>
-
-/*
-                           castling   move     in      in
-                              right update     binary  decimal
- king & rooks didn't move:     1111 & 1111  =  1111    15
-        white king  moved:     1111 & 1100  =  1100    12
-  white king's rook moved:     1111 & 1110  =  1110    14
- white queen's rook moved:     1111 & 1101  =  1101    13
-     
-         black king moved:     1111 & 0011  =  1011    3
-  black king's rook moved:     1111 & 1011  =  1011    11
- black queen's rook moved:     1111 & 0111  =  0111    7
-*/
-
-// castling rights update constants
-const int castling_rights[64] = {
-     7, 15, 15, 15,  3, 15, 15, 11,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    13, 15, 15, 15, 12, 15, 15, 14
-};
+#include "board.h"
 
 int main()
 {
     Brd brd = parse_fen("rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq - 0 1");
-    print_board(brd);
-    generate_moves(brd);
+    Brd new_brd = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    Brd new_brd_2 = parse_fen("rnb2bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    new_brd.last_state = &brd;
+    new_brd_2.last_state = &new_brd;
+    print_board(new_brd_2);
 }
 
 /*
 For moves:
 //optimize pawn moves at end..?
+//also keep array of # so don't have to loop over captured pieces!
 make move
 generate move
 organize
