@@ -7,13 +7,13 @@ static inline bool is_sq_atk(Brd brd, int square, int color)
     map occ = brd.occ;
     if (color == WHITE)
     {
-        return lookup(BQ, square, occ) & brd.pce[BQ] || lookup(BR, square, occ) & brd.pce[BR] || lookup(BB, square, occ) & brd.pce[BB] || 
-               lookup(BN, square, occ) & brd.pce[BN] || lookup(WP, square, occ) & brd.pce[BP] || lookup(BK, square, occ) & brd.pce[BK];
+        return get_queen_attacks(square, occ) & brd.pce[BQ] || get_rook_attacks(square, occ) & brd.pce[BR] || get_bishop_attacks(square, occ) & brd.pce[BB] || 
+               knight_attacks[square] & brd.pce[BN] || pawn_attacks[WHITE][square] & brd.pce[BP] || king_attacks[square] & brd.pce[BK];
     }
     else 
     {
-        return lookup(WQ, square, occ) & brd.pce[WQ] || lookup(WR, square, occ) & brd.pce[WR] || lookup(WB, square, occ) & brd.pce[WB] || 
-               lookup(WN, square, occ) & brd.pce[WN] || lookup(BP, square, occ) & brd.pce[WP] || lookup(WK, square, occ) & brd.pce[WK];
+        return get_queen_attacks(square, occ) & brd.pce[WQ] || get_rook_attacks(square, occ) & brd.pce[WR] || get_bishop_attacks(square, occ) & brd.pce[WB] || 
+               knight_attacks[square] & brd.pce[WN] || pawn_attacks[BLACK][square] & brd.pce[WP] || king_attacks[square] & brd.pce[WK];
     }
 
     return false;
@@ -23,23 +23,25 @@ static inline bool is_sq_atk(Brd brd, int square, int color)
 static inline bool in_check(Brd brd)
 {
     map occ = brd.occ;
-    int k_square;
+    int square;
 
     if (brd.color == WHITE)
     {
-        k_square = get_ls1b_index(brd.pce[WK]);
-        return lookup(BQ, k_square, occ) & brd.pce[BQ] || lookup(BR, k_square, occ) & brd.pce[BR] || lookup(BB, k_square, occ) & brd.pce[BB] || 
-               lookup(BN, k_square, occ) & brd.pce[BN] || lookup(WP, k_square, occ) & brd.pce[BP] || lookup(BK, k_square, occ) & brd.pce[BK];
+        square = get_ls1b_index(WK);
+        return get_queen_attacks(square, occ) & brd.pce[BQ] || get_rook_attacks(square, occ) & brd.pce[BR] || get_bishop_attacks(square, occ) & brd.pce[BB] || 
+               knight_attacks[square] & brd.pce[BN] || pawn_attacks[WHITE][square] & brd.pce[BP] || king_attacks[square] & brd.pce[BK];
     }
     else 
     {
-        k_square = get_ls1b_index(brd.pce[BK]);
-        return lookup(WQ, k_square, occ) & brd.pce[WQ] || lookup(WR, k_square, occ) & brd.pce[WR] || lookup(WB, k_square, occ) & brd.pce[WB] || 
-               lookup(WN, k_square, occ) & brd.pce[WN] || lookup(BP, k_square, occ) & brd.pce[WP] || lookup(WK, k_square, occ) & brd.pce[WK];
+        square = get_ls1b_index(BK);
+        return get_queen_attacks(square, occ) & brd.pce[WQ] || get_rook_attacks(square, occ) & brd.pce[WR] || get_bishop_attacks(square, occ) & brd.pce[WB] || 
+               knight_attacks[square] & brd.pce[WN] || pawn_attacks[BLACK][square] & brd.pce[WP] || king_attacks[square] & brd.pce[WK];
     }
     
     return false;
-}char pce_on_square(int square, Brd brd)
+}
+
+char pce_on_square(int square, Brd brd)
 {
     map sq = 0ULL;
     set_bit(sq, square);
@@ -818,4 +820,28 @@ bool make_move(Brd& brd, int move)
     brd.color ^= 1;
 
     return true;
+}
+
+int perft_driver(Brd& brd, int depth)
+{    
+    if (depth == 0)
+    {
+        return 1;
+    }
+
+    int total_nodes = 0;
+    std::list<int> moves = generate_moves(brd);
+
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        Brd cpy_brd = copy_board(brd);
+        if (!make_move(brd, *itr))
+        {
+            continue;
+        }
+        total_nodes += perft_driver(brd, depth - 1);
+        brd = cpy_brd;
+    }
+
+    return total_nodes;
 }

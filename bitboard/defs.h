@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include <cstring>
+#include <chrono>
 
 class Brd;
 
@@ -160,5 +161,27 @@ void print_bitboard(map bitboard);
 void print_move(int move);
 
 void print_moves(std::list<int> moves);
+
+//Timer class for statistics purposes
+class Timer
+{
+  public:
+    Timer()
+    {
+        start();
+    }
+    void start()
+    {
+        m_time = std::chrono::high_resolution_clock::now();
+    }
+    double elapsed() const
+    {
+        std::chrono::duration<double,std::milli> diff =
+                          std::chrono::high_resolution_clock::now() - m_time;
+        return diff.count();
+    }
+  private:
+    std::chrono::high_resolution_clock::time_point m_time;
+};
 
 #endif

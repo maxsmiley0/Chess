@@ -45,4 +45,6 @@ void take_back(Brd& brd);
 //Makes a move on a given board, returns true if move was made (legal)
 bool make_move(Brd& brd, int move);
 
+int perft_driver(Brd& brd, int depth);
+
 #endif
