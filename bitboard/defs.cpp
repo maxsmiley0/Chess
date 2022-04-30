@@ -84,4 +84,13 @@ void print_move(int move)
     std::cout << "From: " << square_to_coordinates[get_move_source(move)] << std::endl;
     std::cout << "To: " << square_to_coordinates[get_move_target(move)] << std::endl;
     std::cout << "Piece: " << pce_char[get_move_piece(move)] << std::endl;
+    std::cout << "Move Key " << move << std::endl << std::endl;
+}
+
+void print_moves(std::list<int> moves)
+{
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    {
+        print_move(*itr);
+    }
 }

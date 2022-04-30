@@ -16,7 +16,6 @@ struct Brd {
 
     //History
     Brd* last_state;             //pointer to last board state
-    int his_ply;                 //stores what number ply of the game we are on
     int fifty_move;              //Last ply when moving pawn or capture or promotion
 };
 

@@ -25,10 +25,10 @@ class Brd;
 #define WHITE 0
 #define BLACK 1
 
-#define WKCA 8
-#define WQCA 4
-#define BKCA 2
-#define BQCA 1
+#define WKCA 1
+#define WQCA 2
+#define BKCA 4
+#define BQCA 8
 
 #define map unsigned long long
 
@@ -158,5 +158,7 @@ void print_board(Brd brd);
 void print_bitboard(map bitboard);
 
 void print_move(int move);
+
+void print_moves(std::list<int> moves);
 
 #endif

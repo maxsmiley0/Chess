@@ -652,11 +652,6 @@ std::list<int> generate_moves(Brd brd)
             pop_bit(bitboard, src_sq);
         }
     }
-    //Now test and add rest of moves... what's the deal with enpas having capture & enpas flag???
-    for (std::list<int>::iterator itr = li.begin(); itr != li.end(); itr++)
-    {
-        print_move(*itr);
-    }
 
     return li;
 }
@@ -675,6 +670,152 @@ void take_back(Brd& brd)
 
 bool make_move(Brd& brd, int move)
 {
+    //In case we need to take back
     Brd cpy_brd = copy_board(brd);
-    return false;
+
+    //Extracting move information
+    int src_sq = get_move_source(move);
+    int tar_sq = get_move_target(move);
+    int pce = get_move_piece(move);
+    int promo_pce = get_move_promoted(move);
+    int capture = get_move_capture(move);
+    int double_push = get_move_double(move);
+    int enpas = get_move_enpas(move);
+    int castling = get_move_castling(move);
+
+    //Move piece
+    pop_bit(brd.pce[pce], src_sq);
+    set_bit(brd.pce[pce], tar_sq);
+
+    if (brd.color == WHITE)
+    {
+        //Handling capture
+        if (capture)
+        {
+            for (int cap_pce = BP; cap_pce <= BQ; cap_pce++)
+            {
+                if (get_bit(brd.pce[cap_pce], tar_sq))
+                {
+                    pop_bit(brd.pce[cap_pce], tar_sq);
+                }
+            }
+        }
+
+        //Handling promotions
+        if (promo_pce)
+        {
+            pop_bit(brd.pce[WP], tar_sq);
+            set_bit(brd.pce[promo_pce], tar_sq);
+        }
+
+        //Handling enpas
+        if (enpas)
+        {
+            pop_bit(brd.pce[BP], tar_sq + 8);
+        }
+
+        //Reset enpas square to none
+        brd.enpas = 0;
+
+        //Reinitialize enpas square if double pawn push
+        if (double_push)
+        {
+            brd.enpas = tar_sq + 8;
+        }
+
+        //Handle castling (move rook)
+        if (castling)
+        {
+            switch (tar_sq)
+            {
+                //WKCA
+                case g1:
+                    pop_bit(brd.pce[WR], h1);
+                    set_bit(brd.pce[WR], f1);
+                    break;
+                //WQCA
+                case c1:
+                    pop_bit(brd.pce[WR], a1);
+                    set_bit(brd.pce[WR], d1);
+                    break;
+            }
+        }
+    }
+    else 
+    {
+        //Handling capture
+        if (capture)
+        {
+            for (int cap_pce = WP; cap_pce <= WQ; cap_pce++)
+            {
+                if (get_bit(brd.pce[cap_pce], tar_sq))
+                {
+                    pop_bit(brd.pce[cap_pce], tar_sq);
+                }
+            }
+        }
+
+        //Handling promotions
+        if (promo_pce)
+        {
+            pop_bit(brd.pce[BP], tar_sq);
+            set_bit(brd.pce[promo_pce], tar_sq);
+        }
+
+        //Handling enpas
+        if (enpas)
+        {
+            pop_bit(brd.pce[WP], tar_sq - 8);
+        }
+
+        //Reset enpas square to none
+        brd.enpas = 0;
+
+        //Reinitialize enpas square if double pawn push
+        if (double_push)
+        {
+            brd.enpas = tar_sq - 8;
+        }
+
+        //Handle castling (move rook)
+        if (castling)
+        {
+            switch (tar_sq)
+            {
+                //BKCA
+                case g8:
+                    pop_bit(brd.pce[BR], h8);
+                    set_bit(brd.pce[BR], f8);
+                    break;
+                //BQCA
+                case c8:
+                    pop_bit(brd.pce[BR], a8);
+                    set_bit(brd.pce[BR], d8);
+                    break;
+            }
+        }
+    }
+
+    //Update castling rights
+    brd.castleperms &= castling_rights[src_sq];
+    brd.castleperms &= castling_rights[tar_sq];
+
+    //Update occupancies
+    brd.side[WHITE] = brd.pce[WP] | brd.pce[WN] | brd.pce[WB] | brd.pce[WR] | brd.pce[WQ] | brd.pce[WK];
+    brd.side[BLACK] = brd.pce[BP] | brd.pce[BN] | brd.pce[BB] | brd.pce[BR] | brd.pce[BQ] | brd.pce[BK];
+    brd.occ = brd.side[WHITE] | brd.side[BLACK];
+
+    brd.fifty_move++;
+    brd.last_state = &cpy_brd;
+    
+    //Take back if in check (illegal)
+    if (in_check(brd))
+    {
+        take_back(brd);
+        return false;
+    }
+
+    brd.color ^= 1;
+
+    return true;
 }

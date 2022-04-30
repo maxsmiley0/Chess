@@ -2,12 +2,11 @@
 
 int main()
 {
-    Brd brd = parse_fen("rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq - 0 1");
-    Brd new_brd = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    Brd new_brd_2 = parse_fen("rnb2bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    new_brd.last_state = &brd;
-    new_brd_2.last_state = &new_brd;
-    print_board(new_brd_2);
+    Brd brd = parse_fen("rnb1kbnr/ppp1qppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1");
+    std::list<int> moves = generate_moves(brd);
+    print_moves(moves);
+    make_move(brd, 5244124);
+    print_board(brd);
 }
 
 /*
