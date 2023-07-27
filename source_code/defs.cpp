@@ -8,7 +8,7 @@
 
 #include "defs.h"
 #include "board.h"
-
+#include "nnue/nnue.h"
 #include <climits> 
 
 //Returns true if a piece is a pawn
@@ -299,138 +299,47 @@ int eg_king_table[8][8] = {
 #define RG 2
 #define QG 4
 
+const int strawmanToNnuePce[] = {6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 7};
+
 //Static evaluation, to be called at the leaf nodes
 const int static_eval(const Board& b)
 {
-    int mgScore = 0;
-    int egScore = 0;
-    int gamePhase = 0;
+    int pieces[33];
+    int squares[33];
+
+    int index = 2;
+    for (int pce = 0; pce < 12; pce++)
+    {
+        int nnuePceValue = strawmanToNnuePce[pce]; //Mapping from strawman pieces to nnue pieces
+        for(int pceNum = 0; pceNum < b.getPceNum(pce); pceNum++)
+        {            
+            int row = b.getPceR(pce, pceNum);
+            int col = b.getPceC(pce, pceNum);
+            int square = (7 - row) * 8 + col;      //Mapping from strawman indexing scheme to nnue indexing scheme
+            
+            if (pce == WK)
+            {
+                pieces[0] = nnuePceValue;
+                squares[0] = square;
+            }
+            else if (pce == BK)
+            {
+                pieces[1] = nnuePceValue;
+                squares[1] = square;
+            }
+            else
+            {
+                pieces[index] = nnuePceValue;
+                squares[index] = square;
+                index++;
+            }
+        }
+    }    
     
-    //Looping through all white pawns
-    for(int i = 0; i < b.getPceNum(WP); i++)
-    {
-        mgScore += PM;
-        egScore += PE;
-        mgScore += mg_pawn_table[b.getPceR(WP, i)][b.getPceC(WP, i)];
-        egScore += eg_pawn_table[b.getPceR(WP, i)][b.getPceC(WP, i)];
-        gamePhase += PG;
-    }
-    //Looping through all white knights
-    for(int i = 0; i < b.getPceNum(WN); i++)
-    {
-        mgScore += NM;
-        egScore += NE;
-        mgScore += mg_knight_table[b.getPceR(WN, i)][b.getPceC(WN, i)];
-        egScore += eg_knight_table[b.getPceR(WN, i)][b.getPceC(WN, i)];
-        gamePhase += NG;
-    }
-    //Looping through all white bishops
-    for(int i = 0; i < b.getPceNum(WB); i++)
-    {
-        mgScore += BM;
-        egScore += BE;
-        mgScore += mg_bishop_table[b.getPceR(WB, i)][b.getPceC(WB, i)];
-        egScore += eg_bishop_table[b.getPceR(WB, i)][b.getPceC(WB, i)];
-        gamePhase += BG;
-    }
-    //Looping through all white rooks
-    for(int i = 0; i < b.getPceNum(WR); i++)
-    {
-        mgScore += RM;
-        egScore += RE;
+    pieces[index] = 0;
+    squares[index] = 0;
 
-        int rR = b.getPceR(WR, i);
-        int rC = b.getPceC(WR, i);
-        mgScore += mg_rook_table[rR][rC];
-        egScore += eg_rook_table[rR][rC];
-        gamePhase += RG;
-
-        mgScore += b.sqExposedVert(rR, rC) * 3;   //bonus for (semi)open file
-    }
-
-    //Looping through all white queens
-    for(int i = 0; i < b.getPceNum(WQ); i++)
-    {
-        mgScore += QM;
-        egScore += QE;
-        mgScore += mg_queen_table[b.getPceR(WQ, i)][b.getPceC(WQ, i)];
-        egScore += eg_queen_table[b.getPceR(WQ, i)][b.getPceC(WQ, i)];
-        gamePhase += QG;
-    }
-
-    //King PST
-    int kR = b.getKingR(WHITE);
-    int kC = b.getKingC(WHITE);
-    mgScore += mg_king_table[kR][kC];
-    egScore += eg_king_table[kR][kC];
-    mgScore -= b.sqExposed(kR, kC) * 3;       //king safety penalty
-    
-    //Looping through all black pawns
-    for(int i = 0; i < b.getPceNum(BP); i++)
-    {
-        mgScore -= PM;
-        egScore -= PE;
-        mgScore -= mg_pawn_table[7 - b.getPceR(BP, i)][b.getPceC(BP, i)];
-        egScore -= eg_pawn_table[7 - b.getPceR(BP, i)][b.getPceC(BP, i)];
-        gamePhase += PG;
-    }
-    //Looping through all black knights
-    for(int i = 0; i < b.getPceNum(BN); i++)
-    {
-        mgScore -= NM;
-        egScore -= NE;
-        mgScore -= mg_knight_table[7 - b.getPceR(BN, i)][b.getPceC(BN, i)];
-        egScore -= eg_knight_table[7 - b.getPceR(BN, i)][b.getPceC(BN, i)];
-        gamePhase += NG;
-    }
-    //Looping through all black bishops
-    for(int i = 0; i < b.getPceNum(BB); i++)
-    {
-        mgScore -= BM;
-        egScore -= BE;
-        mgScore -= mg_bishop_table[7 - b.getPceR(BB, i)][b.getPceC(BB, i)];
-        egScore -= eg_bishop_table[7 - b.getPceR(BB, i)][b.getPceC(BB, i)];
-        gamePhase += BG;
-    }
-    //Looping through all black rooks
-    for(int i = 0; i < b.getPceNum(BR); i++)
-    {
-        mgScore -= RM;
-        egScore -= RE;
-
-        int rR = b.getPceR(BR, i);
-        int rC = b.getPceC(BR, i);
-        mgScore -= mg_rook_table[7 - rR][rC];
-        egScore -= eg_rook_table[7 - rR][rC];
-        gamePhase += RG;
-
-        mgScore -= b.sqExposedVert(rR, rC) * 3;   //bonus for (semi)open file
-    }
-
-    //Looping through all black queens
-    for(int i = 0; i < b.getPceNum(BQ); i++)
-    {
-        mgScore -= QM;
-        egScore -= QE;
-        mgScore -= mg_queen_table[7 - b.getPceR(BQ, i)][b.getPceC(BQ, i)];
-        egScore -= eg_queen_table[7 - b.getPceR(BQ, i)][b.getPceC(BQ, i)];
-        gamePhase += QG;
-    }
-    
-    //King PST
-    kR = b.getKingR(BLACK);
-    kC = b.getKingC(BLACK);
-    mgScore -= mg_king_table[7 - kR][kC];
-    egScore -= eg_king_table[7 - kR][kC];
-    mgScore += b.sqExposed(kR, kC) * 3;       //king safety penalty
-
-    //Tapered eval
-    int mgPhase = gamePhase;
-    if (mgPhase > 24) mgPhase = 24; //In case of early promotion
-    int egPhase = 24 - mgPhase;
-    int score = (mgScore * mgPhase + egScore * egPhase) / 24;
-    
-    return (b.getSide() == WHITE) ? (score) : (-score);
+    return nnue_evaluate(b.getSide(), pieces, squares);
 }
 
 #include <cstring>

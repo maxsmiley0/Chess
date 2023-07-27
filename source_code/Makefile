@@ -1,4 +1,4 @@
-strawman: main.o board.o defs.o game.o main.o movegen.o searcher.o
+strawman: main.o board.o defs.o game.o main.o movegen.o searcher.o nnue.o
 	g++ -std=c++0x -O2 *.o -lpthread
 
 board.o: board.cpp board.h
@@ -18,6 +18,9 @@ movegen.o: movegen.cpp movegen.h
 
 searcher.o: searcher.cpp searcher.h
 	g++ -c -std=c++0x -O2 searcher.cpp -lpthread
+
+nnue.o: nnue/nnue.cpp nnue/nnue.h
+	g++ -c -std=c++0x -O2 nnue/nnue.cpp nnue/nnue.h -lpthread
 
 clean:
 	rm *.o a.out
