@@ -10,7 +10,7 @@ Computer Mode: Two instances of strawberry mangoes with computer mode set to tru
 
 Ponder Mode: Setting this equal to true will make the computer use the time the human spends thinking to perform additional calculations.
 
-Estimated elo: ~2000 (99.86 percentile, according to Chess.com)
+Estimated elo: ~2400
 
 Implemented:
 Zobrist hashing
@@ -32,12 +32,12 @@ History heuristic
 Evaluation extension
 Improved move ordering sorting algorithm
 Pondering
+NNUE evaluation
 
 To be implemented?
 Revamp board interface to be implemented with bit-boards
-More efficient legal move generation (priority queue..? study this)
-Opening book (run alpha beta for a long time and cache depth
-Tune parameters
+More efficient legal move generation
+Opening book (run alpha beta for a long time and cache depth)
 Transposition table
 Aspiration windows
 Multicut pruning
