@@ -2,7 +2,7 @@
 #include "Movemap.h"
 
 //Returns true if square is under attack
-static inline bool is_sq_atk(Brd brd, int square, int color)
+static inline bool is_sq_atk(const Brd& brd, int square, int color)
 {
     map occ = brd.occ;
     if (color == WHITE)
@@ -20,20 +20,20 @@ static inline bool is_sq_atk(Brd brd, int square, int color)
 }
 
 //Returns true if the side to move is in check
-static inline bool in_check(Brd brd)
+static inline bool in_check(const Brd& brd)
 {
     map occ = brd.occ;
     int square;
 
     if (brd.color == WHITE)
     {
-        square = get_ls1b_index(WK);
+        square = get_ls1b_index(brd.pce[WK]);
         return get_queen_attacks(square, occ) & brd.pce[BQ] || get_rook_attacks(square, occ) & brd.pce[BR] || get_bishop_attacks(square, occ) & brd.pce[BB] || 
                knight_attacks[square] & brd.pce[BN] || pawn_attacks[WHITE][square] & brd.pce[BP] || king_attacks[square] & brd.pce[BK];
     }
     else 
     {
-        square = get_ls1b_index(BK);
+        square = get_ls1b_index(brd.pce[BK]);
         return get_queen_attacks(square, occ) & brd.pce[WQ] || get_rook_attacks(square, occ) & brd.pce[WR] || get_bishop_attacks(square, occ) & brd.pce[WB] || 
                knight_attacks[square] & brd.pce[WN] || pawn_attacks[BLACK][square] & brd.pce[WP] || king_attacks[square] & brd.pce[WK];
     }
@@ -41,7 +41,7 @@ static inline bool in_check(Brd brd)
     return false;
 }
 
-char pce_on_square(int square, Brd brd)
+char pce_on_square(int square, const Brd& brd)
 {
     map sq = 0ULL;
     set_bit(sq, square);
@@ -233,9 +233,9 @@ Brd parse_fen(std::string fen)
 }
 
 //Given a board, returns a list of generated (pseudo-legal) moves in the position
-std::list<int> generate_moves(Brd brd)
+static inline void generate_moves(const Brd& brd, MoveList* move_list)
 {
-    std::list<int> li;
+    move_list->cnt = 0;
     
     //Pce current / future position
     int src_sq, tar_sq;
@@ -258,19 +258,19 @@ std::list<int> generate_moves(Brd brd)
                 //pawn promotion
                 if (src_sq >= a7 && src_sq <= h7)
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WQ, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WR, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WB, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WN, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WQ, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WR, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WB, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WN, 0, 0, 0, 0));
                 }
                 else 
                 {
                     //One ahead
-                    li.push_back(encode_move(src_sq, tar_sq, WP, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, 0, 0, 0, 0, 0));
                     //Two ahead
                     if ((src_sq >= a2 && src_sq <= h2) && !get_bit(brd.occ, tar_sq - 8))
                     {
-                        li.push_back(encode_move(src_sq, tar_sq - 8, WP, 0, 0, 1, 0, 0));
+                        add_move(move_list, encode_move(src_sq, tar_sq - 8, WP, 0, 0, 1, 0, 0));
                     }
                 }
             }
@@ -283,15 +283,15 @@ std::list<int> generate_moves(Brd brd)
                 //Pawn promotion / capture
                 if (src_sq >= a7 && src_sq <= h7)
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WQ, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WR, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WB, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, WP, WN, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WQ, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WR, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WB, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, WN, 1, 0, 0, 0));
                 }
                 else 
                 {
                     //Regular capture case
-                    li.push_back(encode_move(src_sq, tar_sq, WP, 0, 1, 0, 0, 0));  
+                    add_move(move_list, encode_move(src_sq, tar_sq, WP, 0, 1, 0, 0, 0));  
                 }
 
                 pop_bit(attacks, tar_sq);
@@ -303,7 +303,7 @@ std::list<int> generate_moves(Brd brd)
                 map enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
                 if (enpas_attack)
                 {
-                    li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), WP, 0, 1, 0, 1, 0));
+                    add_move(move_list, encode_move(src_sq, get_ls1b_index(enpas_attack), WP, 0, 1, 0, 1, 0));
                 }
             }
 
@@ -314,11 +314,11 @@ std::list<int> generate_moves(Brd brd)
         //Castle
         if (brd.castleperms & WKCA && !get_bit(brd.occ, f1) && !get_bit(brd.occ, g1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, f1, WHITE))
         {
-            li.push_back(encode_move(e1, g1, WK, 0, 0, 0, 0, 1));
+            add_move(move_list, encode_move(e1, g1, WK, 0, 0, 0, 0, 1));
         }
         if (brd.castleperms & WQCA && !get_bit(brd.occ, d1) && !get_bit(brd.occ, c1) && !get_bit(brd.occ, b1) && !is_sq_atk(brd, e1, WHITE) && !is_sq_atk(brd, d1, WHITE))
         {
-            li.push_back(encode_move(e1, c1, WK, 0, 0, 0, 0, 1));
+            add_move(move_list, encode_move(e1, c1, WK, 0, 0, 0, 0, 1));
         }
         //Regular move
         src_sq = get_ls1b_index(brd.pce[WK]);
@@ -330,12 +330,12 @@ std::list<int> generate_moves(Brd brd)
             //Quiet
             if (!get_bit(brd.side[BLACK], tar_sq))
             {
-                li.push_back(encode_move(src_sq, tar_sq, WK, 0, 0, 0, 0, 0));
+                add_move(move_list, encode_move(src_sq, tar_sq, WK, 0, 0, 0, 0, 0));
             }
             //Capture
             else 
             {
-                li.push_back(encode_move(src_sq, tar_sq, WK, 0, 1, 0, 0, 0));
+                add_move(move_list, encode_move(src_sq, tar_sq, WK, 0, 1, 0, 0, 0));
             }
             pop_bit(attacks, tar_sq);
         }
@@ -354,12 +354,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[BLACK], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WN, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WN, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WN, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WN, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -381,12 +381,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[BLACK], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WB, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WB, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WB, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WB, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -408,12 +408,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[BLACK], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WR, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WR, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WR, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WR, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -435,12 +435,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[BLACK], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WQ, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WQ, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, WQ, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, WQ, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -464,19 +464,19 @@ std::list<int> generate_moves(Brd brd)
                 //pawn promotion
                 if (src_sq >= a2 && src_sq <= h2)
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BQ, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BR, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BB, 0, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BN, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BQ, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BR, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BB, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BN, 0, 0, 0, 0));
                 }
                 else 
                 {
                     //One ahead
-                    li.push_back(encode_move(src_sq, tar_sq, BP, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, 0, 0, 0, 0, 0));
                     //Two ahead
                     if ((src_sq >= a7 && src_sq <= h7) && !get_bit(brd.occ, tar_sq + 8))
                     {
-                        li.push_back(encode_move(src_sq, tar_sq + 8, BP, 0, 0, 1, 0, 0));
+                        add_move(move_list, encode_move(src_sq, tar_sq + 8, BP, 0, 0, 1, 0, 0));
                     }
                 }
             }
@@ -489,15 +489,15 @@ std::list<int> generate_moves(Brd brd)
                 //Pawn promotion / capture
                 if (src_sq >= a2 && src_sq <= h2)
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BQ, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BR, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BB, 1, 0, 0, 0));
-                    li.push_back(encode_move(src_sq, tar_sq, BP, BN, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BQ, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BR, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BB, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, BN, 1, 0, 0, 0));
                 }
                 else 
                 {
                     //Regular capture case
-                    li.push_back(encode_move(src_sq, tar_sq, BP, 0, 1, 0, 0, 0));  
+                    add_move(move_list, encode_move(src_sq, tar_sq, BP, 0, 1, 0, 0, 0));  
                 }
 
                 pop_bit(attacks, tar_sq);
@@ -509,7 +509,7 @@ std::list<int> generate_moves(Brd brd)
                 map enpas_attack = pawn_attacks[BLACK][src_sq] & (1ULL << brd.enpas);
                 if (enpas_attack)
                 {
-                    li.push_back(encode_move(src_sq, get_ls1b_index(enpas_attack), BP, 0, 1, 0, 1, 0));
+                    add_move(move_list, encode_move(src_sq, get_ls1b_index(enpas_attack), BP, 0, 1, 0, 1, 0));
                 }
             }
 
@@ -518,13 +518,13 @@ std::list<int> generate_moves(Brd brd)
 
         //Black king
         //Castle
-        if (brd.castleperms & BKCA && !get_bit(brd.occ, f8) && !get_bit(brd.occ, g8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, f8, WHITE))
+        if (brd.castleperms & BKCA && !get_bit(brd.occ, f8) && !get_bit(brd.occ, g8) && !is_sq_atk(brd, e8, BLACK) && !is_sq_atk(brd, f8, BLACK))
         {
-            li.push_back(encode_move(e8, g8, BK, 0, 0, 0, 0, 1));
+            add_move(move_list, encode_move(e8, g8, BK, 0, 0, 0, 0, 1));
         }
-        if (brd.castleperms & BQCA && !get_bit(brd.occ, d8) && !get_bit(brd.occ, c8) && !get_bit(brd.occ, b8) && !is_sq_atk(brd, e8, WHITE) && !is_sq_atk(brd, d8, WHITE))
+        if (brd.castleperms & BQCA && !get_bit(brd.occ, d8) && !get_bit(brd.occ, c8) && !get_bit(brd.occ, b8) && !is_sq_atk(brd, e8, BLACK) && !is_sq_atk(brd, d8, BLACK))
         {
-            li.push_back(encode_move(e8, c8, BK, 0, 0, 0, 0, 1));
+            add_move(move_list, encode_move(e8, c8, BK, 0, 0, 0, 0, 1));
         }
         //Regular move
         src_sq = get_ls1b_index(brd.pce[BK]);
@@ -536,12 +536,12 @@ std::list<int> generate_moves(Brd brd)
             //Quiet
             if (!get_bit(brd.side[WHITE], tar_sq))
             {
-                li.push_back(encode_move(src_sq, tar_sq, BK, 0, 0, 0, 0, 0));
+                add_move(move_list, encode_move(src_sq, tar_sq, BK, 0, 0, 0, 0, 0));
             }
             //Capture
             else 
             {
-                li.push_back(encode_move(src_sq, tar_sq, BK, 0, 1, 0, 0, 0));
+                add_move(move_list, encode_move(src_sq, tar_sq, BK, 0, 1, 0, 0, 0));
             }
             pop_bit(attacks, tar_sq);
         }
@@ -560,12 +560,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[WHITE], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BN, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BN, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BN, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BN, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -587,12 +587,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[WHITE], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BB, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BB, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BB, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BB, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -614,12 +614,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[WHITE], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BR, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BR, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BR, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BR, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -641,12 +641,12 @@ std::list<int> generate_moves(Brd brd)
                 //Quiet
                 if (!get_bit(brd.side[WHITE], tar_sq))
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BQ, 0, 0, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BQ, 0, 0, 0, 0, 0));
                 }
                 //Capture
                 else 
                 {
-                    li.push_back(encode_move(src_sq, tar_sq, BQ, 0, 1, 0, 0, 0));
+                    add_move(move_list, encode_move(src_sq, tar_sq, BQ, 0, 1, 0, 0, 0));
                 }
                 pop_bit(attacks, tar_sq);
             }
@@ -654,26 +654,16 @@ std::list<int> generate_moves(Brd brd)
             pop_bit(bitboard, src_sq);
         }
     }
-
-    return li;
 }
 
-Brd copy_board(Brd& brd)
+static inline bool make_move(Brd& brd, int move)
 {
-    Brd new_brd;
-    memcpy(&new_brd, &brd, sizeof(Brd));
-    return new_brd;
-}
-
-void take_back(Brd& brd)
-{
-    brd = *(brd.last_state);
-}
-
-bool make_move(Brd& brd, int move)
-{
-    //In case we need to take back
-    Brd cpy_brd = copy_board(brd);
+    //Copying
+    map pce_cpy[12], side_cpy[2];
+    int color_cpy, enpas_cpy, castleperms_cpy;
+    memcpy(pce_cpy, brd.pce, 96);
+    memcpy(side_cpy, brd.side, 16);
+    color_cpy = brd.color, enpas_cpy = brd.enpas, castleperms_cpy = brd.castleperms;
 
     //Extracting move information
     int src_sq = get_move_source(move);
@@ -808,12 +798,17 @@ bool make_move(Brd& brd, int move)
     brd.occ = brd.side[WHITE] | brd.side[BLACK];
 
     brd.fifty_move++;
-    brd.last_state = &cpy_brd;
-    
+
     //Take back if in check (illegal)
     if (in_check(brd))
     {
-        take_back(brd);
+        memcpy(brd.pce, pce_cpy, 96);
+        memcpy(brd.side, side_cpy, 16);
+        brd.enpas = enpas_cpy;
+        brd.castleperms = castleperms_cpy;
+        brd.occ = brd.side[0] | brd.side[1];
+        brd.color = color_cpy;
+
         return false;
     }
 
@@ -830,18 +825,50 @@ int perft_driver(Brd& brd, int depth)
     }
 
     int total_nodes = 0;
-    std::list<int> moves = generate_moves(brd);
+    MoveList move_list[1];
+    generate_moves(brd, move_list);
 
-    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    for (int move_cnt = 0; move_cnt < move_list->cnt; move_cnt++)
     {
-        Brd cpy_brd = copy_board(brd);
-        if (!make_move(brd, *itr))
+        int move = move_list->move[move_cnt];
+        map pce_cpy[12], side_cpy[2];
+        int color_cpy, enpas_cpy, castleperms_cpy;
+        memcpy(pce_cpy, brd.pce, 96);
+        memcpy(side_cpy, brd.side, 16);
+        color_cpy = brd.color, enpas_cpy = brd.enpas, castleperms_cpy = brd.castleperms; 
+
+        if (!make_move(brd, move))
         {
             continue;
+            
         }
-        total_nodes += perft_driver(brd, depth - 1);
-        brd = cpy_brd;
+
+        int nodes_of_lower_depth = perft_driver(brd, depth - 1);
+        total_nodes += nodes_of_lower_depth;
+        if (depth == 2) {
+            int src_sq = get_move_source(move);
+            int tar_sq = get_move_target(move);
+            int pce = get_move_piece(move);
+            int promo_pce = get_move_promoted(move);
+            int capture = get_move_capture(move);
+            int double_push = get_move_double(move);
+            int enpas = get_move_enpas(move);
+            int castling = get_move_castling(move);
+        }
+
+        memcpy(brd.pce, pce_cpy, 96);
+        memcpy(brd.side, side_cpy, 16);
+        brd.occ = brd.side[0] | brd.side[1];
+        brd.enpas = enpas_cpy;
+        brd.castleperms = castleperms_cpy;
+        brd.color = color_cpy;
     }
 
     return total_nodes;
+}
+
+static inline void add_move(MoveList* move_list, int move)
+{
+    move_list->move[move_list->cnt] = move;
+    move_list->cnt++;
 }
