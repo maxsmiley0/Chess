@@ -30,7 +30,7 @@ void print_board(Brd brd)
 
     //Prints auxiliary information
     std::cout << std::endl << "      a  b  c  d  e  f  g  h" << std::endl << std::endl;
-    brd.color ? std::cout << "      Color: Black" : std::cout << "      Color: White" << std::endl;
+    brd.color ? std::cout << "      Color: Black" << std::endl : std::cout << "      Color: White" << std::endl;
     std::cout << "Castle Perms: ";
     if (brd.castleperms & WKCA)
     {
@@ -49,7 +49,8 @@ void print_board(Brd brd)
         std::cout << "q";
     }
     std::cout << std::endl;
-    std::cout << "Enpas: " << brd.enpas << std::endl << std::endl;
+    std::cout << "Enpas: " << square_to_coordinates[brd.enpas] << std::endl << std::endl;
+    std::cout << "Key: " << brd.poskey << std::endl;
 }
 
 void print_bitboard(map bitboard)
@@ -85,12 +86,4 @@ void print_move(int move)
     std::cout << "To: " << square_to_coordinates[get_move_target(move)] << std::endl;
     std::cout << "Piece: " << pce_char[get_move_piece(move)] << std::endl;
     std::cout << "Move Key " << move << std::endl << std::endl;
-}
-
-void print_moves(std::list<int> moves)
-{
-    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
-    {
-        print_move(*itr);
-    }
 }

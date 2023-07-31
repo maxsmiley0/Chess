@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <string>
+#include <random>
 #include <list>
 #include <cstring>
 #include <chrono>
+#include <climits>
 
 class Brd;
 
@@ -153,14 +155,18 @@ static inline int get_ls1b_index(map bitboard) {
    return index64[((bitboard & -bitboard) * 0x03f79d71b4cb0a89) >> 58];
 }
 
-//Prints board to cout
 void print_board(Brd brd);
-
 void print_bitboard(map bitboard);
-
 void print_move(int move);
 
-void print_moves(std::list<int> moves);
+//Random
+static std::random_device rd;
+static std::default_random_engine generator(rd());
+
+static inline int rand32() {
+    std::uniform_int_distribution<> distro(0, INT_MAX);
+    return distro(generator);
+}
 
 //Timer class for statistics purposes
 class Timer

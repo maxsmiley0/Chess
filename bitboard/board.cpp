@@ -1,6 +1,44 @@
 #include "board.h"
 #include "Movemap.h"
 
+int sideKey;              //key for if white is to move
+int castleKey[4];         //4 keys for each castling side {WK, WQ, BK, BQ}
+int castleKeyCombo[16];   //16 keys for all combinations of hashed castle keys
+int enpasKey[64];         //only 16 possible squares, but we'll generate 64 keys for looping convenience
+int pceKey[64][12];       //64 squares with 12 possible pieces
+
+void init_keys() {
+    sideKey = rand32();
+    std::cout << sideKey << std::endl;
+    for (int i = 0; i < 4; i++) {
+        castleKey[i] = rand32();
+    }
+    for (int i = 0; i < 64; i++) {
+        enpasKey[i] = rand32();
+    }
+    for (int i = 0; i < 64; i++) {
+        for (int j = 0; j < 12; j++) {
+            pceKey[i][j] = rand32();
+        }
+    }
+    for (int i = 0; i < 16; i++) {
+        int key = 0;
+        if (i & WKCA) {
+            key ^= castleKey[0];
+        }
+        if (i & WQCA) {
+            key ^= castleKey[1];
+        }
+        if (i & BKCA) {
+            key ^= castleKey[2];
+        }
+        if (i & BQCA) {
+            key ^= castleKey[3];
+        }
+        castleKeyCombo[i] = key;
+    }
+}
+
 //Returns true if square is under attack
 static inline bool is_sq_atk(const Brd& brd, int square, int color)
 {
@@ -59,17 +97,13 @@ char pce_on_square(int square, const Brd& brd)
 
 //Given a fen string, returns a board loaded to that fen
 Brd parse_fen(std::string fen)
-{
+{   
     Brd brd;
-
-    int castlePerms = 0;
-    int enpas = 0;
+    memset(&brd, 0, sizeof(Brd));
     
     int section = 0;    //0 -> pieces | 1 -> side | 2 -> castle | 3 -> enpas square
     int r = 0;          //stores row we are on
     int c = 0;          //stores column we are on
-
-    map bp = 0, bn = 0, bb = 0, br = 0, bq = 0, bk = 0, wp = 0, wn = 0, wb = 0, wr = 0, wq = 0, wk = 0;
     
     //Loop through all characters of the FEN
     for (int i = 0; i < fen.length(); i++)
@@ -83,51 +117,51 @@ Brd parse_fen(std::string fen)
                     section++;
                     break;
                 case 'p':
-                    set_bit(bp, r * 8 + c);
+                    add_pce(brd, BP, r * 8 + c);
                     c++;
                     break;
                 case 'n':
-                    set_bit(bn, r * 8 + c);
+                    add_pce(brd, BN, r * 8 + c);
                     c++;
                     break;
                 case 'b':
-                    set_bit(bb, r * 8 + c);
+                    add_pce(brd, BB, r * 8 + c);
                     c++;
                     break;
                 case 'r':
-                    set_bit(br, r * 8 + c);
+                    add_pce(brd, BR, r * 8 + c);
                     c++;
                     break;
                 case 'q':
-                    set_bit(bq, r * 8 + c);
+                    add_pce(brd, BQ, r * 8 + c);
                     c++;
                     break;
                 case 'k':
-                    set_bit(bk, r * 8 + c);
+                    add_pce(brd, BK, r * 8 + c);
                     c++;
                     break;
                 case 'P':
-                    set_bit(wp, r * 8 + c);
+                    add_pce(brd, WP, r * 8 + c);
                     c++;
                     break;
                 case 'N':
-                    set_bit(wn, r * 8 + c);
+                    add_pce(brd, WN, r * 8 + c);
                     c++;
                     break;
                 case 'B':
-                    set_bit(wb, r * 8 + c);
+                    add_pce(brd, WB, r * 8 + c);
                     c++;
                     break;
                 case 'R':
-                    set_bit(wr, r * 8 + c);
+                    add_pce(brd, WR, r * 8 + c);
                     c++;
                     break;
                 case 'Q':
-                    set_bit(wq, r * 8 + c);
+                    add_pce(brd, WQ, r * 8 + c);
                     c++;
                     break;
                 case 'K':
-                    set_bit(wk, r * 8 + c);
+                    add_pce(brd, WK, r * 8 + c);
                     c++;
                     break;
                 case '/':
@@ -162,6 +196,7 @@ Brd parse_fen(std::string fen)
             else if (fen[i] == 'b')
             {
                 brd.color = BLACK;
+                brd.poskey ^= sideKey;
                 section++;
                 i++;
             }
@@ -178,16 +213,16 @@ Brd parse_fen(std::string fen)
                 case '-':
                     break;
                 case 'K':
-                    castlePerms |= WKCA;
+                    hashInCastle(brd, g1);
                     break;
                 case 'Q':
-                    castlePerms |= WQCA;
+                    hashInCastle(brd, c1);
                     break;
                 case 'k':
-                    castlePerms |= BKCA;
+                    hashInCastle(brd, g8);
                     break;
                 case 'q':
-                    castlePerms |= BQCA;
+                    hashInCastle(brd, c8);
                     break;
                 default:
                     std::cerr << "Invalid FEN" << std::endl;
@@ -200,34 +235,16 @@ Brd parse_fen(std::string fen)
         {
             if (fen[i] != '-')
             {
-                //update position key
-                //update en passant square
-                enpas = (8 - ((int)fen[i + 1] - (int)'0')) * 8 + (int)fen[i] - (int)'a';
+                brd.enpas = (8 - ((int)fen[i + 1] - (int)'0')) * 8 + (int)fen[i] - (int)'a';
+                hashInCastle(brd, brd.enpas);
             }
             section++;
         }
     }
 
-    brd.pce[WP] = wp;
-    brd.pce[WN] = wn;
-    brd.pce[WB] = wb;
-    brd.pce[WR] = wr;
-    brd.pce[WQ] = wq;
-    brd.pce[WK] = wk;
-
-    brd.pce[BP] = bp;
-    brd.pce[BN] = bn;
-    brd.pce[BB] = bb;
-    brd.pce[BR] = br;
-    brd.pce[BQ] = bq;
-    brd.pce[BK] = bk;
-
-    brd.side[WHITE] = wp | wn | wb | wr | wq | wk;
-    brd.side[BLACK] = bp | bn | bb | br | bq | bk;
+    brd.side[WHITE] = brd.pce[WP] | brd.pce[WN] | brd.pce[WB] | brd.pce[WR] | brd.pce[WQ] | brd.pce[WK];
+    brd.side[BLACK] = brd.pce[BP] | brd.pce[BN] | brd.pce[BB] | brd.pce[BR] | brd.pce[BQ] | brd.pce[BK];
     brd.occ = brd.side[WHITE] | brd.side[BLACK];
-
-    brd.enpas = enpas;
-    brd.castleperms = castlePerms;
 
     return brd;
 }
@@ -659,11 +676,7 @@ static inline void generate_moves(const Brd& brd, MoveList* move_list)
 static inline bool make_move(Brd& brd, int move)
 {
     //Copying
-    map pce_cpy[12], side_cpy[2];
-    int color_cpy, enpas_cpy, castleperms_cpy;
-    memcpy(pce_cpy, brd.pce, 96);
-    memcpy(side_cpy, brd.side, 16);
-    color_cpy = brd.color, enpas_cpy = brd.enpas, castleperms_cpy = brd.castleperms;
+    Brd cpy_brd = copy_board(brd);
 
     //Extracting move information
     int src_sq = get_move_source(move);
@@ -676,8 +689,8 @@ static inline bool make_move(Brd& brd, int move)
     int castling = get_move_castling(move);
 
     //Move piece
-    pop_bit(brd.pce[pce], src_sq);
-    set_bit(brd.pce[pce], tar_sq);
+    remove_pce(brd, pce, src_sq);
+    add_pce(brd, pce, tar_sq);
 
     if (brd.color == WHITE)
     {
@@ -688,7 +701,8 @@ static inline bool make_move(Brd& brd, int move)
             {
                 if (get_bit(brd.pce[cap_pce], tar_sq))
                 {
-                    pop_bit(brd.pce[cap_pce], tar_sq);
+                    remove_pce(brd, cap_pce, tar_sq);
+                    break;
                 }
             }
         }
@@ -696,23 +710,22 @@ static inline bool make_move(Brd& brd, int move)
         //Handling promotions
         if (promo_pce)
         {
-            pop_bit(brd.pce[WP], tar_sq);
-            set_bit(brd.pce[promo_pce], tar_sq);
+            remove_pce(brd, WP, tar_sq);
+            add_pce(brd, promo_pce, tar_sq);
         }
 
         //Handling enpas
         if (enpas)
         {
-            pop_bit(brd.pce[BP], tar_sq + 8);
+            remove_pce(brd, BP, tar_sq + 8);
         }
 
-        //Reset enpas square to none
-        brd.enpas = 0;
+        hashOutEp(brd);
 
         //Reinitialize enpas square if double pawn push
         if (double_push)
         {
-            brd.enpas = tar_sq + 8;
+            hashInEp(brd, tar_sq + 8);
         }
 
         //Handle castling (move rook)
@@ -722,13 +735,13 @@ static inline bool make_move(Brd& brd, int move)
             {
                 //WKCA
                 case g1:
-                    pop_bit(brd.pce[WR], h1);
-                    set_bit(brd.pce[WR], f1);
+                    remove_pce(brd, WR, h1);
+                    add_pce(brd, WR, f1);
                     break;
                 //WQCA
                 case c1:
-                    pop_bit(brd.pce[WR], a1);
-                    set_bit(brd.pce[WR], d1);
+                    remove_pce(brd, WR, a1);
+                    add_pce(brd, WR, d1);
                     break;
             }
         }
@@ -742,7 +755,8 @@ static inline bool make_move(Brd& brd, int move)
             {
                 if (get_bit(brd.pce[cap_pce], tar_sq))
                 {
-                    pop_bit(brd.pce[cap_pce], tar_sq);
+                    remove_pce(brd, cap_pce, tar_sq);
+                    break;
                 }
             }
         }
@@ -750,23 +764,22 @@ static inline bool make_move(Brd& brd, int move)
         //Handling promotions
         if (promo_pce)
         {
-            pop_bit(brd.pce[BP], tar_sq);
-            set_bit(brd.pce[promo_pce], tar_sq);
+            remove_pce(brd, BP, tar_sq);
+            add_pce(brd, promo_pce, tar_sq);
         }
 
         //Handling enpas
         if (enpas)
         {
-            pop_bit(brd.pce[WP], tar_sq - 8);
+            remove_pce(brd, WP, tar_sq - 8);
         }
 
-        //Reset enpas square to none
-        brd.enpas = 0;
+        hashOutEp(brd);
 
         //Reinitialize enpas square if double pawn push
         if (double_push)
         {
-            brd.enpas = tar_sq - 8;
+            hashInEp(brd, tar_sq - 8);
         }
 
         //Handle castling (move rook)
@@ -776,21 +789,20 @@ static inline bool make_move(Brd& brd, int move)
             {
                 //BKCA
                 case g8:
-                    pop_bit(brd.pce[BR], h8);
-                    set_bit(brd.pce[BR], f8);
+                    remove_pce(brd, BR, h8);
+                    add_pce(brd, BR, f8);
                     break;
                 //BQCA
                 case c8:
-                    pop_bit(brd.pce[BR], a8);
-                    set_bit(brd.pce[BR], d8);
+                    remove_pce(brd, BR, a8);
+                    add_pce(brd, BR, d8);
                     break;
             }
         }
     }
 
     //Update castling rights
-    brd.castleperms &= castling_rights[src_sq];
-    brd.castleperms &= castling_rights[tar_sq];
+    hashOutCastle(brd, src_sq, tar_sq);
 
     //Update occupancies
     brd.side[WHITE] = brd.pce[WP] | brd.pce[WN] | brd.pce[WB] | brd.pce[WR] | brd.pce[WQ] | brd.pce[WK];
@@ -802,17 +814,11 @@ static inline bool make_move(Brd& brd, int move)
     //Take back if in check (illegal)
     if (in_check(brd))
     {
-        memcpy(brd.pce, pce_cpy, 96);
-        memcpy(brd.side, side_cpy, 16);
-        brd.enpas = enpas_cpy;
-        brd.castleperms = castleperms_cpy;
-        brd.occ = brd.side[0] | brd.side[1];
-        brd.color = color_cpy;
-
+        brd = cpy_brd;
         return false;
     }
 
-    brd.color ^= 1;
+    changeSide(brd);
 
     return true;
 }
@@ -831,37 +837,15 @@ int perft_driver(Brd& brd, int depth)
     for (int move_cnt = 0; move_cnt < move_list->cnt; move_cnt++)
     {
         int move = move_list->move[move_cnt];
-        map pce_cpy[12], side_cpy[2];
-        int color_cpy, enpas_cpy, castleperms_cpy;
-        memcpy(pce_cpy, brd.pce, 96);
-        memcpy(side_cpy, brd.side, 16);
-        color_cpy = brd.color, enpas_cpy = brd.enpas, castleperms_cpy = brd.castleperms; 
+        Brd cpy_brd = copy_board(brd);
 
         if (!make_move(brd, move))
         {
             continue;
-            
         }
 
-        int nodes_of_lower_depth = perft_driver(brd, depth - 1);
-        total_nodes += nodes_of_lower_depth;
-        if (depth == 2) {
-            int src_sq = get_move_source(move);
-            int tar_sq = get_move_target(move);
-            int pce = get_move_piece(move);
-            int promo_pce = get_move_promoted(move);
-            int capture = get_move_capture(move);
-            int double_push = get_move_double(move);
-            int enpas = get_move_enpas(move);
-            int castling = get_move_castling(move);
-        }
-
-        memcpy(brd.pce, pce_cpy, 96);
-        memcpy(brd.side, side_cpy, 16);
-        brd.occ = brd.side[0] | brd.side[1];
-        brd.enpas = enpas_cpy;
-        brd.castleperms = castleperms_cpy;
-        brd.color = color_cpy;
+        total_nodes += perft_driver(brd, depth - 1);
+        brd = cpy_brd;
     }
 
     return total_nodes;
@@ -871,4 +855,74 @@ static inline void add_move(MoveList* move_list, int move)
 {
     move_list->move[move_list->cnt] = move;
     move_list->cnt++;
+}
+
+//Sets the bit in the according b.pce[] and updates the poskey
+static inline void add_pce(Brd& brd, int pce, int sq) {
+    set_bit(brd.pce[pce], sq);
+    brd.poskey ^= pceKey[sq][pce];
+}
+
+//Removes the bit in the according b.pce[] given known pce and updates the poskey
+static inline void remove_pce(Brd& brd, int pce, int sq) {
+    pop_bit(brd.pce[pce], sq);
+    brd.poskey ^= pceKey[sq][pce];
+}
+
+//Adds the castleperms and poskey (does not move any pieces)
+static inline void hashInCastle(Brd& brd, int sq) {
+    switch (sq) {
+        case c1: //WQ
+            brd.poskey ^= castleKey[1];
+            brd.castleperms |= WQCA;
+            return;
+        case g1: //WK
+            brd.poskey ^= castleKey[0];
+            brd.castleperms |= WKCA;
+            return;
+        case c8: //BQ
+            brd.poskey ^= castleKey[3];
+            brd.castleperms |= BQCA;
+            return;
+        case g8: //BK
+            brd.poskey ^= castleKey[2];
+            brd.castleperms |= BKCA;
+            return;
+    }
+}
+
+//Updates the castleperms and poskey (does not move any pieces)
+static inline void hashOutCastle(Brd& brd, int src_sq, int tar_sq) {
+    int init_castleperms = brd.castleperms;
+    brd.castleperms &= castling_rights[src_sq];
+    brd.castleperms &= castling_rights[tar_sq];
+
+    int castle_bit_diff = init_castleperms ^ brd.castleperms;
+    brd.poskey ^= castleKeyCombo[castle_bit_diff];
+}
+
+//Sets the ep, and updates position key, assuming no ep
+static inline void hashInEp(Brd& brd, int sq) {
+    brd.enpas = sq;
+    brd.poskey ^= enpasKey[sq];
+}
+
+//Resets the ep square to 0, and updates position key
+static inline void hashOutEp(Brd& brd) {
+    if (brd.enpas != 0) {
+        brd.poskey ^= enpasKey[brd.enpas];
+        brd.enpas = 0;
+    }
+}
+
+//Changes the side and updates the poskey
+static inline void changeSide(Brd& brd) {
+    brd.color ^= 1;
+    brd.poskey ^= sideKey;
+}
+
+static inline Brd copy_board(const Brd& brd) {
+    Brd new_brd;
+    memcpy(&new_brd, &brd, sizeof(Brd));
+    return new_brd;
 }
