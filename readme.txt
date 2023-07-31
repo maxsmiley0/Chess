@@ -32,7 +32,7 @@ History heuristic
 Evaluation extension
 Improved move ordering sorting algorithm
 Pondering
-NNUE evaluation
+NNUE evaluation (from dshawul/nnue-probe's repo - weights from stockfish)
 
 To be implemented?
 Revamp board interface to be implemented with bit-boards
