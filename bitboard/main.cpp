@@ -1,4 +1,5 @@
 #include "board.h"
+#include "test.h"
 
 void validate_perft() {
     Brd brd_open = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -40,19 +41,8 @@ void init_speed_test() {
 int main()
 {
     init_keys();
-
-    Brd brd_a = parse_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
-    Brd brd_b = parse_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq -");
-
-    std::cout << (brd_a.poskey ^ brd_b.poskey) << std::endl;
-
-    /*
-    Moving a piece
-    Destroying castling rights
-    Enpas rights
-    Side rights
-
-    Testing protocol:
-    initialize two boards, and use make_move on the other until it equals the same to show expected
-    */
+    Brd brd = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    TestFramework test;
+    test.parseMoves(brd, {{e2, e4}, {g8, f6}, {b1, c3}, {e7, e6}, {g1, f3}, {f8, e7}, {f1, c4}, {e8, f8}, {h1, f1}, {c7, c5}, {e4, e5}, {d7, d5}, {e5, d6}, {d8, d6}, {d2, d4}, {b8, c6}, {c1, h6}, {g7, h6}, {d1, e2}, {a8, b8}, {e1, c1}});
+    Brd brd_test = parse_fen("1rb2k1r/pp2bp1p/2nqpn1p/2p5/2BP4/2N2N2/PPP1QPPP/2KR1R2 b - - 0 1");
 }

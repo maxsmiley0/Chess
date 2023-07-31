@@ -236,7 +236,7 @@ Brd parse_fen(std::string fen)
             if (fen[i] != '-')
             {
                 brd.enpas = (8 - ((int)fen[i + 1] - (int)'0')) * 8 + (int)fen[i] - (int)'a';
-                hashInCastle(brd, brd.enpas);
+                hashInEp(brd, brd.enpas);
             }
             section++;
         }
@@ -250,7 +250,7 @@ Brd parse_fen(std::string fen)
 }
 
 //Given a board, returns a list of generated (pseudo-legal) moves in the position
-static inline void generate_moves(const Brd& brd, MoveList* move_list)
+void generate_moves(const Brd& brd, MoveList* move_list)
 {
     move_list->cnt = 0;
     
@@ -673,7 +673,7 @@ static inline void generate_moves(const Brd& brd, MoveList* move_list)
     }
 }
 
-static inline bool make_move(Brd& brd, int move)
+bool make_move(Brd& brd, int move)
 {
     //Copying
     Brd cpy_brd = copy_board(brd);

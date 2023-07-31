@@ -33,10 +33,10 @@ char pce_on_square(int square, const Brd& brd);                         //Given 
 
 //Move generation
 static inline void add_move(MoveList* move_list, int move);
-static inline std::list<int> generate_moves(const Brd& brd);            //Given a board, returns a list of generated (pseudo-legal) moves in the position
+void generate_moves(const Brd& brd, MoveList* move_list);               //Given a board, returns a list of generated (pseudo-legal) moves in the position
 
 //Board operations 
-static inline bool make_move(Brd& brd, int move);                       //Makes a move on a given board, returns true if move was made (legal)
+bool make_move(Brd& brd, int move);                                     //Makes a move on a given board, returns true if move was made (legal)
 int perft_driver(Brd& brd, int depth);                                  //Returns the leaf nodes after a given depth of a position
 static inline Brd copy_board(const Brd& brd);                           //Returns a deep copy of the board struct
 
@@ -46,7 +46,7 @@ Use these functions, as they will ensure that the bitboards and keys are properl
 */
 
 static inline void add_pce(Brd& brd, int pce, int sq);                  //Sets the bit in the according b.pce[] and updates the poskey
-static inline void remove_pce(Brd& brd, int pce, int sq);         //Removes the bit in the according b.pce[] given known pce and updates the poskey
+static inline void remove_pce(Brd& brd, int pce, int sq);               //Removes the bit in the according b.pce[] given known pce and updates the poskey
 static inline void hashInCastle(Brd& brd, int sq);                      //Adds the castleperms and poskey (does not move any pieces)
 static inline void hashOutCastle(Brd& brd, int src_sq, int tar_sq);     //Updates the castleperms and poskey (does not move any pieces)
 static inline void hashInEp(Brd& brd, int sq);                          //Sets the ep, and updates position key, assuming no ep
