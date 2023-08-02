@@ -12,12 +12,12 @@ Algebraic convert machine readable to human readable;
 class Brd;
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 using std::string;
 using std::vector;
 using std::pair;
+
 class TestFramework {
 public:
     TestFramework();

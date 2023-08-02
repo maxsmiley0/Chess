@@ -9,7 +9,6 @@ int pceKey[64][12];       //64 squares with 12 possible pieces
 
 void init_keys() {
     sideKey = rand32();
-    std::cout << sideKey << std::endl;
     for (int i = 0; i < 4; i++) {
         castleKey[i] = rand32();
     }

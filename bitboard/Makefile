@@ -1,17 +1,8 @@
-strawman: main.o board.o defs.o test.o
-	g++ -std=c++2a -O2 *.cpp -lpthread
+strawman:
+	g++ -o strawman.out -std=c++2a -O2 src/*.cpp -lpthread
 
-board.o: board.cpp board.h
-	g++ -c -std=c++0x -O2 board.cpp -lpthread
-
-defs.o: defs.cpp defs.h 
-	g++ -c -std=c++0x -O2 defs.cpp -lpthread
-
-main.o: main.cpp
-	g++ -c -std=c++0x -O2 main.cpp -lpthread
-
-test.o: test.h test.cpp 
-	g++ -c -std=c++0x -O2 test.cpp -lpthread
+tester: 
+	g++ -o tester.out -std=c++2a -O2 src/defs.cpp src/board.cpp test/test.cpp test/main.cpp -lpthread
 
 clean:
-	rm *.o a.out
+	rm *.out

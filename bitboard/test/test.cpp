@@ -1,5 +1,5 @@
+#include "../src/board.h"
 #include "test.h"
-#include "board.h"
 
 TestFramework::TestFramework() {
 
