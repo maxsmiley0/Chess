@@ -1,5 +1,6 @@
 #include "board.h"
 #include "Movemap.h"
+#include "nnue/nnue.h"
 
 int sideKey;              //key for if white is to move
 int castleKey[4];         //4 keys for each castling side {WK, WQ, BK, BQ}
@@ -41,7 +42,7 @@ void init_keys() {
 //Returns true if square is under attack
 static inline bool is_sq_atk(const Brd& brd, int square, int color)
 {
-    map occ = brd.occ;
+    bitbrd occ = brd.occ;
     if (color == WHITE)
     {
         return get_queen_attacks(square, occ) & brd.pce[BQ] || get_rook_attacks(square, occ) & brd.pce[BR] || get_bishop_attacks(square, occ) & brd.pce[BB] || 
@@ -59,7 +60,7 @@ static inline bool is_sq_atk(const Brd& brd, int square, int color)
 //Returns true if the side to move is in check
 static inline bool in_check(const Brd& brd)
 {
-    map occ = brd.occ;
+    bitbrd occ = brd.occ;
     int square;
 
     if (brd.color == WHITE)
@@ -80,7 +81,7 @@ static inline bool in_check(const Brd& brd)
 
 char pce_on_square(int square, const Brd& brd)
 {
-    map sq = 0ULL;
+    bitbrd sq = 0ULL;
     set_bit(sq, square);
 
     for (int pce = WP; pce <= BK; pce++)
@@ -92,6 +93,47 @@ char pce_on_square(int square, const Brd& brd)
     }
 
     return '.';
+}
+
+int static_eval(const Brd& brd) {
+    int pieces[33];
+    int squares[33];
+
+    int index = 2;
+    for (int pce = 0; pce < 12; pce++)
+    {
+        int nnuePceValue = strawmanToNnuePce[pce]; //bitmapping from strawman pieces to nnue pieces
+        bitbrd bitboard = brd.pce[pce];
+
+        while (bitboard) {
+            int sq = get_ls1b_index(bitboard);
+            int nnue_sq = strawmanToNnueSq[sq];
+            
+            if (pce == WK)
+            {
+                pieces[0] = nnuePceValue;
+                squares[0] = nnue_sq;
+            }
+            else if (pce == BK)
+            {
+                pieces[1] = nnuePceValue;
+                squares[1] = nnue_sq;
+            }
+            else
+            {
+                pieces[index] = nnuePceValue;
+                squares[index] = nnue_sq;
+                index++;
+            }
+
+            pop_bit(bitboard, sq);
+        }
+    }
+
+    pieces[index] = 0;
+    squares[index] = 0;
+    
+    return nnue_evaluate(brd.color, pieces, squares);
 }
 
 //Given a fen string, returns a board loaded to that fen
@@ -255,8 +297,8 @@ void generate_moves(const Brd& brd, MoveList* move_list)
     
     //Pce current / future position
     int src_sq, tar_sq;
-    //Current piece map copy and its attack squares
-    map bitboard, attacks;
+    //Current piece bitbrd copy and its attack squares
+    bitbrd bitboard, attacks;
     
     if (brd.color == WHITE)
     {
@@ -316,7 +358,7 @@ void generate_moves(const Brd& brd, MoveList* move_list)
             //Enpas
             if (brd.enpas)
             {
-                map enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
+                bitbrd enpas_attack = pawn_attacks[WHITE][src_sq] & (1ULL << brd.enpas);
                 if (enpas_attack)
                 {
                     add_move(move_list, encode_move(src_sq, get_ls1b_index(enpas_attack), WP, 0, 1, 0, 1, 0));
@@ -522,7 +564,7 @@ void generate_moves(const Brd& brd, MoveList* move_list)
             //Enpas
             if (brd.enpas)
             {
-                map enpas_attack = pawn_attacks[BLACK][src_sq] & (1ULL << brd.enpas);
+                bitbrd enpas_attack = pawn_attacks[BLACK][src_sq] & (1ULL << brd.enpas);
                 if (enpas_attack)
                 {
                     add_move(move_list, encode_move(src_sq, get_ls1b_index(enpas_attack), BP, 0, 1, 0, 1, 0));

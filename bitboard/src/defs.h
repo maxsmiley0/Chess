@@ -33,7 +33,7 @@ class Brd;
 #define BKCA 4
 #define BQCA 8
 
-#define map unsigned long long
+#define bitbrd unsigned long long
 
 
 /*
@@ -115,7 +115,20 @@ const int castling_rights[64] = {
     13, 15, 15, 15, 12, 15, 15, 14
 };
 
+//Maps strawman square indexing to nnue indexing
+const int strawmanToNnueSq[] = {
+    56, 57, 58, 59, 60, 61, 62, 63,
+    48, 49, 50, 51, 52, 53, 54, 55,
+    40, 41, 42, 43, 44, 45, 46, 47,
+    32, 33, 34, 35, 36, 37, 38, 39,
+    24, 25, 26, 27, 28, 29, 30, 31,
+    16, 17, 18, 19, 20, 21, 22, 23,
+    8, 9, 10, 11, 12, 13, 14, 15,
+    0, 1, 2, 3, 4, 5, 6, 7
+};
+
 static std::string pce_char = "PNBRQKpnbrqk.";
+static int strawmanToNnuePce[] = {6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 7};
 
 //for ls1b de bruijn multiplication
 static constexpr int index64[64] = {
@@ -151,12 +164,12 @@ const std::string square_to_coordinates[] = {
     "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
 };
 
-static inline int get_ls1b_index(map bitboard) {
+static inline int get_ls1b_index(bitbrd bitboard) {
    return index64[((bitboard & -bitboard) * 0x03f79d71b4cb0a89) >> 58];
 }
 
 void print_board(Brd brd);
-void print_bitboard(map bitboard);
+void print_bitboard(bitbrd bitboard);
 void print_move(int move);
 
 //Random

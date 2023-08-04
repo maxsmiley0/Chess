@@ -19,10 +19,8 @@ void print_board(Brd brd)
                 std::cout << "  " << 8 - rank << "  ";
             }
 
-            //shifts left to get the nth bit value, prints 1 if hits 0 if misses
             std::cout << " ";
             std::cout << pce_on_square(square, brd);
-            //get_bit(bitboard, square) ? std::cout << 1 : std::cout << 0;
             std::cout << " ";
         }
         std::cout << std::endl;
@@ -53,7 +51,7 @@ void print_board(Brd brd)
     std::cout << "Key: " << brd.poskey << std::endl;
 }
 
-void print_bitboard(map bitboard)
+void print_bitboard(bitbrd bitboard)
 {
     for (int rank = 0; rank < 8; rank++)
     {

@@ -10,9 +10,9 @@ struct MoveList {
 
 struct Brd {
     //Pieces
-    map pce[12];    //piece map, indexed by piece type
-    map side[2];    //side map, indexed by side
-    map occ;        //all occupancies
+    bitbrd pce[12];    //piece bitbrd, indexed by piece type
+    bitbrd side[2];    //side bitbrd, indexed by side
+    bitbrd occ;        //all occupancies
 
     //State
     int color;
@@ -30,6 +30,7 @@ void init_keys();                //Key related functions for Zobrist hashing
 static inline bool is_sq_atk(const Brd& brd, int square, int color);    //Returns true if square is under attack
 static inline bool in_check(const Brd& brd);                            //Returns true if the side to move is in check
 char pce_on_square(int square, const Brd& brd);                         //Given a square return character of piece on it
+int static_eval(const Brd& brd);                                        //Centipawn score of NNUE eval
 
 //Move generation
 static inline void add_move(MoveList* move_list, int move);
