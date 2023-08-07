@@ -22,8 +22,11 @@ class TestFramework {
 public:
     TestFramework();
     void parseMoves(Brd& brd, vector<pair<int, int>> moves);
-
+    void initCaptureTest(string fen);
+    int nextCapture();
 private:
+    MoveHint hint;
+    Brd captureBoard;
     int getMove(Brd& brd, int src_sq, int tar_sq);
 };
 

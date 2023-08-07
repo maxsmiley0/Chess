@@ -714,6 +714,112 @@ void generate_moves(const Brd& brd, MoveList* move_list)
     }
 }
 
+/*
+        Need:
+        pce, pce_sq, pce_bitboard, pce_attacker, attacker_bitboard
+        pce: enemy pieces outer loop from Q -> P
+        attacker pce: our piece inner loop from P -> Q
+
+        return move info here
+        Pass in move_hint.pce = BQ or WQ from QA
+        Pce->Cap
+
+        Ex: I'm white, I want to search the captures in this order
+        WP BQ   WN BQ   WB BQ   WR BQ   WQ BQ   WK BQ
+        WP BR   WN BR   WB BR   WR BR   WQ BR   WK BR
+        WP BB   WN BB   WB BB   WR BB   WQ BB   WK BB
+        WP BN   WN BN   WB BN   WR BN   WQ BN   WK BN
+        WP BP   WN BP   WB BP   WR BP   WQ BP   WK BP
+        */
+
+MoveHint get_starter_hint(const Brd& brd) {
+    MoveHint hint;
+    if (brd.color == WHITE) {
+        hint.capturing_pce = WP;
+        hint.captured_pce = BQ;
+        hint.capturing_bitboard = brd.pce[WP];
+        hint.captured_bitboard = 0;
+    }
+    else {
+        hint.capturing_pce = BP;
+        hint.captured_pce = WQ;
+        hint.capturing_bitboard = brd.pce[BP];
+        hint.captured_bitboard = 0;
+    }
+    return hint;
+}
+
+int generate_capture_incr(const Brd& brd, MoveHint& move_hint) {
+    if (move_hint.captured_bitboard) {
+        int tar_sq = get_ls1b_index(move_hint.captured_bitboard);
+        pop_bit(move_hint.captured_bitboard, tar_sq);
+        //some logic here required to set the actual pieces - enpas and promotion cases!
+        return encode_move(move_hint.capturing_pce_sq, tar_sq, move_hint.capturing_pce, 0, 1, 0, 0, 0);
+    }// pce > pce_bitboard > attackers_bitboard
+    else if (move_hint.capturing_bitboard) {
+        move_hint.capturing_pce_sq = get_ls1b_index(move_hint.capturing_bitboard);
+        pop_bit(move_hint.capturing_bitboard, move_hint.capturing_pce_sq);
+
+        switch (move_hint.capturing_pce) {        //Get attack squares, and-ed with opponent's pieces to form capture moves
+            case WQ:
+            case BQ:
+                move_hint.captured_bitboard = get_queen_attacks(move_hint.capturing_pce_sq, brd.occ) & brd.pce[move_hint.captured_pce];
+                break;
+            case WR:
+            case BR:
+                move_hint.captured_bitboard = get_rook_attacks(move_hint.capturing_pce_sq, brd.occ) & brd.pce[move_hint.captured_pce];
+                break;
+            case WB:
+            case BB:
+                move_hint.captured_bitboard = get_bishop_attacks(move_hint.capturing_pce_sq, brd.occ) & brd.pce[move_hint.captured_pce];
+                break;
+            case WN:
+            case BN:
+                move_hint.captured_bitboard = knight_attacks[move_hint.capturing_pce_sq] & brd.pce[move_hint.captured_pce];
+                break;
+            case WP:
+                move_hint.captured_bitboard = pawn_attacks[WHITE][move_hint.capturing_pce_sq] & brd.pce[move_hint.captured_pce];
+                break;
+            case BP:
+                move_hint.captured_bitboard = pawn_attacks[BLACK][move_hint.capturing_pce_sq] & brd.pce[move_hint.captured_pce];
+                break;
+            case WK:
+            case BK:
+                move_hint.captured_bitboard = king_attacks[move_hint.capturing_pce_sq] & brd.pce[move_hint.captured_pce];
+                break;
+        }
+        return generate_capture_incr(brd, move_hint);
+        //some optimizations here, goto's and delaying certain operations
+    }
+    else {
+        //MVV LVA controller
+        //Where are we generating en passant moves?
+        move_hint.capturing_pce++;
+        if (move_hint.capturing_pce == 6) {          //We were just on attacker == white king, loop back to white pawn and try next less valuable piece
+            move_hint.capturing_pce = WP;
+            move_hint.captured_pce--;
+            if (move_hint.captured_pce == 5) {               //We were just on captured == black pawn, terminate the routine and return -1
+                return -1;
+            }
+        }
+        else if (move_hint.capturing_pce == 12) {    //We were just on attacker == black king, loop back to black pawn and try next less valuable piece
+            move_hint.capturing_pce = BP;
+            move_hint.captured_pce--;
+            if (move_hint.captured_pce == -1) {              //We were just on captured == white pawn, terminate the routine and return -1
+                return -1;
+            }
+        }
+
+        move_hint.capturing_bitboard = brd.pce[move_hint.capturing_pce];
+        return generate_capture_incr(brd, move_hint);
+    }
+}
+
+/*
+Curious to test following benchmarks:
+generate_captures vs generate_captures_incr with and without AB pruning in QS
+*/
+
 bool make_move(Brd& brd, int move)
 {
     //Copying

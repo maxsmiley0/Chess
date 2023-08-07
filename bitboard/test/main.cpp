@@ -1,6 +1,9 @@
 #include "../src/board.h"
 #include "test.h"
 #include <cassert>
+#include <iostream>
+
+using namespace std;
 
 void validate_perft() {
     Brd brd_open = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -61,9 +64,55 @@ void validate_poskey() {
 int main() {
     init_keys();
 
-    validate_perft();
+    //given a fen, I want to return a capture stream of 
+    TestFramework test;
+    //test.initCaptureTest("k7/8/8/8/8/8/8/K7 w - - 0 1");
+    //cout << test.nextCapture() << endl;
+
+    /*test.initCaptureTest("k7/8/8/8/8/8/q7/K7 w - - 0 1");
+    print_move(test.nextCapture());
+    print_move(test.nextCapture());
+
+    test.initCaptureTest("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    print_move(test.nextCapture());
+
+    test.initCaptureTest("rnbqkbnr/pppp2pp/8/4pp2/4PP2/8/PPPP2PP/RNBQKBNR w KQkq - 0 1");
+    while (true) {
+        int move = test.nextCapture();
+        if (move == -1) break;
+        print_move(move);
+    }
+
+    test.initCaptureTest("rnbqkbnr/pppp2pp/8/4pp2/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 1");
+    while (true) {
+        int move = test.nextCapture();
+        if (move == -1) break;
+        print_move(move);
+    }*/
+    /*test.initCaptureTest("rnbqkbnr/8/1p6/2pp1pp1/3PpP1p/2p1P1P1/PPP4P/RNBQKBNR w KQkq - 0 1");
+    while (true) {
+        int move = test.nextCapture();
+        if (move == -1) break;
+        print_move(move);
+    }*/
+    //crazy position!
+    /*test.initCaptureTest("r1b3n1/1B3Q2/1p1k4/2pp1pp1/2qPpPnp/N1p1PbP1/PPPB1rRP/R3K1N1 w - - 0 1");
+    while (true) {
+        int move = test.nextCapture();
+        if (move == -1) break;
+        print_move(move);
+    }*/
+    test.initCaptureTest("r1b3n1/1B3Q2/1p1k4/2pp1pp1/2qPpPnp/N1p1PbP1/PPPB1rRP/R3K1N1 b - - 0 1");
+    while (true) {
+        int move = test.nextCapture();
+        if (move == -1) break;
+        print_move(move);
+    }
+    //TODO TMRW: handle enpas and promos to make a function that compares the valididty of generate_capture_incr with the list from generated_moves or make generate_captures
+    //How much does QS actually save?
+    /*validate_perft();
     init_speed_test();
     validate_poskey();
-    
+    */
     return 0;
 }

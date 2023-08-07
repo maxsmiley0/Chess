@@ -44,3 +44,12 @@ void TestFramework::parseMoves(Brd& brd, vector<pair<int, int>> moves) {
         std::cout << "PK: " << brd.poskey << std::endl;
     }
 }
+
+void TestFramework::initCaptureTest(string fen) {
+    captureBoard = parse_fen(fen);
+    hint = get_starter_hint(captureBoard);
+}
+
+int TestFramework::nextCapture() {
+    return generate_capture_incr(captureBoard, hint);
+}

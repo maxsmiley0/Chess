@@ -3,6 +3,19 @@
 
 #include "defs.h"
 
+/*
+The MoveHint struct is defined, so that the move generators can iteratively generate moves, rather than in a chunk.
+The motivation is that full move generation may be expensive and unnecessary if pruning occurs in a search, and further moves are discarded
+This struct stores the piece we're generating moves for, the bitboard of pieces of this type, and the bitboard of squares the piece can move / attack
+*/
+struct MoveHint {
+    int capturing_pce;
+    int capturing_pce_sq;
+    int captured_pce;
+    bitbrd capturing_bitboard;
+    bitbrd captured_bitboard;
+};
+
 struct MoveList {
     int move[256];
     int cnt;
@@ -36,15 +49,18 @@ int static_eval(const Brd& brd);                                        //Centip
 static inline void add_move(MoveList* move_list, int move);
 void generate_moves(const Brd& brd, MoveList* move_list);               //Given a board, returns a list of generated (pseudo-legal) moves in the position
 
+//Provides an initial move hint for QS capture generation
+MoveHint get_starter_hint(const Brd& brd);
+//Iteratively generates captures according to MVVLVA - The hints passed indicate what moves will be generated next
+int generate_capture_incr(const Brd& brd, MoveHint& move_hint);
+
 //Board operations 
 bool make_move(Brd& brd, int move);                                     //Makes a move on a given board, returns true if move was made (legal)
 int perft_driver(Brd& brd, int depth);                                  //Returns the leaf nodes after a given depth of a position
 static inline Brd copy_board(const Brd& brd);                           //Returns a deep copy of the board struct
 
-/*
-   ***   INTERFACE TO INTERACT WITH BRD   ***   
-Use these functions, as they will ensure that the bitboards and keys are properly set
-*/
+/*          ***   INTERFACE TO INTERACT WITH BRD   ***   
+Use these functions, as they will ensure that the bitboards and keys are properly set */
 
 static inline void add_pce(Brd& brd, int pce, int sq);                  //Sets the bit in the according b.pce[] and updates the poskey
 static inline void remove_pce(Brd& brd, int pce, int sq);               //Removes the bit in the according b.pce[] given known pce and updates the poskey
