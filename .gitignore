@@ -1,0 +1,13 @@
+*.o
+*.gch
+*.d
+
+*.nnue
+
+/v3/smv3
+/v3/smv3_test
+
+/bench/*
+!/bench/*.cpp
+
+.DS_Store
