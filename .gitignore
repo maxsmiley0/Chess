@@ -1,13 +1,21 @@
 *.o
 *.gch
 *.d
-
 *.nnue
-
 /v3/smv3
 /v3/smv3_test
-
+# Third-party engines and tools are fetched by v3/scripts/get-tools.sh.
+# No third-party source belongs in this repository.
+/v3/external/
+/tools/
+# Opening books are downloaded, not authored here.
+/v3/books/
+# fastchess writes a config.json autosave wherever it is invoked.
+config.json
 /bench/*
 !/bench/*.cpp
-
+__pycache__/
+*.pyc
 .DS_Store
+/v3/test/*.epd
+/v3/logs/

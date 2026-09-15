@@ -2,10 +2,6 @@
 
 #include "types.h"
 
-// ------------------------------------------------------------------ //
-//  Bit manipulation primitives
-// ------------------------------------------------------------------ //
-
 constexpr Bitboard  bit(Square s)                  { return 1ULL << s; }
 constexpr bool      bb_test(Bitboard b, Square s)  { return b & bit(s); }
 inline void         bb_set(Bitboard& b, Square s)  { b |=  bit(s); }
@@ -20,10 +16,6 @@ inline Square pop_lsb(Bitboard& b) {
     b &= b - 1;
     return s;
 }
-
-// ------------------------------------------------------------------ //
-//  Board masks
-// ------------------------------------------------------------------ //
 
 constexpr Bitboard FILE_BB[8] = {
     0x0101010101010101ULL, 0x0202020202020202ULL,
@@ -41,10 +33,6 @@ constexpr Bitboard RANK_BB[8] = {
 constexpr Bitboard NOT_FILE_A = ~FILE_BB[FILE_A];
 constexpr Bitboard NOT_FILE_H = ~FILE_BB[FILE_H];
 
-// ------------------------------------------------------------------ //
-//  Direction shifts — file-safe, zero cost
-// ------------------------------------------------------------------ //
-
 template<int D> constexpr Bitboard shift(Bitboard b) {
     if constexpr (D ==  8) return  b << 8;
     if constexpr (D == -8) return  b >> 8;
@@ -57,7 +45,6 @@ template<int D> constexpr Bitboard shift(Bitboard b) {
     return 0;
 }
 
-// Pawn push directions by color
 template<Color C> constexpr Bitboard pawn_push(Bitboard b) {
     return C == WHITE ? shift<8>(b) : shift<-8>(b);
 }
@@ -66,17 +53,9 @@ template<Color C> constexpr Bitboard pawn_attacks_bb(Bitboard b) {
                       : shift<-9>(b) | shift<-7>(b);
 }
 
-// ------------------------------------------------------------------ //
-//  Leaper attack tables — populated by init_bitboards()
-// ------------------------------------------------------------------ //
-
 extern Bitboard PAWN_ATTACKS[NUM_COLORS][NUM_SQUARES];
 extern Bitboard KNIGHT_ATTACKS[NUM_SQUARES];
 extern Bitboard KING_ATTACKS[NUM_SQUARES];
-
-// ------------------------------------------------------------------ //
-//  Magic bitboard tables for sliding pieces
-// ------------------------------------------------------------------ //
 
 struct Magic {
     Bitboard  mask;
@@ -89,9 +68,6 @@ struct Magic {
     }
 };
 
-// Known-good magic numbers stored as constexpr — 1KB total, zero binary overhead.
-// Attack tables (2MB+ for rooks) are populated once at startup by init_bitboards()
-// using these numbers. This avoids executable bloat while keeping lookup O(1).
 constexpr Bitboard BISHOP_MAGIC_NUMBERS[NUM_SQUARES] = {
     0x40040844404084ULL,   0x2004208a004208ULL,   0x10190041080202ULL,   0x108060845042010ULL,
     0x581104180800210ULL,  0x2112080446200010ULL,  0x1080820820060210ULL, 0x3c0808410220200ULL,
@@ -137,18 +113,10 @@ inline Bitboard bishop_attacks(Square s, Bitboard occ) { return BISHOP_MAGICS[s]
 inline Bitboard rook_attacks(Square s, Bitboard occ)   { return ROOK_MAGICS[s][occ];   }
 inline Bitboard queen_attacks(Square s, Bitboard occ)  { return BISHOP_MAGICS[s][occ] | ROOK_MAGICS[s][occ]; }
 
-// ------------------------------------------------------------------ //
-//  Ray tables
-// ------------------------------------------------------------------ //
-
 extern Bitboard BETWEEN_BB[NUM_SQUARES][NUM_SQUARES];
 extern Bitboard LINE_BB[NUM_SQUARES][NUM_SQUARES];
 
 inline Bitboard between(Square a, Square b) { return BETWEEN_BB[a][b]; }
 inline Bitboard line(Square a, Square b)    { return LINE_BB[a][b]; }
-
-// ------------------------------------------------------------------ //
-//  Init
-// ------------------------------------------------------------------ //
 
 void init_bitboards();

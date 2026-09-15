@@ -30,9 +30,10 @@ static int64_t now_ms() {
 }
 
 void Searcher::init_timer(const Position& pos, const SearchLimits& limits) {
-    start_ms = now_ms();
-    stopped  = false;
-    nodes    = 0;
+    start_ms   = now_ms();
+    stopped    = false;
+    nodes      = 0;
+    node_limit = limits.max_nodes;
 
     if (limits.infinite) {
         alloc_ms = 0;
@@ -46,21 +47,39 @@ void Searcher::init_timer(const Position& pos, const SearchLimits& limits) {
     int remaining = pos.side_to_move() == WHITE ? limits.wtime : limits.btime;
     int increment = pos.side_to_move() == WHITE ? limits.winc  : limits.binc;
 
-    alloc_ms = remaining > 0 ? std::max(1, remaining / 20 + increment / 2) : 0;
+    if (remaining > 0) {
+        alloc_ms = std::max(1, remaining / 20 + increment / 2);
+    } else if (limits.depth >= MAX_PLY && limits.max_nodes == 0) {
+        alloc_ms = DEFAULT_MOVETIME_MS;
+    } else {
+        alloc_ms = 0;
+    }
+}
+
+int64_t Searcher::elapsed_ms() const {
+    return now_ms() - start_ms;
 }
 
 bool Searcher::check_time() {
-    if (alloc_ms == 0) return false;
-    if ((nodes & 2047) == 0 && (now_ms() - start_ms) >= alloc_ms) {
+    if (stopped) return true;
+    if (node_limit && nodes >= node_limit) {
         stopped = true;
         return true;
     }
-    return stopped;
+    if ((nodes & 1023) != 0) return false;
+
+    if (stop_requested.load(std::memory_order_relaxed)) {
+        stopped = true;
+        return true;
+    }
+    if (alloc_ms > 0 && elapsed_ms() >= alloc_ms) {
+        stopped = true;
+        return true;
+    }
+    return false;
 }
 
-int Searcher::move_score(const Position& pos, Move m, Move first_move) const {
-    if (m == first_move) return 1000000;
-
+int Searcher::move_score(const Position& pos, Move m) const {
     if (move_flag(m) == EN_PASSANT) return 100000 + MVV_LVA[PAWN][PAWN];
 
     if (move_is_capture(m)) {
@@ -74,10 +93,31 @@ int Searcher::move_score(const Position& pos, Move m, Move first_move) const {
     return 0;
 }
 
-void Searcher::order_moves(const Position& pos, MoveList& ml, Move first_move) const {
-    std::sort(ml.begin(), ml.end(), [&](Move a, Move b) {
-        return move_score(pos, a, first_move) > move_score(pos, b, first_move);
+void Searcher::order_moves(const Position& pos, MoveList& ml) const {
+    std::stable_sort(ml.begin(), ml.end(), [&](Move a, Move b) {
+        return move_score(pos, a) > move_score(pos, b);
     });
+}
+
+std::string Searcher::format_pv(Move first) const {
+    std::string line = move_to_uci(first);
+    for (int i = 1; i < pv_length[1]; i++)
+        line += " " + move_to_uci(pv_table[1][i]);
+    return line;
+}
+
+void Searcher::report(int depth, int line, Score score, Move first) const {
+    int64_t  elapsed = elapsed_ms();
+    uint64_t nps     = elapsed > 0 ? (nodes * 1000) / static_cast<uint64_t>(elapsed) : 0;
+
+    std::cout << "info depth " << depth
+              << " multipv "   << line
+              << " score "     << format_score(score)
+              << " nodes "     << nodes
+              << " nps "       << nps
+              << " time "      << elapsed
+              << " pv "        << format_pv(first)
+              << std::endl;
 }
 
 Score Searcher::quiesce(Position& pos, Score alpha, Score beta, int ply) {
@@ -90,7 +130,7 @@ Score Searcher::quiesce(Position& pos, Score alpha, Score beta, int ply) {
     if (stand_pat > alpha) alpha = stand_pat;
 
     MoveList ml = generate_captures(pos);
-    order_moves(pos, ml, MOVE_NONE);
+    order_moves(pos, ml);
 
     for (Move m : ml) {
         pos.do_move(m);
@@ -106,23 +146,24 @@ Score Searcher::quiesce(Position& pos, Score alpha, Score beta, int ply) {
 }
 
 Score Searcher::negamax(Position& pos, Score alpha, Score beta, int depth, int ply) {
+    pv_length[ply] = ply;
+
     nodes++;
     if (check_time()) return 0;
+    if (ply >= MAX_PLY) return evaluate(pos);
 
-    if (ply > 0 && (pos.is_repetition() || pos.fifty_move_clock() >= 100))
+    if (pos.is_repetition() || pos.fifty_move_clock() >= 100)
         return SCORE_DRAW;
 
     if (depth <= 0) return quiesce(pos, alpha, beta, ply);
 
     MoveList ml = generate_moves(pos);
-
     if (ml.size == 0)
         return pos.in_check() ? -SCORE_MATE + ply : SCORE_DRAW;
 
-    Move  best_move  = MOVE_NONE;
-    Score best_score = -SCORE_INFINITE;
+    order_moves(pos, ml);
 
-    order_moves(pos, ml, ply == 0 ? root_best_move : MOVE_NONE);
+    Score best_score = -SCORE_INFINITE;
 
     for (Move m : ml) {
         pos.do_move(m);
@@ -131,17 +172,18 @@ Score Searcher::negamax(Position& pos, Score alpha, Score beta, int depth, int p
 
         if (stopped) return 0;
 
-        if (score > best_score) {
-            best_score = score;
-            best_move   = m;
-        }
-        if (score > alpha) alpha = score;
-        if (alpha >= beta) break;
-    }
+        if (score > best_score) best_score = score;
 
-    if (ply == 0 && best_move != MOVE_NONE) {
-        root_best_move  = best_move;
-        root_best_score = best_score;
+        if (score > alpha) {
+            alpha = score;
+
+            pv_table[ply][ply] = m;
+            for (int i = ply + 1; i < pv_length[ply + 1]; i++)
+                pv_table[ply][i] = pv_table[ply + 1][i];
+            pv_length[ply] = pv_length[ply + 1];
+        }
+
+        if (alpha >= beta) break;
     }
 
     return best_score;
@@ -149,35 +191,69 @@ Score Searcher::negamax(Position& pos, Score alpha, Score beta, int depth, int p
 
 void Searcher::search(Position& pos, const SearchLimits& limits) {
     init_timer(pos, limits);
-    root_best_move  = MOVE_NONE;
-    root_best_score = 0;
 
-    Move  final_move  = MOVE_NONE;
-    Score final_score = 0;
-
-    for (int depth = 1; depth <= limits.depth && depth < MAX_PLY; depth++) {
-        Score score = negamax(pos, -SCORE_INFINITE, SCORE_INFINITE, depth, 0);
-
-        if (stopped) break;
-
-        final_move  = root_best_move;
-        final_score = score;
-
-        int64_t elapsed = now_ms() - start_ms;
-        int64_t nps     = elapsed > 0 ? (nodes * 1000) / elapsed : 0;
-
-        std::cout << "info depth " << depth
-                  << " score "     << format_score(final_score)
-                  << " nodes "     << nodes
-                  << " nps "       << nps
-                  << " time "      << elapsed
-                  << " pv "        << move_to_uci(final_move)
-                  << std::endl;
-
-        if (alloc_ms > 0 && (now_ms() - start_ms) >= alloc_ms / 2) break;
+    MoveList root_moves = generate_moves(pos);
+    if (root_moves.size == 0) {
+        std::cout << "bestmove 0000" << std::endl;
+        return;
     }
 
-    if (final_move == MOVE_NONE) final_move = root_best_move;
+    order_moves(pos, root_moves);
+    root_best_move = root_moves.moves[0];
 
-    std::cout << "bestmove " << move_to_uci(final_move) << std::endl;
+    const int lines = std::min(multipv, root_moves.size);
+
+    for (int depth = 1; depth <= limits.depth && depth < MAX_PLY; depth++) {
+        Move chosen[MAX_MOVES];
+        int  chosen_count = 0;
+        bool aborted      = false;
+
+        for (int line = 1; line <= lines; line++) {
+            Move  line_move  = MOVE_NONE;
+            Score line_score = -SCORE_INFINITE;
+            Score alpha      = -SCORE_INFINITE;
+
+            Move line_pv[MAX_PLY + 1];
+            int  line_pv_length = 1;
+
+            for (Move m : root_moves) {
+                bool already_reported = false;
+                for (int i = 0; i < chosen_count; i++)
+                    if (chosen[i] == m) { already_reported = true; break; }
+                if (already_reported) continue;
+
+                pos.do_move(m);
+                Score score = -negamax(pos, -SCORE_INFINITE, -alpha, depth - 1, 1);
+                pos.undo_move(m);
+
+                if (stopped) { aborted = true; break; }
+
+                if (score > line_score) {
+                    line_score     = score;
+                    line_move      = m;
+                    line_pv_length = pv_length[1];
+                    for (int i = 1; i < pv_length[1]; i++) line_pv[i] = pv_table[1][i];
+                    if (lines == 1) alpha = score;
+                }
+            }
+
+            if (aborted || line_move == MOVE_NONE) {
+                aborted = true;
+                break;
+            }
+
+            chosen[chosen_count++] = line_move;
+
+            pv_length[1] = line_pv_length;
+            for (int i = 1; i < line_pv_length; i++) pv_table[1][i] = line_pv[i];
+            report(depth, line, line_score, line_move);
+
+            if (line == 1) root_best_move = line_move;
+        }
+
+        if (aborted) break;
+        if (alloc_ms > 0 && elapsed_ms() >= alloc_ms / 2) break;
+    }
+
+    std::cout << "bestmove " << move_to_uci(root_best_move) << std::endl;
 }

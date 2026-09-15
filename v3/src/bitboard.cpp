@@ -11,21 +11,14 @@ Magic ROOK_MAGICS[NUM_SQUARES];
 Bitboard BETWEEN_BB[NUM_SQUARES][NUM_SQUARES];
 Bitboard LINE_BB[NUM_SQUARES][NUM_SQUARES];
 
-// Each square is allocated exactly 2^popcount(mask) entries in one shared
-// array rather than a uniform worst-case slot, so the working set is the sum
-// of per-square requirements instead of 64 times the maximum.
 static Bitboard ROOK_TABLE[102400];
 static Bitboard BISHOP_TABLE[5248];
-
-// ------------------------------------------------------------------ //
-//  Occupancy subset enumeration (carry-rippler trick)
-// ------------------------------------------------------------------ //
 
 static Bitboard slow_slider_attacks(Square s, Bitboard occ, bool bishop) {
     Bitboard attacks = 0;
     const int dirs[2][4][2] = {
-        {{ 1, 1}, { 1,-1}, {-1, 1}, {-1,-1}},   // bishop
-        {{ 1, 0}, {-1, 0}, { 0, 1}, { 0,-1}},   // rook
+        {{ 1, 1}, { 1,-1}, {-1, 1}, {-1,-1}},
+        {{ 1, 0}, {-1, 0}, { 0, 1}, { 0,-1}},
     };
     int r = square_rank(s), f = square_file(s);
     for (int d = 0; d < 4; d++) {
@@ -42,8 +35,6 @@ static Bitboard slow_slider_attacks(Square s, Bitboard occ, bool bishop) {
     return attacks;
 }
 
-// Relevant occupancy excludes the final square of each ray: a blocker on the
-// board edge cannot change which squares are attacked beyond it.
 static Bitboard make_mask(Square s, bool bishop) {
     static constexpr int BISHOP_DIRS[4][2] = { {1,1}, {1,-1}, {-1,1}, {-1,-1} };
     static constexpr int ROOK_DIRS[4][2]   = { {1,0}, {-1,0}, {0,1},  {0,-1}  };
@@ -64,10 +55,6 @@ static Bitboard make_mask(Square s, bool bishop) {
     }
     return mask;
 }
-
-// ------------------------------------------------------------------ //
-//  Magic table population
-// ------------------------------------------------------------------ //
 
 static void init_magic(Magic* magics, Bitboard* storage,
                        const Bitboard* magic_numbers, bool bishop) {
@@ -92,10 +79,6 @@ static void init_magic(Magic* magics, Bitboard* storage,
         cursor += 1ULL << popcount(mask);
     }
 }
-
-// ------------------------------------------------------------------ //
-//  Leaper attacks
-// ------------------------------------------------------------------ //
 
 static constexpr int KNIGHT_DELTAS[8][2] = {
     { 2, 1}, { 2,-1}, {-2, 1}, {-2,-1},
@@ -130,10 +113,6 @@ static void init_leapers() {
     }
 }
 
-// ------------------------------------------------------------------ //
-//  Between / line tables
-// ------------------------------------------------------------------ //
-
 static void init_rays() {
     for (int a = 0; a < NUM_SQUARES; a++)
         for (int b = 0; b < NUM_SQUARES; b++) {
@@ -161,10 +140,6 @@ static void init_rays() {
         }
     }
 }
-
-// ------------------------------------------------------------------ //
-//  Entry point
-// ------------------------------------------------------------------ //
 
 void init_bitboards() {
     init_leapers();

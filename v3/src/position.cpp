@@ -264,6 +264,19 @@ static constexpr uint8_t CASTLING_MASK[64] = {
     revoke(BLACK_OO | BLACK_OOO), KEEP_ALL, KEEP_ALL, revoke(BLACK_OO),
 };
 
+void Position::set_search_root() {
+    state[0] = state[ply];
+    ply      = 0;
+
+    if (history_size > MAX_HISTORY - MAX_PLY - 2) {
+        int keep  = fifty_move_clock() + 1;
+        if (keep > history_size) keep = history_size;
+        int first = history_size - keep;
+        for (int i = 0; i < keep; i++) key_history[i] = key_history[first + i];
+        history_size = keep;
+    }
+}
+
 void Position::do_move(Move m) {
     assert(ply < MAX_PLY);
 

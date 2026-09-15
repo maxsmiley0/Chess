@@ -8,7 +8,6 @@ Key castling[16];
 Key ep_file[8];
 Key side;
 
-// xorshift64 — fast, good distribution, no stdlib dependency
 static uint64_t seed = 0x246C'CB2E'2B53'0B4DULL;
 
 static uint64_t rand64() {
@@ -32,4 +31,4 @@ void init() {
     side = rand64();
 }
 
-} // namespace Zobrist
+}

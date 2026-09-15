@@ -1,0 +1,34 @@
+italian              e2e4 e7e5 g1f3 b8c6 f1c4
+ruy-lopez            e2e4 e7e5 g1f3 b8c6 f1b5
+scotch               e2e4 e7e5 g1f3 b8c6 d2d4
+four-knights         e2e4 e7e5 g1f3 b8c6 b1c3 g8f6
+petrov               e2e4 e7e5 g1f3 g8f6
+philidor             e2e4 e7e5 g1f3 d7d6
+vienna               e2e4 e7e5 b1c3 g8f6
+kings-gambit         e2e4 e7e5 f2f4 e5f4
+sicilian-najdorf     e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6
+sicilian-dragon      e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 g7g6
+sicilian-classical   e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6
+french-classical     e2e4 e7e6 d2d4 d7d5 b1c3 g8f6
+french-winawer       e2e4 e7e6 d2d4 d7d5 b1c3 f8b4
+caro-kann            e2e4 c7c6 d2d4 d7d5 b1c3 d5e4
+pirc                 e2e4 d7d6 d2d4 g8f6 b1c3 g7g6
+modern               e2e4 g7g6 d2d4 f8g7 b1c3 d7d6
+scandinavian         e2e4 d7d5 e4d5 d8d5
+alekhine             e2e4 g8f6 e4e5 f6d5
+qgd                  d2d4 d7d5 c2c4 e7e6 b1c3 g8f6
+qga                  d2d4 d7d5 c2c4 d5c4 g1f3 g8f6
+slav                 d2d4 d7d5 c2c4 c7c6 g1f3 g8f6
+nimzo-indian         d2d4 g8f6 c2c4 e7e6 b1c3 f8b4
+queens-indian        d2d4 g8f6 c2c4 e7e6 g1f3 b7b6
+kings-indian         d2d4 g8f6 c2c4 g7g6 b1c3 f8g7
+grunfeld             d2d4 g8f6 c2c4 g7g6 b1c3 d7d5
+benoni               d2d4 g8f6 c2c4 c7c5 d4d5 e7e6
+catalan              d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 g2g3
+dutch                d2d4 f7f5 g1f3 g8f6 g2g3 e7e6
+london               d2d4 d7d5 g1f3 g8f6 c1f4 e7e6
+english-reversed     c2c4 e7e5 b1c3 g8f6
+english-symmetric    c2c4 c7c5 g1f3 g8f6
+reti                 g1f3 d7d5 c2c4 e7e6 g2g3
+kia                  g1f3 g8f6 g2g3 g7g6 f1g2 f8g7
+bird                 f2f4 d7d5 g1f3 g8f6

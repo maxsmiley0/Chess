@@ -20,21 +20,9 @@ constexpr Score SCORE_MATE     = 32000;
 constexpr Score SCORE_DRAW     = 0;
 constexpr Score SCORE_MATE_MAX = SCORE_MATE - MAX_PLY;
 
-// ------------------------------------------------------------------ //
-//  Color
-// ------------------------------------------------------------------ //
-
 enum Color : uint8_t { WHITE, BLACK, COLOR_NONE };
 
 constexpr Color operator~(Color c) { return static_cast<Color>(c ^ 1); }
-
-// ------------------------------------------------------------------ //
-//  Piece types and pieces
-//
-//  Internal layout: [W_PAWN..W_KING, B_PAWN..B_KING]
-//  i.e. W_PAWN=0, W_KNIGHT=1, W_BISHOP=2, W_ROOK=3, W_QUEEN=4, W_KING=5
-//       B_PAWN=6, B_KNIGHT=7, B_BISHOP=8, B_ROOK=9, B_QUEEN=10, B_KING=11
-// ------------------------------------------------------------------ //
 
 enum PieceType : uint8_t {
     PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
@@ -46,10 +34,6 @@ enum Piece : uint8_t {
     B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING,
     PIECE_NONE
 };
-
-// ------------------------------------------------------------------ //
-//  Square, File, Rank
-// ------------------------------------------------------------------ //
 
 enum Square : uint8_t {
     A1, B1, C1, D1, E1, F1, G1, H1,
@@ -71,10 +55,6 @@ constexpr File   square_file(Square s)        { return static_cast<File>(s % 8);
 constexpr Rank   square_rank(Square s)        { return static_cast<Rank>(s / 8); }
 constexpr Square flip_rank(Square s)          { return static_cast<Square>(s ^ 56); }
 
-// ------------------------------------------------------------------ //
-//  Castling
-// ------------------------------------------------------------------ //
-
 enum CastlingRight : uint8_t {
     NO_CASTLING  = 0,
     WHITE_OO     = 1,
@@ -83,28 +63,6 @@ enum CastlingRight : uint8_t {
     BLACK_OOO    = 8,
     ALL_CASTLING = 15
 };
-
-// ------------------------------------------------------------------ //
-//  Move encoding
-//
-//  16 bits: [15-12] flags | [11-6] to | [5-0] from
-//
-//  Flag values follow the standard encoding used in most modern engines:
-//    0000 = quiet
-//    0001 = double pawn push
-//    0010 = kingside castle
-//    0011 = queenside castle
-//    0100 = capture
-//    0101 = en passant
-//    1000 = promo knight
-//    1001 = promo bishop
-//    1010 = promo rook
-//    1011 = promo queen
-//    1100 = capture + promo knight
-//    1101 = capture + promo bishop
-//    1110 = capture + promo rook
-//    1111 = capture + promo queen
-// ------------------------------------------------------------------ //
 
 enum MoveFlag : uint8_t {
     QUIET            = 0,
@@ -138,10 +96,6 @@ constexpr bool      move_is_promo(Move m)   { return move_flag(m) >= PROMO_KNIGH
 constexpr PieceType promo_piece_type(Move m) {
     return static_cast<PieceType>(KNIGHT + ((move_flag(m) & 3)));
 }
-
-// ------------------------------------------------------------------ //
-//  Piece helpers
-// ------------------------------------------------------------------ //
 
 constexpr Color     piece_color(Piece p)               { return static_cast<Color>(p / 6); }
 constexpr PieceType piece_type(Piece p)                { return static_cast<PieceType>(p % 6); }

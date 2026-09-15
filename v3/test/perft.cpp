@@ -8,8 +8,11 @@
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
+#include <fstream>
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 
@@ -178,6 +181,7 @@ MoveList reference_moves(Position& pos) {
     return legal;
 }
 
+
 bool zobrist_matches_scratch(const Position& pos) {
     Position fresh;
     fresh.set(pos.fen());
@@ -297,6 +301,131 @@ int run_suite(int max_depth) {
     return failures;
 }
 
+
+}
+
+namespace {
+
+Move match_san(const Position& pos, const std::string& raw) {
+    std::string token;
+    for (char c : raw)
+        if (c != '+' && c != '#' && c != '!' && c != '?') token += c;
+    if (token.empty()) return MOVE_NONE;
+
+    MoveList legal = generate_moves(pos);
+
+    if (token == "O-O" || token == "O-O-O") {
+        MoveFlag want = token == "O-O" ? KINGSIDE_CASTLE : QUEENSIDE_CASTLE;
+        for (Move m : legal)
+            if (move_flag(m) == want) return m;
+        return MOVE_NONE;
+    }
+
+    PieceType promotion = PIECE_TYPE_NONE;
+    size_t equals = token.find('=');
+    if (equals != std::string::npos) {
+        char c = token[equals + 1];
+        promotion = c == 'N' ? KNIGHT : c == 'B' ? BISHOP : c == 'R' ? ROOK : QUEEN;
+        token.erase(equals);
+    }
+
+    if (token.size() < 2) return MOVE_NONE;
+
+    Square target = make_square(static_cast<File>(token[token.size() - 2] - 'a'),
+                                static_cast<Rank>(token[token.size() - 1] - '1'));
+    token.erase(token.size() - 2);
+
+    PieceType mover = PAWN;
+    if (!token.empty() && std::isupper(static_cast<unsigned char>(token[0]))) {
+        char c = token[0];
+        mover = c == 'N' ? KNIGHT : c == 'B' ? BISHOP : c == 'R' ? ROOK
+              : c == 'Q' ? QUEEN  : KING;
+        token.erase(0, 1);
+    }
+
+    int from_file = -1, from_rank = -1;
+    for (char c : token) {
+        if (c >= 'a' && c <= 'h') from_file = c - 'a';
+        else if (c >= '1' && c <= '8') from_rank = c - '1';
+    }
+
+    for (Move m : legal) {
+        if (move_to(m) != target) continue;
+        if (piece_type(pos.piece_on(move_from(m))) != mover) continue;
+
+        if (promotion != PIECE_TYPE_NONE) {
+            if (!move_is_promo(m) || promo_piece_type(m) != promotion) continue;
+        } else if (move_is_promo(m)) {
+            continue;
+        }
+
+        Square from = move_from(m);
+        if (from_file >= 0 && square_file(from) != from_file) continue;
+        if (from_rank >= 0 && square_rank(from) != from_rank) continue;
+
+        return m;
+    }
+    return MOVE_NONE;
+}
+
+int pgn_to_fens(const char* path, int limit) {
+    std::ifstream file(path);
+    if (!file) {
+        std::cerr << "cannot open " << path << std::endl;
+        return 1;
+    }
+
+    Position pos;
+    std::string line;
+    std::string movetext;
+    int emitted = 0;
+    int rejected = 0;
+
+    auto flush_game = [&]() {
+        if (movetext.empty()) return;
+
+        pos.set(START_FEN);
+        std::istringstream stream(movetext);
+        std::string token;
+        bool ok = true;
+
+        while (stream >> token) {
+            if (token.back() == '.') continue;
+            if (!token.empty() && std::isdigit(static_cast<unsigned char>(token[0]))
+                && token.find('.') != std::string::npos) continue;
+            if (token == "1-0" || token == "0-1" || token == "1/2-1/2" || token == "*") break;
+
+            size_t dot = token.find_last_of('.');
+            std::string san = dot == std::string::npos ? token : token.substr(dot + 1);
+            if (san.empty()) continue;
+
+            Move m = match_san(pos, san);
+            if (m == MOVE_NONE) { ok = false; break; }
+            pos.do_move(m);
+        }
+
+        if (ok) { std::cout << pos.fen() << '\n'; emitted++; }
+        else      rejected++;
+
+        movetext.clear();
+    };
+
+    while (std::getline(file, line)) {
+        if (!line.empty() && line[0] == '[') {
+            flush_game();
+            if (limit > 0 && emitted >= limit) break;
+            continue;
+        }
+        if (line.empty()) continue;
+        movetext += line;
+        movetext += ' ';
+    }
+    if (limit <= 0 || emitted < limit) flush_game();
+
+    std::cerr << "emitted " << emitted << " rejected " << rejected << std::endl;
+    return rejected == 0 ? 0 : 1;
+}
+
 }
 
 void run_single(const char* fen, int depth) {
@@ -315,11 +444,88 @@ void run_single(const char* fen, int depth) {
               << "nps     " << static_cast<uint64_t>(nodes / seconds) << std::endl;
 }
 
+int check_openings(const char* path, const char* epd_out) {
+    std::ifstream file(path);
+    if (!file) {
+        std::cerr << "cannot open " << path << std::endl;
+        return 1;
+    }
+
+    std::ofstream epd;
+    if (epd_out) {
+        epd.open(epd_out);
+        if (!epd) {
+            std::cerr << "cannot write " << epd_out << std::endl;
+            return 1;
+        }
+    }
+
+    int failures = 0;
+    int lines    = 0;
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue;
+
+        std::istringstream stream(line);
+        std::string name;
+        stream >> name;
+
+        Position pos;
+        pos.set(START_FEN);
+
+        std::string token;
+        std::string played;
+        bool ok = true;
+        int  plies = 0;
+
+        while (stream >> token) {
+            Move m = parse_uci_move(pos, token);
+            if (m == MOVE_NONE) {
+                std::cout << "  ILLEGAL  " << name << "  at ply " << (plies + 1)
+                          << " move " << token << '\n'
+                          << "    after: " << played << '\n'
+                          << "    fen:   " << pos.fen() << '\n';
+                ok = false;
+                break;
+            }
+            pos.do_move(m);
+            pos.set_search_root();
+            played += token + " ";
+            plies++;
+
+            std::string trail = name + ": " + played;
+            if (!validate(pos, 1, trail)) { ok = false; break; }
+        }
+
+        lines++;
+        if (!ok) {
+            failures++;
+        } else {
+            std::cout << "  ok  " << std::setw(20) << std::left << name
+                      << plies << " plies   " << pos.fen() << '\n';
+            if (epd) epd << pos.fen() << '\n';
+        }
+    }
+
+    std::cout << '\n' << lines << " openings, "
+              << (failures == 0 ? "all legal" : std::to_string(failures) + " bad");
+    if (epd_out && failures == 0) std::cout << ", book -> " << epd_out;
+    std::cout << std::endl;
+    return failures;
+}
+
 int main(int argc, char* argv[]) {
     Zobrist::init();
     init_bitboards();
 
     std::string mode = argc > 1 ? argv[1] : "--perft";
+
+    if (mode == "--openings") {
+        const char* path = argc > 2 ? argv[2] : "test/openings.txt";
+        const char* epd  = argc > 3 ? argv[3] : nullptr;
+        return check_openings(path, epd) == 0 ? 0 : 1;
+    }
 
     if (mode == "--single") {
         if (argc < 4) {
@@ -341,6 +547,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+
     if (mode == "--validate") {
         if (argc < 4) {
             std::cerr << "usage: --validate <fen> <depth>" << std::endl;
@@ -352,6 +559,14 @@ int main(int argc, char* argv[]) {
         bool ok = validate(pos, std::atoi(argv[3]), trail);
         if (ok) std::cout << "movegen matches reference" << std::endl;
         return ok ? 0 : 1;
+    }
+
+    if (mode == "--pgn-fens") {
+        if (argc < 3) {
+            std::cerr << "usage: --pgn-fens <file.pgn> [limit]" << std::endl;
+            return 1;
+        }
+        return pgn_to_fens(argv[2], argc > 3 ? std::atoi(argv[3]) : 0);
     }
 
     int max_depth = argc > 2 ? std::atoi(argv[2]) : 4;

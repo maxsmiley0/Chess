@@ -5,7 +5,6 @@
 #include <string>
 
 struct StateInfo {
-    Key     zobrist;
     Square  ep_square;
     uint8_t castling;
     uint8_t fifty_move;
@@ -62,6 +61,7 @@ struct Position {
     bool is_repetition(int threshold = 2) const;
 
     void set(const std::string& fen);
+    void set_search_root();
     void do_move(Move m);
     void undo_move(Move m);
     void do_null_move();
